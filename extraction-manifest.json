@@ -11,6 +11,7 @@
     "docs/joint-scenarios.md": "24a21704d9bae32f4e7a24cc7a8a9edcf1c37e5b36d77d460f1c6c32602b356d",
     "docs/portfolio-modes.md": "49d335d4ac2cbf87993f46b962ead949c6e3308084a1b878fcb6e62229964fb7",
     "docs/reports.md": "613658208de648e2475178eaeea97976116f3770199cc77c25ea44c5198697f0",
+    "docs/retirement-utility.md": "360ef5491ad207983d1eaea39102bf4c40531d8408c073dc797eea9275d40313",
     "examples/baseline-request.json": "51e21cb71884bdce4fdc8c4ed04e6ab84ad5d06a5fbdeed3f18a35ad25b69664",
     "examples/baseline-result.json": "b411cdaae2b29b190eb7163befb5ac61ed8ec3289f5497bcd580a89e86ab4f29",
     "examples/deferred-request.json": "06f884910aadf55e61651e8b5ee6100246ffb73a15dd1cdf4fa769fc8bd70e09",
@@ -54,6 +55,7 @@
     "src/okama_planner/reports.py": "b880a48988d5cd8346a5797bfaadc4220f78f4ae18fdf3738a5ae2ecfd9395e4",
     "src/okama_planner/scenarios.py": "583d74106c1a009148553edbc8d3326a4d2ee6d43945d6ce406f398ddf495a2d",
     "src/okama_planner/segmented.py": "70ab62eb372b3569e9508561758ade6021ac1c8b56d12f9e0d49e48dc4d2e0ec",
+    "src/okama_planner/utility.py": "52943d45b5cee35aa18a406db7a8bc82f5b48dc90a582d03a48babc01150860b",
     "tests/planner_tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "tests/planner_tests/forecast/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "tests/planner_tests/forecast/test_distributions.py": "fb9d7cb84e0316478a761555f051921d42780bb7b8ad802c90dbe87ea5f49996",
@@ -75,6 +77,7 @@
     "tests/test_portfolio_modes_example.py": "e231bf74afa4b4c6dfa23ee5faeff4929d374659c39d8810ca054fd9449e3480",
     "tests/test_reports.py": "5742788e3f97950300723b17d7120b0ddecfef2b37e95c9ea5ac6e5836f70ca5",
     "tests/test_scenarios.py": "9989809149f0aa2316d1a9e4a5c06cc1fe62c79b02126134421bd3fbf73fc850",
-    "tests/test_segmented.py": "a5a02e7b2ce929666d4416a9544ac66d268c1084cf837890ef84dabe472146db"
+    "tests/test_segmented.py": "a5a02e7b2ce929666d4416a9544ac66d268c1084cf837890ef84dabe472146db",
+    "tests/test_utility.py": "841b5d4c12c0758ff63ef59e205bdc2b13de8300cce0983f06abd261784fb442"
   }
 }
