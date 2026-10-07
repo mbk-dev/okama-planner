@@ -24,3 +24,5 @@ jobs:
         run: poetry run python examples/demo.py
       - name: Neutral synthetic reports
         run: poetry run python examples/reports.py
+      - name: Synthetic family portfolio modes
+        run: poetry run python examples/portfolio_modes.py

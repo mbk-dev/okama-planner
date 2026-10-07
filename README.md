@@ -1,8 +1,9 @@
 # okama Planner
 
 A standalone Python library for personal and family financial planning, powered by
-`okama.FinPlan`. It turns a household budget, assets, fixed-payment loans and dated goals
-into a monthly ledger and a two-stage Monte Carlo forecast. No client registry, database,
+`okama.FinPlan` and explicit joint market scenarios. It turns a household budget, assets,
+fixed-payment loans and dated goals into a monthly ledger and a forecast with pooled or
+goal-specific investment portfolios. No client registry, database,
 Excel template or MCP server is required.
 
 Released under the [MIT license](LICENSE). This repository contains the independently usable
@@ -74,16 +75,47 @@ Saved results include a positive portfolio median while total capital additional
 the acquired property. Sample probabilities are Monte Carlo estimates from 500 paths, not
 claims about real investment returns or a guarantee that deferral improves a plan.
 
-Implemented: a single investment portfolio with accumulation and withdrawal strategies,
-annual indexation, fixed-payment debt, liquid buffers, pooled/separate fixed-rate savings,
-reserve targets and non-working assets. Separate savings accounts are not separate
-investment portfolios for goals.
+Implemented: a legacy single investment portfolio with accumulation and withdrawal
+strategies, plus joint-bootstrap `single` and `per_goal` investment portfolios with actual
+event funding. Annual indexation, fixed-payment debt, liquid buffers, pooled/separate
+fixed-rate savings, reserve targets and non-working assets remain supported. Separate
+fixed-rate savings accounts differ from goal-specific investment portfolios.
 
-Not implemented in this candidate: goal-specific investment portfolios, gamma/equivalent
-alpha, FX conversion, jurisdictional taxes, transaction fees or a web UI. Net budget/returns must already reflect any externally
-modelled taxes and fees. Positive initial invested capital and two non-empty stages are
-required by this implementation. Undated purchases are rejected; dated goals outside the
-forecast horizon are excluded from its ledger and goal results. Loan proceeds are not
+The richer offline family example compares home and pension portfolios against one pooled
+portfolio on one shared scenario cube. Its empty household account, opening allocations,
+dated strategies, surplus weights, payment order, transfers and completion rules are explicit:
+
+```bash
+poetry install --extras reports
+poetry run python examples/portfolio_modes.py
+```
+
+It saves both requests/results, `comparison.json` and a neutral workbook under
+`tmp/portfolio-modes/`. Ready-made synthetic snapshots are
+`examples/family-single-request.json`, `examples/family-single-result.json`,
+`examples/family-per-goal-request.json` and `examples/family-per-goal-result.json`.
+The family, amounts and synchronized histories are fictional. See
+[portfolio mode semantics](docs/portfolio-modes.md) and [report semantics](docs/reports.md).
+Risk differs between the two modes, so their differences describe these explicit
+strategies and policies, not an isolated benefit of account separation.
+
+To replay two complete requests without changing the example:
+
+```bash
+poetry run python examples/portfolio_modes.py \
+  --single-request path/to/single.json --per-goal-request path/to/per-goal.json \
+  --output-dir path/to/results
+```
+
+Both requests must describe the same household, history, currency, seed and path count.
+The helper writes snapshots only to the selected output directory and does not print their
+contents. Keep personal requests/results outside the public repository.
+
+FX conversion, jurisdictional taxes, transaction fees and a web UI are outside the current
+model. Net budget/returns must already reflect any externally modelled taxes and fees.
+The legacy FinPlan path requires positive initial invested capital and two non-empty stages;
+joint funding supports empty segments. Undated purchases are rejected; dated goals outside
+the forecast horizon are excluded from its ledger and goal results. Loan proceeds are not
 created automatically: any corresponding asset or receipt must be supplied explicitly.
 
 ## Neutral Excel reports

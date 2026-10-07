@@ -1,5 +1,123 @@
 {
   "$defs": {
+    "AllocationSpec": {
+      "additionalProperties": false,
+      "description": "All choices are required: even an empty transfer order is an explicit decision.",
+      "properties": {
+        "segments": {
+          "items": {
+            "$ref": "#/$defs/SegmentSpec"
+          },
+          "minItems": 1,
+          "title": "Segments",
+          "type": "array"
+        },
+        "single_strategy": {
+          "items": {
+            "$ref": "#/$defs/StrategyStep"
+          },
+          "minItems": 1,
+          "title": "Single Strategy",
+          "type": "array"
+        },
+        "surplus_weights": {
+          "items": {
+            "$ref": "#/$defs/SurplusStep"
+          },
+          "minItems": 1,
+          "title": "Surplus Weights",
+          "type": "array"
+        },
+        "household_segment_id": {
+          "title": "Household Segment Id",
+          "type": "string"
+        },
+        "goal_funders": {
+          "items": {
+            "$ref": "#/$defs/GoalFunder"
+          },
+          "title": "Goal Funders",
+          "type": "array"
+        },
+        "event_priority": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Event Priority",
+          "type": "array"
+        },
+        "funding_source_order": {
+          "items": {
+            "enum": [
+              "cash",
+              "buffer",
+              "segment"
+            ],
+            "type": "string"
+          },
+          "title": "Funding Source Order",
+          "type": "array"
+        },
+        "reserve_funding_source_order": {
+          "items": {
+            "enum": [
+              "cash",
+              "buffer",
+              "segment"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Reserve Funding Source Order",
+          "type": "array"
+        },
+        "transfer_policy": {
+          "enum": [
+            "none",
+            "ordered",
+            "unrestricted"
+          ],
+          "title": "Transfer Policy",
+          "type": "string"
+        },
+        "transfer_order": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Transfer Order",
+          "type": "array"
+        },
+        "buffer_policy": {
+          "enum": [
+            "retain",
+            "planned_targets"
+          ],
+          "title": "Buffer Policy",
+          "type": "string"
+        },
+        "purchase_execution": {
+          "const": "all_or_nothing",
+          "title": "Purchase Execution",
+          "type": "string"
+        }
+      },
+      "required": [
+        "segments",
+        "single_strategy",
+        "surplus_weights",
+        "household_segment_id",
+        "goal_funders",
+        "event_priority",
+        "funding_source_order",
+        "reserve_funding_source_order",
+        "transfer_policy",
+        "transfer_order",
+        "buffer_policy",
+        "purchase_execution"
+      ],
+      "title": "AllocationSpec",
+      "type": "object"
+    },
     "AssetIn": {
       "additionalProperties": false,
       "properties": {
@@ -104,6 +222,56 @@
         "monthly_amount"
       ],
       "title": "BudgetItemIn",
+      "type": "object"
+    },
+    "CompletionPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "retain",
+            "transfer_to"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "destination": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Destination"
+        }
+      },
+      "required": [
+        "action"
+      ],
+      "title": "CompletionPolicy",
+      "type": "object"
+    },
+    "GoalFunder": {
+      "additionalProperties": false,
+      "properties": {
+        "goal_id": {
+          "title": "Goal Id",
+          "type": "integer"
+        },
+        "segment_id": {
+          "minLength": 1,
+          "title": "Segment Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "goal_id",
+        "segment_id"
+      ],
+      "title": "GoalFunder",
       "type": "object"
     },
     "GoalIn": {
@@ -249,6 +417,45 @@
         "weight"
       ],
       "title": "HoldingIn",
+      "type": "object"
+    },
+    "JointHistory": {
+      "additionalProperties": false,
+      "description": "Aligned monthly observations, already expressed in the plan currency.\n\nEach asset's observation at the same offset belongs to the same month.\nThe caller is responsible for calendar alignment and currency conversion.",
+      "properties": {
+        "start_month": {
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+          "title": "Start Month",
+          "type": "string"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        },
+        "method": {
+          "const": "synchronized_bootstrap",
+          "title": "Method",
+          "type": "string"
+        },
+        "asset_returns": {
+          "additionalProperties": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "title": "Asset Returns",
+          "type": "object"
+        }
+      },
+      "required": [
+        "start_month",
+        "currency",
+        "method",
+        "asset_returns"
+      ],
+      "title": "JointHistory",
       "type": "object"
     },
     "LiabilityIn": {
@@ -480,6 +687,27 @@
       "title": "PlanInputs",
       "type": "object"
     },
+    "PortfolioWeight": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "minLength": 1,
+          "title": "Asset",
+          "type": "string"
+        },
+        "weight": {
+          "minimum": 0,
+          "title": "Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "asset",
+        "weight"
+      ],
+      "title": "PortfolioWeight",
+      "type": "object"
+    },
     "Rates": {
       "additionalProperties": false,
       "description": "The six run-level rates. None is derived from another; all are required.",
@@ -582,6 +810,79 @@
       "title": "ReturnSample",
       "type": "object"
     },
+    "SegmentShare": {
+      "additionalProperties": false,
+      "properties": {
+        "segment_id": {
+          "minLength": 1,
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "weight": {
+          "minimum": 0,
+          "title": "Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "segment_id",
+        "weight"
+      ],
+      "title": "SegmentShare",
+      "type": "object"
+    },
+    "SegmentSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "segment_id": {
+          "minLength": 1,
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "goal_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Goal Id"
+        },
+        "opening_amount": {
+          "minimum": 0,
+          "title": "Opening Amount",
+          "type": "number"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        },
+        "strategy": {
+          "items": {
+            "$ref": "#/$defs/StrategyStep"
+          },
+          "minItems": 1,
+          "title": "Strategy",
+          "type": "array"
+        },
+        "completion": {
+          "$ref": "#/$defs/CompletionPolicy"
+        }
+      },
+      "required": [
+        "segment_id",
+        "goal_id",
+        "opening_amount",
+        "currency",
+        "strategy",
+        "completion"
+      ],
+      "title": "SegmentSpec",
+      "type": "object"
+    },
     "StageSamples": {
       "additionalProperties": false,
       "properties": {
@@ -597,6 +898,54 @@
         "withdrawal"
       ],
       "title": "StageSamples",
+      "type": "object"
+    },
+    "StrategyStep": {
+      "additionalProperties": false,
+      "properties": {
+        "start_month": {
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+          "title": "Start Month",
+          "type": "string"
+        },
+        "weights": {
+          "items": {
+            "$ref": "#/$defs/PortfolioWeight"
+          },
+          "minItems": 1,
+          "title": "Weights",
+          "type": "array"
+        }
+      },
+      "required": [
+        "start_month",
+        "weights"
+      ],
+      "title": "StrategyStep",
+      "type": "object"
+    },
+    "SurplusStep": {
+      "additionalProperties": false,
+      "properties": {
+        "start_month": {
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+          "title": "Start Month",
+          "type": "string"
+        },
+        "weights": {
+          "items": {
+            "$ref": "#/$defs/SegmentShare"
+          },
+          "minItems": 1,
+          "title": "Weights",
+          "type": "array"
+        }
+      },
+      "required": [
+        "start_month",
+        "weights"
+      ],
+      "title": "SurplusStep",
       "type": "object"
     }
   },
@@ -643,6 +992,37 @@
       "anyOf": [
         {
           "$ref": "#/$defs/StageSamples"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "portfolio_mode": {
+      "default": "single",
+      "enum": [
+        "single",
+        "per_goal"
+      ],
+      "title": "Portfolio Mode",
+      "type": "string"
+    },
+    "joint_history": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/JointHistory"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "allocation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AllocationSpec"
         },
         {
           "type": "null"

@@ -1,4 +1,8 @@
-# Forecast contract, schema version 1.0
+# Legacy forecast contract, schema version 1.0
+
+This page describes the unchanged legacy FinPlan path. Requests with explicit joint history
+and allocation return schema 1.1 in either portfolio mode; see
+[the goal-portfolio contract](portfolio-modes.md) for actual funding and comparison semantics.
 
 The entry point is `okama_planner.forecast(ForecastRequest | dict) -> dict`.
 The request schema is available from `ForecastRequest.model_json_schema()` and as
@@ -61,14 +65,14 @@ Cash flows are already nominally indexed in the ledger. `TimeSeriesStrategy` rec
 with `time_series_discounted_values=True` to avoid applying okama's indexation again.
 `DatedFinPlan` keeps forecast dates anchored to `t0` independently of historical sample dates.
 `HistoryPortfolio` is a narrow offline adapter for FinPlan, not a general asset-data provider.
-Normal draws can fall below -100%; this candidate follows okama's model and does not impose
+Normal draws can fall below -100%; this path follows okama's model and does not impose
 a different tail law. Matched Student t uses fitted tail shape with the sample centre/spread;
 unconstrained fits can change expected return. Distribution choice is an explicit assumption.
 
 ## Adapter handoff
 
-A future MCP tool can validate the complete request, call `forecast` once and return this dict.
-For comparisons, make independent calls with copied requests; this candidate has no mutable
+A thin MCP adapter can validate the complete request, call `forecast` once and return this dict.
+For legacy comparisons, make independent calls with copied requests; the library has no mutable
 scenario/session storage. Example baseline/deferred requests and results fix the purchase-date
 comparison without adding an MCP implementation here. Market-backed stages may share okama
 portfolio cache entries within a process; offline calculation has no market downloads.

@@ -1,0 +1,356 @@
+{
+  "currency": "USD",
+  "mc_number": 500,
+  "seed": 707,
+  "portfolio_mode": "per_goal",
+  "plan": {
+    "t0": "2026-01",
+    "horizon_years": 6,
+    "retirement_year": 2029,
+    "buffer_lookahead_months": 0,
+    "pension_replaces_expenses": true,
+    "rates": {
+      "inflation_rate": 0.02,
+      "expense_indexation_rate": 0.02,
+      "income_indexation_rate": 0.02,
+      "goal_indexation_rate": 0.02,
+      "discount_rate": 0.02,
+      "buffer_rate": 0.0
+    },
+    "persons": [
+      {
+        "name": "Synthetic adult 1",
+        "birth_year": 1970,
+        "role": "adult"
+      },
+      {
+        "name": "Synthetic adult 2",
+        "birth_year": 1972,
+        "role": "adult"
+      },
+      {
+        "name": "Synthetic child",
+        "birth_year": 2012,
+        "role": "child"
+      }
+    ],
+    "assets": [
+      {
+        "label": "Synthetic investments",
+        "amount": 140000,
+        "currency": "USD",
+        "asset_class": "portfolio"
+      }
+    ],
+    "liabilities": [],
+    "budget_items": [
+      {
+        "kind": "income",
+        "label": "Synthetic salary 1",
+        "monthly_amount": 3000,
+        "end_rule": "until_retirement"
+      },
+      {
+        "kind": "income",
+        "label": "Synthetic salary 2",
+        "monthly_amount": 1500,
+        "end_rule": "until_retirement"
+      },
+      {
+        "kind": "expense",
+        "label": "Synthetic family living",
+        "monthly_amount": 3000
+      }
+    ],
+    "goals": [
+      {
+        "goal_id": 1,
+        "label": "Synthetic home",
+        "kind": "lump",
+        "amount_pv": 100000,
+        "pv_year": 2026,
+        "target_year": 2028,
+        "target_month": 7,
+        "becomes_asset": true
+      },
+      {
+        "goal_id": 2,
+        "label": "Synthetic pension",
+        "kind": "retirement_income",
+        "amount_pv": 3000,
+        "pv_year": 2026
+      }
+    ]
+  },
+  "joint_history": {
+    "currency": "USD",
+    "start_month": "2020-01",
+    "method": "synchronized_bootstrap",
+    "asset_returns": {
+      "Synthetic growth": [
+        0.035,
+        -0.04,
+        0.02,
+        0.01,
+        -0.025,
+        0.03,
+        0.015,
+        -0.01,
+        0.025,
+        0.005,
+        -0.03,
+        0.045,
+        0.035,
+        -0.04,
+        0.02,
+        0.01,
+        -0.025,
+        0.03,
+        0.015,
+        -0.01,
+        0.025,
+        0.005,
+        -0.03,
+        0.045,
+        0.035,
+        -0.04,
+        0.02,
+        0.01,
+        -0.025,
+        0.03,
+        0.015,
+        -0.01,
+        0.025,
+        0.005,
+        -0.03,
+        0.045
+      ],
+      "Synthetic defensive": [
+        0.002,
+        0.003,
+        0.001,
+        0.002,
+        0.001,
+        0.002,
+        0.003,
+        0.001,
+        0.002,
+        0.002,
+        0.001,
+        0.002,
+        0.002,
+        0.003,
+        0.001,
+        0.002,
+        0.001,
+        0.002,
+        0.003,
+        0.001,
+        0.002,
+        0.002,
+        0.001,
+        0.002,
+        0.002,
+        0.003,
+        0.001,
+        0.002,
+        0.001,
+        0.002,
+        0.003,
+        0.001,
+        0.002,
+        0.002,
+        0.001,
+        0.002
+      ]
+    }
+  },
+  "allocation": {
+    "segments": [
+      {
+        "segment_id": "household",
+        "goal_id": null,
+        "opening_amount": 0,
+        "currency": "USD",
+        "strategy": [
+          {
+            "start_month": "2026-01",
+            "weights": [
+              {
+                "asset": "Synthetic growth",
+                "weight": 0.0
+              },
+              {
+                "asset": "Synthetic defensive",
+                "weight": 1.0
+              }
+            ]
+          }
+        ],
+        "completion": {
+          "action": "retain"
+        }
+      },
+      {
+        "segment_id": "home",
+        "goal_id": 1,
+        "opening_amount": 70000,
+        "currency": "USD",
+        "strategy": [
+          {
+            "start_month": "2026-01",
+            "weights": [
+              {
+                "asset": "Synthetic growth",
+                "weight": 0.0
+              },
+              {
+                "asset": "Synthetic defensive",
+                "weight": 1.0
+              }
+            ]
+          }
+        ],
+        "completion": {
+          "action": "transfer_to",
+          "destination": "pension"
+        }
+      },
+      {
+        "segment_id": "pension",
+        "goal_id": 2,
+        "opening_amount": 70000,
+        "currency": "USD",
+        "strategy": [
+          {
+            "start_month": "2026-01",
+            "weights": [
+              {
+                "asset": "Synthetic growth",
+                "weight": 1.0
+              },
+              {
+                "asset": "Synthetic defensive",
+                "weight": 0.0
+              }
+            ]
+          },
+          {
+            "start_month": "2029-01",
+            "weights": [
+              {
+                "asset": "Synthetic growth",
+                "weight": 0.5
+              },
+              {
+                "asset": "Synthetic defensive",
+                "weight": 0.5
+              }
+            ]
+          }
+        ],
+        "completion": {
+          "action": "retain"
+        }
+      }
+    ],
+    "single_strategy": [
+      {
+        "start_month": "2026-01",
+        "weights": [
+          {
+            "asset": "Synthetic growth",
+            "weight": 0.7
+          },
+          {
+            "asset": "Synthetic defensive",
+            "weight": 0.30000000000000004
+          }
+        ]
+      },
+      {
+        "start_month": "2029-01",
+        "weights": [
+          {
+            "asset": "Synthetic growth",
+            "weight": 0.4
+          },
+          {
+            "asset": "Synthetic defensive",
+            "weight": 0.6
+          }
+        ]
+      }
+    ],
+    "surplus_weights": [
+      {
+        "start_month": "2026-01",
+        "weights": [
+          {
+            "segment_id": "household",
+            "weight": 0.0
+          },
+          {
+            "segment_id": "home",
+            "weight": 0.7
+          },
+          {
+            "segment_id": "pension",
+            "weight": 0.3
+          }
+        ]
+      },
+      {
+        "start_month": "2028-08",
+        "weights": [
+          {
+            "segment_id": "household",
+            "weight": 0.0
+          },
+          {
+            "segment_id": "home",
+            "weight": 0.0
+          },
+          {
+            "segment_id": "pension",
+            "weight": 1.0
+          }
+        ]
+      }
+    ],
+    "household_segment_id": "household",
+    "goal_funders": [
+      {
+        "goal_id": 1,
+        "segment_id": "home"
+      },
+      {
+        "goal_id": 2,
+        "segment_id": "pension"
+      }
+    ],
+    "event_priority": [
+      "expense",
+      "mortgage_payment",
+      "goal:1",
+      "goal:2"
+    ],
+    "funding_source_order": [
+      "cash",
+      "buffer",
+      "segment"
+    ],
+    "reserve_funding_source_order": [
+      "cash",
+      "segment"
+    ],
+    "transfer_policy": "ordered",
+    "transfer_order": [
+      "household",
+      "home",
+      "pension"
+    ],
+    "buffer_policy": "retain",
+    "purchase_execution": "all_or_nothing"
+  }
+}

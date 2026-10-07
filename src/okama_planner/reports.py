@@ -91,10 +91,12 @@ def _validate(items: Sequence[dict[str, Any]]) -> list[ForecastRequest]:
         digest = hashlib.sha256(encoded.encode()).hexdigest()
         if result["provenance"]["input_sha256"] != digest:
             raise ValueError("Saved result does not match its request")
-        if result["schema_version"] != "1.0" or result["currency"] != request.currency:
+        if result["schema_version"] not in {"1.0", "1.1"} or result["currency"] != request.currency:
             raise ValueError("Unsupported result schema or inconsistent currency")
-        if result["portfolio_mode"] != "single":
-            raise ValueError("Unsupported portfolio mode")
+        if result["portfolio_mode"] != request.portfolio_mode or (
+            result["schema_version"] == "1.0" and result["portfolio_mode"] != "single"
+        ):
+            raise ValueError("Unsupported or inconsistent portfolio mode")
         periods = pd.period_range(
             request.plan.t0, periods=12 * effective_horizon_years(request.plan), freq="M"
         )
@@ -105,6 +107,7 @@ def _validate(items: Sequence[dict[str, Any]]) -> list[ForecastRequest]:
         for series in result["charts"].values():
             if [row["month"] for row in series] != chart_months:
                 raise ValueError("Chart horizon does not match the request")
+        _validate_actual(request, result, chart_months)
         json.dumps(result, allow_nan=False)
         requests.append(request)
     if any(
@@ -115,6 +118,16 @@ def _validate(items: Sequence[dict[str, Any]]) -> list[ForecastRequest]:
         raise ValueError("Comparison requires the same currency, start and horizon")
     return requests
 
+
+
+def _validate_actual(request: ForecastRequest, result: dict[str, Any], months: list[str]) -> None:
+    if result["schema_version"] != "1.1":
+        return
+    if request.joint_history is None or request.allocation is None:
+        raise ValueError("Joint result requires a joint request")
+    series = [result["actual"]["monthly_summaries"], *(s["chart"] for s in result["segments"])]
+    if any([row["month"] for row in rows] != months for rows in series):
+        raise ValueError("Actual or segment horizon does not match the request")
 
 def _assumptions(sheet: Worksheet, items: Sequence[dict[str, Any]], requests: list[ForecastRequest]) -> None:
     def flatten(value: Any, prefix: str = "") -> list[tuple[str, Any]]:
@@ -130,7 +143,8 @@ def _assumptions(sheet: Worksheet, items: Sequence[dict[str, Any]], requests: li
 
     for item, request in zip(items, requests, strict=True):
         data = request.model_dump(mode="json")
-        data.pop("return_samples")
+        data.pop("return_samples", None)
+        data.pop("joint_history", None)
         for key, value in flatten(data):
             # Preserve complete assumptions instead of silently choosing a few scenario levers.
             _append(sheet, [item["label"], key, json.dumps(value, ensure_ascii=False, allow_nan=False)])
@@ -167,12 +181,20 @@ def _balance(sheet: Worksheet, result: dict[str, Any]) -> None:
         zip(result["charts"]["portfolio"], result["charts"]["capital"], strict=True)
     ):
         row = [portfolio["month"], portfolio["p50"], capital["p50"]]
-        row.extend(
-            ledger[key][i - 1] if i else None
-            for key in ("buffer_balance", "reserve_balance", "non_working_balance", "liability_balance")
-        )
+        if result["schema_version"] == "1.1":
+            actual = result["actual"]["monthly_summaries"][i]
+            row.extend(actual[key]["p50"] for key in ("buffer", "reserve", "non_working", "liability"))
+        else:
+            row.extend(
+                ledger[key][i - 1] if i else None
+                for key in ("buffer_balance", "reserve_balance", "non_working_balance", "liability_balance")
+            )
         _append(sheet, row)
-    sheet["A4"] = "Opening component balances are omitted; p50 series include the opening point."
+    sheet["A4"] = (
+        "Actual scenario p50 balances, including opening balances; component medians are not additive."
+        if result["schema_version"] == "1.1"
+        else "Opening component balances are omitted; p50 series include the opening point."
+    )
     sheet.merge_cells("A4:G4")
     sheet.row_dimensions[4].height = 30
 
@@ -200,8 +222,9 @@ def _summary(sheet: Worksheet, result: dict[str, Any]) -> None:
         ("Full-plan success", result["metrics"]["probability_of_success"]),
         ("Terminal portfolio p50", result["metrics"]["terminal_p50"]),
         ("Portfolio mode", result["portfolio_mode"]),
-        ("Gamma", "Not available"),
-        ("Equivalent annual alpha", "Not available"),
+        *(([("Total unmet mean", result["metrics"]["unmet_mean"])])
+          if result["schema_version"] == "1.1" else
+          [("Gamma", "Not available"), ("Equivalent annual alpha", "Not available")]),
     ]:
         _append(sheet, [label, value])
     sheet["B6"].number_format = PERCENT
@@ -222,8 +245,11 @@ def _comparison(sheet: Worksheet, items: Sequence[dict[str, Any]]) -> None:
         _append(sheet, [*values, None if other else "Not supplied"])
         if other:
             sheet.cell(row, 4, f"=C{row}-B{row}")
-    for label in ["Gamma", "Equivalent annual alpha"]:
-        _append(sheet, [label, "Not available", "Not available", "Not available"])
+    if all(item["result"]["schema_version"] == "1.0" for item in items):
+        for label in ["Gamma", "Equivalent annual alpha"]:
+            _append(sheet, [label, "Not available", "Not available", "Not available"])
+    else:
+        _joint_comparison(sheet, items)
     for column in ("B", "C", "D"):
         sheet[f"{column}6"].number_format = PERCENT
     sheet["A4"] = (
@@ -232,6 +258,103 @@ def _comparison(sheet: Worksheet, items: Sequence[dict[str, Any]]) -> None:
     sheet.merge_cells("A4:D4")
     sheet.row_dimensions[4].height = 36
 
+
+
+def _joint_goals(sheet: Worksheet, items: Sequence[dict[str, Any]]) -> None:
+    for item in items:
+        for goal in item["result"]["goals"]:
+            joint = item["result"]["schema_version"] == "1.1"
+            _append(sheet, [
+                item["label"], goal["label"], goal["month"], goal["amount_nominal"],
+                goal["p_funded"] if joint else "Legacy: see affordability in saved JSON",
+                goal.get("p_full_stream"), goal.get("funded_mean"), goal.get("unmet_mean"),
+                goal.get("funding_basis", "legacy_before_goal_affordability"),
+            ])
+    sheet["A4"] = "Actual funding covers every required goal event; pension success covers the full stream."
+    sheet.merge_cells("A4:I4")
+
+
+def _joint_comparison(sheet: Worksheet, items: Sequence[dict[str, Any]]) -> None:
+    left = items[0]["result"]
+    right = items[1]["result"] if len(items) == 2 else None
+
+    def difference(label: str, a: Any, b: Any, probability: bool = False) -> None:
+        row = sheet.max_row + 1
+        _append(sheet, [label, a, b, None])
+        if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+            sheet.cell(row, 4, f"=C{row}-B{row}")
+        else:
+            _text(sheet, row, 4, "Not comparable")
+        if probability:
+            for column in (2, 3, 4):
+                sheet.cell(row, column).number_format = PERCENT
+
+    difference("Total unmet mean", left["metrics"].get("unmet_mean", "Legacy: unavailable"),
+               right["metrics"].get("unmet_mean", "Legacy: unavailable") if right else "Not supplied")
+    other_goals = {g["goal_id"]: g for g in right["goals"]} if right else {}
+    for goal in left["goals"]:
+        other = other_goals.get(goal["goal_id"], {})
+        for key, label, probability in [
+            ("p_funded", "fully funded probability", True),
+            ("p_full_stream", "full-stream probability", True),
+            ("funded_mean", "funded mean", False),
+            ("unmet_mean", "unmet mean", False),
+        ]:
+            if key == "p_full_stream" and goal.get(key) is None and other.get(key) is None:
+                continue
+            difference(f"{goal['label']}: {label}", goal.get(key, "Unavailable"),
+                       other.get(key, "Unavailable"), probability)
+    for label, key in [("Portfolio mode", "portfolio_mode"), ("Shared history hash", "history_sha256"),
+                       ("Shared scenario rows hash", "scenario_rows_sha256")]:
+        if key == "portfolio_mode":
+            values = [r[key] if r else "Not supplied" for r in (left, right)]
+        else:
+            values = [r["provenance"].get(key, "Legacy: unavailable") if r else "Not supplied"
+                      for r in (left, right)]
+        _append(sheet, [label, *values, "Same" if values[0] == values[1] else "Different"])
+
+
+def _joint_details(book: Workbook, items: Sequence[dict[str, Any]], brand: ReportBrand) -> None:
+    segments = _sheet(book, "Segments", brand, [
+        "Scenario", "Segment", "Goal ID", "Opening amount", "Full-funding probability", "Completion",
+    ])
+    allocation = _sheet(book, "Allocation", brand, ["Scenario", "Policy / schedule", "Explicit value"])
+    balances = _sheet(book, "Segment balances", brand, ["Scenario", "Segment", "Month", "p10", "p50", "p90"])
+    events = _sheet(book, "Funding events", brand, [
+        "Scenario", "Month", "Kind", "Label", "Goal ID", "Segment", "Required mean", "Funded mean",
+        "Unmet mean", "Fully funded probability", "Funding sources (mean)",
+    ])
+    transfers = _sheet(book, "Transfers", brand, [
+        "Scenario", "Mode", "Month", "Source", "Destination", "Reason", "Amount mean",
+    ])
+    segments["A4"] = "Single mode segment balances are a display attribution within one pooled portfolio."
+    segments.merge_cells("A4:F4")
+    allocation.column_dimensions["C"].width = 95
+    for item in items:
+        result = item["result"]
+        if result["schema_version"] != "1.1":
+            continue
+        label = item["label"]
+        for key, value in result["allocation"].items():
+            if key != "segments":
+                _append(allocation, [label, key, json.dumps(value, ensure_ascii=False)])
+        for segment in result["segments"]:
+            _append(segments, [label, segment["segment_id"], segment["goal_id"], segment["opening_amount"],
+                               segment["probability_of_full_funding"], json.dumps(segment["completion"])])
+            segments.cell(segments.max_row, 5).number_format = PERCENT
+            for key in ("strategy", "active_strategy"):
+                _append(allocation, [label, f"{segment['segment_id']}.{key}", json.dumps(segment[key])])
+            for point in segment["chart"]:
+                _append(balances, [label, segment["segment_id"], point["month"],
+                                   point["p10"], point["p50"], point["p90"]])
+        for event in result["actual"]["event_funding"]:
+            _append(events, [label, event["month"], event["kind"], event["label"], event["goal_id"],
+                             event["segment_id"], event["required_mean"], event["funded_mean"],
+                             event["unmet_mean"], event["p_funded"], json.dumps(event["funding_sources"])])
+            events.cell(events.max_row, 10).number_format = PERCENT
+        for transfer in result["actual"]["transfers"]:
+            _append(transfers, [label, result["portfolio_mode"], transfer["month"], transfer["source"],
+                                transfer["destination"], transfer["reason"], transfer["amount_mean"]])
 
 def _style_cell(cell: Any) -> None:
     formula = cell.data_type == "f"
@@ -286,7 +409,8 @@ def _print_layout(book: Workbook, summary: Worksheet, unit: str, label: str) -> 
         sheet.oddFooter.right.text = f"Nominal {unit} | {label}"
         sheet.oddFooter.right.font = "Arial"
     for name in ("Budget", "Ledger"):
-        book[name]["A4"] = f"Baseline: {label} | Nominal {unit}"
+        basis = " | Planned requirements, not actual payments/balances" if "Funding events" in book else ""
+        book[name]["A4"] = f"Baseline: {label} | Nominal {unit}{basis}"
         book[name].merge_cells(start_row=4, start_column=1, end_row=4, end_column=book[name].max_column)
 
 
@@ -356,7 +480,8 @@ def export_report(
         ),
         result,
     )
-    _goals(
+    joint = any(item["result"]["schema_version"] == "1.1" for item in scenarios)
+    (_joint_goals if joint else _goals)(
         _sheet(
             book,
             "Goals",
@@ -368,6 +493,10 @@ def export_report(
                 f"Nominal amount ({unit})",
                 "Affordable probability",
                 "Alive probability",
+            ] if not joint else [
+                "Scenario", "Goal", "First month", f"First required amount ({unit})",
+                "Fully funded probability", "Full-stream probability", "Funded mean (whole goal)",
+                "Unmet mean (whole goal)", "Funding basis",
             ],
         ),
         scenarios,
@@ -392,6 +521,8 @@ def export_report(
     raw = _sheet(book, "Ledger", brand, ["Month", "Kind", "Label", f"Amount ({unit})", "Resolved rate"])
     for line in result["ledger"]["lines"]:
         _append(raw, [line["month"], line["line_kind"], line["label"], line["amount"], line["resolved_rate"]])
+    if joint:
+        _joint_details(book, scenarios, brand)
     instructions = _sheet(book, "Instructions", brand, ["Topic", "Instruction", ""])
     for row in [
         [
@@ -421,7 +552,7 @@ def export_report(
         ],
         [
             "Limits",
-            "Single investment portfolio; fixed-rate savings are separate reserves. "
+            "Legacy single or joint single/per_goal investments; fixed-rate savings are separate reserves. "
             "No jurisdictional tax, FX, gamma/alpha or white label legal declaration is inferred.",
         ],
         [

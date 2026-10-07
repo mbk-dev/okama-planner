@@ -14,7 +14,10 @@ os.environ.setdefault("MPLBACKEND", "Agg")
 
 import okama as ok  # noqa: E402 — set the headless backend before importing okama
 import pandas as pd  # noqa: E402
-from pydantic import BaseModel, ConfigDict, Field, model_validator  # noqa: E402
+from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_validator  # noqa: E402
+
+from okama_planner.allocation import AllocationSpec  # noqa: E402
+from okama_planner.scenarios import JointHistory  # noqa: E402
 
 from okama_planner.forecast.goal_results import goal_outcomes  # noqa: E402
 from okama_planner.forecast.plan import build_finplan  # noqa: E402
@@ -65,6 +68,21 @@ class ForecastRequest(BaseModel):
     distribution: Literal["norm", "lognorm", "t"] = "norm"
     match_moments: bool = True
     return_samples: StageSamples | None = None
+    portfolio_mode: Literal["single", "per_goal"] = "single"
+    joint_history: JointHistory | None = None
+    allocation: AllocationSpec | None = None
+
+    @model_serializer(mode="wrap")
+    def serialize_request(self, handler: Any) -> dict[str, Any]:
+        """Keep legacy snapshots and their hashes byte-for-byte compatible."""
+        data = handler(self)
+        if self.joint_history is None and self.allocation is None and self.portfolio_mode == "single":
+            for field in ("portfolio_mode", "joint_history", "allocation"):
+                data.pop(field, None)
+        elif self.joint_history is not None:
+            data.pop("distribution", None)
+            data.pop("match_moments", None)
+        return data
 
     @model_validator(mode="after")
     def valid_plan(self) -> ForecastRequest:
@@ -73,7 +91,10 @@ class ForecastRequest(BaseModel):
         effective_horizon_years(plan)
         if plan.buffer_lookahead_months < 0:
             raise ValueError("Buffer lookahead must not be negative")
-        if sum(a.amount for a in plan.assets if a.asset_class == "portfolio") <= 0:
+        if (
+            self.joint_history is None
+            and sum(a.amount for a in plan.assets if a.asset_class == "portfolio") <= 0
+        ):
             raise ValueError("okama FinPlan requires positive opening portfolio capital")
         if any(a.currency != self.currency for a in plan.assets):
             raise ValueError("Mixed asset currencies require an FX model, which is not supported")
@@ -81,7 +102,39 @@ class ForecastRequest(BaseModel):
         _validate_values(plan)
         if self.return_samples is not None and (plan.accumulation_holdings or plan.withdrawal_holdings):
             raise ValueError("Provide frozen stage samples or holdings, not both")
+        if self.joint_history is None:
+            if self.portfolio_mode != "single" or self.allocation is not None:
+                raise ValueError("portfolio_mode/per-goal allocation requires joint_history")
+        else:
+            self._validate_joint_plan()
         return self
+
+    def _validate_joint_plan(self) -> None:
+        plan = self.plan
+        if {"distribution", "match_moments"} & self.model_fields_set:
+            raise ValueError(
+                "distribution and match_moments are legacy-only; joint history declares its method"
+            )
+        if self.allocation is None:
+            raise ValueError("joint_history requires explicit allocation for both portfolio modes")
+        if self.return_samples is not None or plan.accumulation_holdings or plan.withdrawal_holdings:
+            raise ValueError("joint_history cannot coexist with legacy stage samples or holdings")
+        if plan.savings_mode != "pooled" or plan.goal_savings_rates or plan.savings_horizon_years is not None:
+            raise ValueError("Joint funding does not support separate savings or automatic savings goals")
+        for rebalancing in (plan.accumulation_rebalancing, plan.withdrawal_rebalancing):
+            if (
+                rebalancing.period != "month"
+                or rebalancing.abs_deviation is not None
+                or (rebalancing.rel_deviation is not None)
+            ):
+                raise ValueError("Joint funding supports monthly target-weight rebalancing only")
+        if any(
+            pd.Period(loan.start_month, freq="M") > pd.Period(plan.t0, freq="M") for loan in plan.liabilities
+        ):
+            raise ValueError(
+                "Joint funding supports existing loans only; future loans need a disbursement contract"
+            )
+        self.allocation.validate_plan(plan, self.joint_history, self.currency)
 
 
 def _validate_structure(plan: PlanInputs) -> None:
@@ -137,7 +190,24 @@ def _digest(value: Any) -> str:
 
 def forecast(request: ForecastRequest | dict[str, Any]) -> dict[str, Any]:
     """Return household flows, goal outcomes, forecast metrics, chart series and provenance."""
-    request = ForecastRequest.model_validate(request)
+    request = ForecastRequest.model_validate(
+        request.model_dump(mode="json") if isinstance(request, ForecastRequest) else request
+    )
+    if request.joint_history is not None:
+        from okama_planner.scenarios import sample_joint_returns
+        from okama_planner.segmented import joint_forecast_result
+
+        scenarios = sample_joint_returns(
+            request.joint_history,
+            months=12 * effective_horizon_years(request.plan),
+            paths=request.mc_number,
+            seed=request.seed,
+        )
+        return joint_forecast_result(request, scenarios)
+    return _legacy_forecast(request)
+
+
+def _legacy_forecast(request: ForecastRequest) -> dict[str, Any]:
     inputs = request.plan
     ledger = build_ledger(inputs)
     portfolios = None
@@ -238,5 +308,84 @@ def forecast(request: ForecastRequest | dict[str, Any]) -> dict[str, Any]:
             "scipy_version": version("scipy"),
             "data_source": "provided_stage_samples" if portfolios else "okama_api",
             "stages": stages,
+        },
+    }
+
+
+def compare_portfolio_modes(
+    single: ForecastRequest | dict[str, Any], per_goal: ForecastRequest | dict[str, Any]
+) -> dict[str, Any]:
+    """Compare two allocations on the same household and one shared bootstrap cube.
+
+    Differences are variant minus baseline. Risk and policy changes are explicit.
+    Legacy FinPlan versus joint bootstrap is deliberately not a mode comparison.
+    """
+    from okama_planner import scenarios
+    from okama_planner.segmented import joint_forecast_result
+
+    baseline = ForecastRequest.model_validate(
+        single.model_dump(mode="json") if isinstance(single, ForecastRequest) else single
+    )
+    variant = ForecastRequest.model_validate(
+        per_goal.model_dump(mode="json") if isinstance(per_goal, ForecastRequest) else per_goal
+    )
+    if baseline.portfolio_mode != "single" or variant.portfolio_mode != "per_goal":
+        raise ValueError("Comparison requires single baseline and per_goal variant")
+    if baseline.joint_history is None or variant.joint_history is None:
+        raise ValueError("Mode comparison requires joint_history for both requests")
+    for field in ("plan", "currency", "seed", "mc_number", "joint_history"):
+        if getattr(baseline, field) != getattr(variant, field):
+            raise ValueError(f"Mode comparison requires identical {field}")
+    cube = scenarios.sample_joint_returns(
+        baseline.joint_history,
+        months=12 * effective_horizon_years(baseline.plan),
+        paths=baseline.mc_number,
+        seed=baseline.seed,
+    )
+    left, right = joint_forecast_result(baseline, cube), joint_forecast_result(variant, cube)
+    left_spec, right_spec = (
+        baseline.allocation.model_dump(mode="json"),
+        variant.allocation.model_dump(mode="json"),
+    )
+    changed = [field for field in left_spec if left_spec[field] != right_spec[field]]
+    goal_left = {g["goal_id"]: g for g in left["goals"]}
+    goals = [
+        {
+            "goal_id": g["goal_id"],
+            "p_funded": g["p_funded"] - goal_left[g["goal_id"]]["p_funded"],
+            "unmet_mean": g["unmet_mean"] - goal_left[g["goal_id"]]["unmet_mean"],
+        }
+        for g in right["goals"]
+    ]
+    return {
+        "schema_version": "1.1",
+        "baseline": left,
+        "variant": right,
+        "differences": {
+            "direction": "variant_minus_baseline",
+            "metrics": {key: right["metrics"][key] - value for key, value in left["metrics"].items()},
+            "goals": goals,
+        },
+        "policy": {
+            "same_allocation": not changed,
+            "changed_fields": changed,
+            "baseline": left_spec,
+            "variant": right_spec,
+            "single_funding": "pooled",
+            "per_goal_funding": variant.allocation.transfer_policy,
+        },
+        "risk_structure": {
+            "single_strategy": left_spec["single_strategy"],
+            "segment_strategies": {s["segment_id"]: s["strategy"] for s in right_spec["segments"]},
+            "strategies_differ": any(
+                s["strategy"] != left_spec["single_strategy"] for s in right_spec["segments"]
+            ),
+        },
+        "provenance": {
+            "history_sha256": cube.history_sha256,
+            "scenario_rows_sha256": _digest(cube.row_indices.tolist()),
+            "seed": baseline.seed,
+            "mc_number": baseline.mc_number,
+            "sampled_once": True,
         },
     }
