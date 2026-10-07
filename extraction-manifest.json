@@ -1,19 +1,24 @@
 {
   "schema_version": "1.0",
   "package": "okama-planner",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "inventory": {
-    "README.md": "ae6e2befc974721e0b9293822b1e490563e44f5effe5a3edb808f47c0f54b762",
+    ".github/workflows/ci.yml": "1b42aa5248736f4e3fefed77eb207f41ae70983f92a077d5aabeccc3aaaaf5fb",
+    ".gitignore": "f99e8c89a2fd37d91788494517ee3c148134a29a4e0e560077c90b9304bbbfc4",
+    "LICENSE": "5512ebf70d9c696d1da4f7f8fdcf9bacdfe61e8a35df83bbc9886e2627362315",
+    "README.md": "924921f0b243b2c7a81efd766a527af5cf66d6914fb2fb278121db908f41a0cd",
     "docs/contract.md": "b7ed8ddb2efacf67f47c60d59646fd03ce469072b3a25736c17220abf265c728",
+    "docs/reports.md": "1194350ea7a141f1988ab4a5ad06717864459710ecd16517a596efe8d7948e4a",
     "examples/baseline-request.json": "51e21cb71884bdce4fdc8c4ed04e6ab84ad5d06a5fbdeed3f18a35ad25b69664",
     "examples/baseline-result.json": "b411cdaae2b29b190eb7163befb5ac61ed8ec3289f5497bcd580a89e86ab4f29",
     "examples/deferred-request.json": "06f884910aadf55e61651e8b5ee6100246ffb73a15dd1cdf4fa769fc8bd70e09",
     "examples/deferred-result.json": "b71ca3eeedce5f51a24e9e46999f8e6dc1a5a8de92f62fe8ba47a7320e5db726",
     "examples/demo.py": "bcf8b032c0d9720f942b9ced87708673e92ea17c5c5cedbbe4d59f4bf62ad4f0",
     "examples/family.json": "51e21cb71884bdce4fdc8c4ed04e6ab84ad5d06a5fbdeed3f18a35ad25b69664",
+    "examples/reports.py": "96ed52556831ab55342ec6895c92697857098e13dd973be59c257dcb4b090647",
     "examples/request-schema.json": "68884efec4c5c7fc3f8291f1154d4d88ee1fac6f91bf12990413473c2592d0e7",
     "examples/versions.json": "f89a103618dbf9157a325a0efdec8aa37bc8b447bfb8e76dc4ff0c8e1932508f",
-    "pyproject.toml": "8fea6b7513bdc88df063aa796122a8dd5117600bacc7a95fd63768fb8dd05628",
+    "pyproject.toml": "29e4e407087557105acb1b95e76404b600cb3bae0faf7b56e3eb3c559ed26832",
     "src/okama_planner/__init__.py": "56366e9e512ef9eec6ac9fb7e3b95c93e93162a974c68fdcbb9cc395fbf2b8f9",
     "src/okama_planner/api.py": "c68caff8fe935be0f248cf27c420e539f7f9dcf7cb10c4bf63158d6e420d0253",
     "src/okama_planner/asset_classes.py": "d78b0d5fb31ded15b1cc91385a63ce9c56956981527951871cfea99e299ce66f",
@@ -38,6 +43,7 @@
     "src/okama_planner/ledger/mortgage.py": "cb3185a48df13b7864a015fd1d3300384188ec6748b7d9782fdc052c048ac656",
     "src/okama_planner/ledger/types.py": "445d7d1f77f3c1863eef7528007dcb8d24670174c9f1f1b173d9cdc2713a8cc6",
     "src/okama_planner/rates.py": "1545d07746f5e3fc690000cf6db433383ef0582175ba5254626f20b54be2cdea",
+    "src/okama_planner/reports.py": "480a7237c08230f3735d2e12b9c7ea724ea48ccecf37f6d22fe229c6051c5d5d",
     "tests/planner_tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "tests/planner_tests/forecast/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "tests/planner_tests/forecast/test_distributions.py": "fb9d7cb84e0316478a761555f051921d42780bb7b8ad802c90dbe87ea5f49996",
@@ -54,8 +60,6 @@
     "tests/planner_tests/ledger/test_mortgage.py": "993183b4a15356fa2f2d6a324aa899c35de795e45e421a9e1360c04b6225ddd5",
     "tests/test_api.py": "f543974f9605002aa591539d087e76fe73fb74d21c76d3288a8e745d2f9e8bbf",
     "tests/test_forecast.py": "f86b1605f7bc064a204808f6c76704d09a15afca8b0bbdb78dfc069402173725",
-    "LICENSE": "5512ebf70d9c696d1da4f7f8fdcf9bacdfe61e8a35df83bbc9886e2627362315",
-    ".gitignore": "f99e8c89a2fd37d91788494517ee3c148134a29a4e0e560077c90b9304bbbfc4",
-    ".github/workflows/ci.yml": "f1923a5865c73cab8e82ef304056f16e7ca9386127725ace30762347057261dd"
+    "tests/test_reports.py": "09b2b964ffc1bee50b5ac9172a7cf9fe4ff9b6a3d45d3165cef9f68e94f38111"
   }
 }

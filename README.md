@@ -80,12 +80,19 @@ reserve targets and non-working assets. Separate savings accounts are not separa
 investment portfolios for goals.
 
 Not implemented in this candidate: goal-specific investment portfolios, gamma/equivalent
-alpha, FX conversion, jurisdictional taxes, transaction fees, white label reports,
-Excel export or a web UI. Net budget/returns must already reflect any externally
+alpha, FX conversion, jurisdictional taxes, transaction fees or a web UI. Net budget/returns must already reflect any externally
 modelled taxes and fees. Positive initial invested capital and two non-empty stages are
 required by this implementation. Undated purchases are rejected; dated goals outside the
 forecast horizon are excluded from its ledger and goal results. Loan proceeds are not
 created automatically: any corresponding asset or receipt must be supplied explicitly.
+
+## Neutral Excel reports
+
+An optional exporter produces an English financial-plan workbook with configurable
+company, contacts, local logo and colors. Two fictional-brand examples, configuration
+instructions, licensing and financial boundaries are described in [docs/reports.md](docs/reports.md).
+Run `poetry install --extras reports` and `poetry run python examples/reports.py`.
+Formatting preserves saved forecasts; it does not rerun calculations in Excel.
 
 ## Package boundary
 

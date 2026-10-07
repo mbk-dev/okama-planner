@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "okama-planner"
-version = "0.1.0"
+version = "0.2.0"
 description = "Personal and family financial planning powered by okama"
 authors = ["Sergey Kikevich"]
 license = "MIT"
@@ -20,10 +20,17 @@ okama = ">=3.0.0"
 pydantic = ">=2.0"
 pandas = ">=2.0"
 scipy = ">=1.0"
+openpyxl = {version = ">=3.1,<4", optional = true}
+pillow = {version = ">=10", optional = true}
+
+[tool.poetry.extras]
+reports = ["openpyxl", "pillow"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
 ruff = "*"
+openpyxl = ">=3.1,<4"
+pillow = ">=10"
 
 [build-system]
 requires = ["poetry-core"]

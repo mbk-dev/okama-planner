@@ -22,3 +22,5 @@ jobs:
         run: poetry run ruff check .
       - name: Synthetic offline example
         run: poetry run python examples/demo.py
+      - name: Neutral synthetic reports
+        run: poetry run python examples/reports.py
