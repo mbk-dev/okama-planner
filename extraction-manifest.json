@@ -8,6 +8,7 @@
     "LICENSE": "5512ebf70d9c696d1da4f7f8fdcf9bacdfe61e8a35df83bbc9886e2627362315",
     "README.md": "924921f0b243b2c7a81efd766a527af5cf66d6914fb2fb278121db908f41a0cd",
     "docs/contract.md": "b7ed8ddb2efacf67f47c60d59646fd03ce469072b3a25736c17220abf265c728",
+    "docs/joint-scenarios.md": "24a21704d9bae32f4e7a24cc7a8a9edcf1c37e5b36d77d460f1c6c32602b356d",
     "docs/reports.md": "1194350ea7a141f1988ab4a5ad06717864459710ecd16517a596efe8d7948e4a",
     "examples/baseline-request.json": "51e21cb71884bdce4fdc8c4ed04e6ab84ad5d06a5fbdeed3f18a35ad25b69664",
     "examples/baseline-result.json": "b411cdaae2b29b190eb7163befb5ac61ed8ec3289f5497bcd580a89e86ab4f29",
@@ -44,6 +45,7 @@
     "src/okama_planner/ledger/types.py": "445d7d1f77f3c1863eef7528007dcb8d24670174c9f1f1b173d9cdc2713a8cc6",
     "src/okama_planner/rates.py": "1545d07746f5e3fc690000cf6db433383ef0582175ba5254626f20b54be2cdea",
     "src/okama_planner/reports.py": "480a7237c08230f3735d2e12b9c7ea724ea48ccecf37f6d22fe229c6051c5d5d",
+    "src/okama_planner/scenarios.py": "583d74106c1a009148553edbc8d3326a4d2ee6d43945d6ce406f398ddf495a2d",
     "tests/planner_tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "tests/planner_tests/forecast/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "tests/planner_tests/forecast/test_distributions.py": "fb9d7cb84e0316478a761555f051921d42780bb7b8ad802c90dbe87ea5f49996",
@@ -60,6 +62,7 @@
     "tests/planner_tests/ledger/test_mortgage.py": "993183b4a15356fa2f2d6a324aa899c35de795e45e421a9e1360c04b6225ddd5",
     "tests/test_api.py": "f543974f9605002aa591539d087e76fe73fb74d21c76d3288a8e745d2f9e8bbf",
     "tests/test_forecast.py": "f86b1605f7bc064a204808f6c76704d09a15afca8b0bbdb78dfc069402173725",
-    "tests/test_reports.py": "09b2b964ffc1bee50b5ac9172a7cf9fe4ff9b6a3d45d3165cef9f68e94f38111"
+    "tests/test_reports.py": "09b2b964ffc1bee50b5ac9172a7cf9fe4ff9b6a3d45d3165cef9f68e94f38111",
+    "tests/test_scenarios.py": "9989809149f0aa2316d1a9e4a5c06cc1fe62c79b02126134421bd3fbf73fc850"
   }
 }
