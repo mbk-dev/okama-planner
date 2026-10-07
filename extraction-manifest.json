@@ -73,7 +73,7 @@
     "tests/test_allocation.py": "792a4df4a2568af4dc453a1514905f1b2771c5252eab5b956a8608f2f4edc052",
     "tests/test_api.py": "f543974f9605002aa591539d087e76fe73fb74d21c76d3288a8e745d2f9e8bbf",
     "tests/test_forecast.py": "f86b1605f7bc064a204808f6c76704d09a15afca8b0bbdb78dfc069402173725",
-    "tests/test_portfolio_modes.py": "a7b0cf0bc1a468cb7a4e436b1351537184fc6a22b92e36d9a0b17c138d5a32e3",
+    "tests/test_portfolio_modes.py": "93ce93ac5762b11798cf3f5b80c0d184f21156a1f0cd8659b90a3c5bc9ed983e",
     "tests/test_portfolio_modes_example.py": "e231bf74afa4b4c6dfa23ee5faeff4929d374659c39d8810ca054fd9449e3480",
     "tests/test_reports.py": "5742788e3f97950300723b17d7120b0ddecfef2b37e95c9ea5ac6e5836f70ca5",
     "tests/test_scenarios.py": "9989809149f0aa2316d1a9e4a5c06cc1fe62c79b02126134421bd3fbf73fc850",

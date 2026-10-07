@@ -171,6 +171,17 @@ def test_saved_legacy_json_results_remain_exact(name: str) -> None:
     raw = json.loads((examples / f"{name}-request.json").read_text())
     saved = json.loads((examples / f"{name}-result.json").read_text())
     actual = json.loads(json.dumps(forecast(raw), allow_nan=False))
+    # Saved fixtures record the producer environment; consumers resolve dependencies.
+    # Verify live metadata separately and compare every calculation field exactly.
+    from importlib.metadata import version
+
+    import okama
+
+    runtime_versions = {"okama_version": okama.__version__}
+    runtime_versions.update({f"{name}_version": version(name) for name in ("numpy", "pandas", "scipy")})
+    for key, current in runtime_versions.items():
+        assert actual["provenance"][key] == current
+        saved["provenance"][key] = current
     assert actual == saved
 
 
