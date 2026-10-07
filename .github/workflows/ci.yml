@@ -1,0 +1,24 @@
+name: CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Install library and development dependencies
+        run: poetry install
+      - name: Unit tests
+        run: poetry run pytest -q
+      - name: Ruff
+        run: poetry run ruff check .
+      - name: Synthetic offline example
+        run: poetry run python examples/demo.py

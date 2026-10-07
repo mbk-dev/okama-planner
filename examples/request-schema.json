@@ -1,0 +1,660 @@
+{
+  "$defs": {
+    "AssetIn": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "amount": {
+          "title": "Amount",
+          "type": "number"
+        },
+        "currency": {
+          "title": "Currency",
+          "type": "string"
+        },
+        "asset_class": {
+          "title": "Asset Class",
+          "type": "string"
+        },
+        "growth_rate": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Growth Rate"
+        }
+      },
+      "required": [
+        "label",
+        "amount",
+        "currency",
+        "asset_class"
+      ],
+      "title": "AssetIn",
+      "type": "object"
+    },
+    "BudgetItemIn": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "monthly_amount": {
+          "title": "Monthly Amount",
+          "type": "number"
+        },
+        "indexation_rate": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Indexation Rate"
+        },
+        "start_month": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start Month"
+        },
+        "end_rule": {
+          "default": "none",
+          "title": "End Rule",
+          "type": "string"
+        },
+        "end_month": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End Month"
+        }
+      },
+      "required": [
+        "kind",
+        "label",
+        "monthly_amount"
+      ],
+      "title": "BudgetItemIn",
+      "type": "object"
+    },
+    "GoalIn": {
+      "additionalProperties": false,
+      "properties": {
+        "goal_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Goal Id"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "amount_pv": {
+          "title": "Amount Pv",
+          "type": "number"
+        },
+        "amount_basis": {
+          "default": "amount",
+          "title": "Amount Basis",
+          "type": "string"
+        },
+        "pv_year": {
+          "title": "Pv Year",
+          "type": "integer"
+        },
+        "target_year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Year"
+        },
+        "target_month": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Month"
+        },
+        "priority": {
+          "default": 1,
+          "title": "Priority",
+          "type": "integer"
+        },
+        "becomes_asset": {
+          "default": false,
+          "title": "Becomes Asset",
+          "type": "boolean"
+        },
+        "can_defer": {
+          "default": false,
+          "title": "Can Defer",
+          "type": "boolean"
+        },
+        "can_resize": {
+          "default": false,
+          "title": "Can Resize",
+          "type": "boolean"
+        },
+        "indexation_rate": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Indexation Rate"
+        },
+        "replaces_asset": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replaces Asset"
+        },
+        "reserve_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reserve Label"
+        }
+      },
+      "required": [
+        "goal_id",
+        "label",
+        "kind",
+        "amount_pv",
+        "pv_year"
+      ],
+      "title": "GoalIn",
+      "type": "object"
+    },
+    "HoldingIn": {
+      "additionalProperties": false,
+      "properties": {
+        "symbol": {
+          "title": "Symbol",
+          "type": "string"
+        },
+        "weight": {
+          "title": "Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "symbol",
+        "weight"
+      ],
+      "title": "HoldingIn",
+      "type": "object"
+    },
+    "LiabilityIn": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "principal": {
+          "title": "Principal",
+          "type": "number"
+        },
+        "annual_rate": {
+          "title": "Annual Rate",
+          "type": "number"
+        },
+        "monthly_payment": {
+          "title": "Monthly Payment",
+          "type": "number"
+        },
+        "term_months": {
+          "title": "Term Months",
+          "type": "integer"
+        },
+        "start_month": {
+          "title": "Start Month",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "principal",
+        "annual_rate",
+        "monthly_payment",
+        "term_months",
+        "start_month"
+      ],
+      "title": "LiabilityIn",
+      "type": "object"
+    },
+    "PersonIn": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "birth_year": {
+          "title": "Birth Year",
+          "type": "integer"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "birth_year",
+        "role"
+      ],
+      "title": "PersonIn",
+      "type": "object"
+    },
+    "PlanInputs": {
+      "additionalProperties": false,
+      "description": "Everything one run needs, serialisable without a database.",
+      "properties": {
+        "t0": {
+          "title": "T0",
+          "type": "string"
+        },
+        "horizon_years": {
+          "title": "Horizon Years",
+          "type": "integer"
+        },
+        "withdrawal_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Withdrawal Years"
+        },
+        "retirement_year": {
+          "title": "Retirement Year",
+          "type": "integer"
+        },
+        "buffer_lookahead_months": {
+          "title": "Buffer Lookahead Months",
+          "type": "integer"
+        },
+        "savings_horizon_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Savings Horizon Years"
+        },
+        "pension_replaces_expenses": {
+          "default": false,
+          "title": "Pension Replaces Expenses",
+          "type": "boolean"
+        },
+        "reserves_until_retirement": {
+          "default": false,
+          "title": "Reserves Until Retirement",
+          "type": "boolean"
+        },
+        "savings_mode": {
+          "default": "pooled",
+          "enum": [
+            "pooled",
+            "separate"
+          ],
+          "title": "Savings Mode",
+          "type": "string"
+        },
+        "goal_savings_rates": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Goal Savings Rates",
+          "type": "object"
+        },
+        "rates": {
+          "$ref": "#/$defs/Rates"
+        },
+        "persons": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PersonIn"
+          },
+          "title": "Persons",
+          "type": "array"
+        },
+        "assets": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AssetIn"
+          },
+          "title": "Assets",
+          "type": "array"
+        },
+        "liabilities": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/LiabilityIn"
+          },
+          "title": "Liabilities",
+          "type": "array"
+        },
+        "budget_items": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/BudgetItemIn"
+          },
+          "title": "Budget Items",
+          "type": "array"
+        },
+        "goals": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/GoalIn"
+          },
+          "title": "Goals",
+          "type": "array"
+        },
+        "accumulation_last_date_pin": {
+          "default": "",
+          "title": "Accumulation Last Date Pin",
+          "type": "string"
+        },
+        "withdrawal_last_date_pin": {
+          "default": "",
+          "title": "Withdrawal Last Date Pin",
+          "type": "string"
+        },
+        "accumulation_holdings": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/HoldingIn"
+          },
+          "title": "Accumulation Holdings",
+          "type": "array"
+        },
+        "withdrawal_holdings": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/HoldingIn"
+          },
+          "title": "Withdrawal Holdings",
+          "type": "array"
+        },
+        "accumulation_rebalancing": {
+          "$ref": "#/$defs/RebalancingIn",
+          "default": {
+            "period": "month",
+            "abs_deviation": null,
+            "rel_deviation": null
+          }
+        },
+        "withdrawal_rebalancing": {
+          "$ref": "#/$defs/RebalancingIn",
+          "default": {
+            "period": "month",
+            "abs_deviation": null,
+            "rel_deviation": null
+          }
+        }
+      },
+      "required": [
+        "t0",
+        "horizon_years",
+        "retirement_year",
+        "buffer_lookahead_months",
+        "rates"
+      ],
+      "title": "PlanInputs",
+      "type": "object"
+    },
+    "Rates": {
+      "additionalProperties": false,
+      "description": "The six run-level rates. None is derived from another; all are required.",
+      "properties": {
+        "inflation_rate": {
+          "title": "Inflation Rate",
+          "type": "number"
+        },
+        "expense_indexation_rate": {
+          "title": "Expense Indexation Rate",
+          "type": "number"
+        },
+        "income_indexation_rate": {
+          "title": "Income Indexation Rate",
+          "type": "number"
+        },
+        "goal_indexation_rate": {
+          "title": "Goal Indexation Rate",
+          "type": "number"
+        },
+        "discount_rate": {
+          "title": "Discount Rate",
+          "type": "number"
+        },
+        "buffer_rate": {
+          "title": "Buffer Rate",
+          "type": "number"
+        }
+      },
+      "required": [
+        "inflation_rate",
+        "expense_indexation_rate",
+        "income_indexation_rate",
+        "goal_indexation_rate",
+        "discount_rate",
+        "buffer_rate"
+      ],
+      "title": "Rates",
+      "type": "object"
+    },
+    "RebalancingIn": {
+      "additionalProperties": false,
+      "description": "How a stage portfolio is brought back to its target weights.\n\nThe default is okama's own: monthly rebalancing without a deviation corridor.",
+      "properties": {
+        "period": {
+          "default": "month",
+          "title": "Period",
+          "type": "string"
+        },
+        "abs_deviation": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Abs Deviation"
+        },
+        "rel_deviation": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rel Deviation"
+        }
+      },
+      "title": "RebalancingIn",
+      "type": "object"
+    },
+    "ReturnSample": {
+      "additionalProperties": false,
+      "description": "Contiguous monthly portfolio total returns, already expressed in the plan currency.",
+      "properties": {
+        "start_month": {
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+          "title": "Start Month",
+          "type": "string"
+        },
+        "monthly_returns": {
+          "items": {
+            "type": "number"
+          },
+          "minItems": 12,
+          "title": "Monthly Returns",
+          "type": "array"
+        }
+      },
+      "required": [
+        "start_month",
+        "monthly_returns"
+      ],
+      "title": "ReturnSample",
+      "type": "object"
+    },
+    "StageSamples": {
+      "additionalProperties": false,
+      "properties": {
+        "accumulation": {
+          "$ref": "#/$defs/ReturnSample"
+        },
+        "withdrawal": {
+          "$ref": "#/$defs/ReturnSample"
+        }
+      },
+      "required": [
+        "accumulation",
+        "withdrawal"
+      ],
+      "title": "StageSamples",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Full standalone request. Asset amounts and cash flows use a single explicit currency.",
+  "properties": {
+    "plan": {
+      "$ref": "#/$defs/PlanInputs"
+    },
+    "currency": {
+      "pattern": "^[A-Z]{3}$",
+      "title": "Currency",
+      "type": "string"
+    },
+    "mc_number": {
+      "default": 1000,
+      "maximum": 10000,
+      "minimum": 1,
+      "title": "Mc Number",
+      "type": "integer"
+    },
+    "seed": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "distribution": {
+      "default": "norm",
+      "enum": [
+        "norm",
+        "lognorm",
+        "t"
+      ],
+      "title": "Distribution",
+      "type": "string"
+    },
+    "match_moments": {
+      "default": true,
+      "title": "Match Moments",
+      "type": "boolean"
+    },
+    "return_samples": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StageSamples"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "plan",
+    "currency"
+  ],
+  "title": "ForecastRequest",
+  "type": "object"
+}

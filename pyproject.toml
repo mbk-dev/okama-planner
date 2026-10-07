@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "okama-planner"
+version = "0.1.0"
+description = "Personal and family financial planning powered by okama"
+authors = ["Sergey Kikevich"]
+license = "MIT"
+repository = "https://github.com/mbk-dev/okama-planner"
+readme = "README.md"
+packages = [{include = "okama_planner", from = "src"}]
+include = [
+    {path = "examples/**", format = "sdist"},
+    {path = "docs/**", format = "sdist"},
+    {path = "tests/**", format = "sdist"},
+    {path = "extraction-manifest.json", format = "sdist"},
+]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<4.0"
+okama = ">=3.0.0"
+pydantic = ">=2.0"
+pandas = ">=2.0"
+scipy = ">=1.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+ruff = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "tests"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["C", "E", "F", "W", "B", "UP"]
