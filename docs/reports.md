@@ -102,3 +102,9 @@ and assumptions must be explicitly present in the input; formatting does not add
 
 These templates provide a report interface, not an Excel input editor or a country-specific
 advisory document. Russian localization is a separate packaging step.
+
+## Export charts separately
+
+Responsive offline HTML (default), PNG and SVG chart exports are also available via
+`okama_planner.charts.export_charts`, without the optional Excel dependencies.
+See [Forecast chart exports](charts.md) for the API, examples and browser requirements.

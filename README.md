@@ -126,6 +126,21 @@ instructions, licensing and financial boundaries are described in [docs/reports.
 Run `poetry install --extras reports` and `poetry run python examples/reports.py`.
 Formatting preserves saved forecasts; it does not rerun calculations in Excel.
 
+## Forecast charts
+
+Export portfolio and net-capital charts in **HTML** (default), **PNG** or **SVG** with
+Apache ECharts and the styling of okama-web Portfolio's Monte Carlo forecast.
+HTML works offline, automatically adapts to the window dimensions and has PNG/SVG save buttons.
+
+```bash
+poetry run python examples/charts.py
+poetry run python examples/charts.py --format png --out tmp/forecast-charts/png
+poetry run python examples/charts.py --format svg --out tmp/forecast-charts/svg
+```
+
+Direct image exports require Chrome or Chromium; HTML creation needs no extra dependencies.
+See [the chart API and saved-result examples](docs/charts.md).
+
 ## Package boundary
 
 `extraction-manifest.json` lists the exact reviewed public-file inventory.
