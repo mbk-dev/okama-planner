@@ -17,6 +17,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Literal
 
+from okama_planner.localization import terminology
+
 PERCENTILES = ("p10", "p25", "p50", "p75", "p90")
 ASSETS = files("okama_planner").joinpath("_chart_assets")
 _BROWSER_TIMEOUT = 60
@@ -81,6 +83,13 @@ def _chart_data(result: dict[str, Any]) -> dict[str, Any]:
 
 def _document(data: dict[str, Any]) -> str:
     template = ASSETS.joinpath("page.html").read_text(encoding="utf-8")
+    language = data.get("language", "en")
+    labels = terminology(language)
+    template = template.replace('<html lang="en">', f'<html lang="{language}">')
+    for original, localized in sorted(labels.items(), key=lambda pair: -len(pair[0])):
+        # Translate only the HTML template, before scripts/data/license notices are inserted.
+        template = template.replace(original, localized)
+    data = {**data, "labels": labels}
     engine = ASSETS.joinpath("echarts.min.js").read_text(encoding="utf-8")
     script = ASSETS.joinpath("charts.js").read_text(encoding="utf-8")
     licenses = "\n".join(
@@ -165,6 +174,8 @@ def export_charts(
     width: int = 1200,
     height: int = 720,
     browser_executable: str | Path | None = None,
+    logarithmic: bool = False,
+    language: str = "en",
 ) -> list[Path]:
     """Write one responsive HTML or two images from a saved forecast, without running Monte Carlo.
 
@@ -172,12 +183,19 @@ def export_charts(
     process, not a user's browser session. PNG uses 2x resolution; SVG is vector.
     Width/height specify static-image CSS pixels; HTML adapts to its window.
     """
+    terminology(language)
+    if type(logarithmic) is not bool:
+        raise ValueError("logarithmic must be a boolean")
     if format not in {"html", "png", "svg"}:
         raise ValueError("Chart format must be html, png or svg")
     for name, value, lower, upper in (("width", width, 320, 3840), ("height", height, 240, 2160)):
         if type(value) is not int or not lower <= value <= upper:
             raise ValueError(f"Chart {name} must be an integer between {lower} and {upper}")
     data = _chart_data(result)
+    data["language"] = language
+    data["logarithmic"] = logarithmic
+    if logarithmic and any(not any(row["p90"] > 0 for row in rows) for rows in data["charts"].values()):
+        raise ValueError("Logarithmic scale requires positive values in both forecasts")
     target = Path(output_dir)
     if format == "html":
         document = _document(data)

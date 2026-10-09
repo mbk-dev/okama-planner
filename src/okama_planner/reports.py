@@ -7,6 +7,7 @@ import json
 import math
 import re
 from collections.abc import Sequence
+from copy import copy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -21,6 +22,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from okama_planner.api import ForecastRequest
 from okama_planner.horizon import effective_horizon_years
+from okama_planner.localization import terminology, translate
 
 MONEY = '#,##0.00;(#,##0.00);"-"'
 PERCENT = '0.0%;(0.0%);"-"'
@@ -55,11 +57,11 @@ def _sheet(book: Workbook, name: str, brand: ReportBrand, headers: list[str]) ->
     sheet["A1"].font = Font(name="Arial", size=18, color="FFFFFF", bold=True)
     sheet["A1"].fill = PatternFill("solid", fgColor=brand.color)
     sheet.row_dimensions[1].height = 34
-    sheet["A2"] = "='Branding'!B3"
+    sheet["A2"] = '=IF(\'Branding\'!B3="","",\'Branding\'!B3)'
     sheet["A3"] = "Saved forecast; edit the request and rerun Planner to change calculations."
     sheet.merge_cells(start_row=3, start_column=1, end_row=3, end_column=max(3, len(headers)))
     sheet.row_dimensions[3].height = 30
-    sheet.freeze_panes = "B6"
+    sheet.freeze_panes = "A6"
     sheet.sheet_view.showGridLines = False
     sheet.page_setup.orientation = "landscape"
     sheet.page_setup.paperSize = sheet.PAPERSIZE_A4
@@ -414,17 +416,158 @@ def _print_layout(book: Workbook, summary: Worksheet, unit: str, label: str) -> 
         book[name].merge_cells(start_row=4, start_column=1, end_row=4, end_column=book[name].max_column)
 
 
+def _template_cell(sheet: str, row: int, column: int) -> bool:
+    """Select template cells by role, never by the content of user labels."""
+    if sheet == "Branding":
+        return column == 1 or (row in (1, 5) and column == 2) or (row == 5 and column == 4)
+    if row <= 5:
+        return not (sheet == "Comparison" and row == 5 and column in (2, 3))
+    if sheet in {"Assumptions", "Ledger", "Balance", "Budget", "Allocation", "Segments",
+                 "Segment balances", "Funding events", "Transfers"}:
+        return False
+    if sheet == "Goals":
+        return column in (5, 6, 7, 8)
+    return True
+
+
+def _localized_text(value: str, language: str, unit: str, goal_metric: bool = False) -> str:
+    texts = terminology(language)
+    if value in texts:
+        return texts[value]
+    if value.replace(unit, "{unit}") in texts:
+        return translate(value.replace(unit, "{unit}"), language, unit=unit)
+    if goal_metric:
+        for suffix in ("fully funded probability", "full-stream probability", "funded mean", "unmet mean"):
+            if value.endswith(f": {suffix}"):
+                return value[:-len(suffix)] + translate(suffix, language)
+    return value
+
+
+def _localize_cells(
+    sheet: Worksheet, names: dict[str, str], language: str, unit: str, brand: ReportBrand,
+) -> None:
+    for row in sheet:
+        for cell in row:
+            if cell.data_type == "f":
+                for old, new in names.items():
+                    escaped = new.replace("'", "''")
+                    cell.value = cell.value.replace(f"'{old}'!", f"'{escaped}'!")
+            elif isinstance(cell.value, str) and _template_cell(sheet.title, cell.row, cell.column):
+                value = (f"{brand.company} | {names[sheet.title]}"
+                         if sheet.title != "Branding" and cell.coordinate == "A1"
+                         else _localized_text(cell.value, language, unit,
+                                              sheet.title == "Comparison" and cell.column == 1))
+                _text(sheet, cell.row, cell.column, value)
+            if cell.comment:
+                cell.comment = Comment(translate(cell.comment.text, language), cell.comment.author)
+
+
+def _localized_layout(sheet: Worksheet, language: str, resize: bool = True) -> None:
+    for row in sheet:
+        if language == "zh":
+            for cell in row:
+                font = copy(cell.font)
+                font.name = "Microsoft YaHei"
+                cell.font = font
+        if resize and row[0].row >= 5:
+            lines = max(math.ceil((12 if cell.data_type == "f" else len(str(cell.value or ""))) /
+                                  max(10, sheet.column_dimensions[get_column_letter(cell.column)].width))
+                        for cell in row)
+            old_height = sheet.row_dimensions[row[0].row].height or 18
+            sheet.row_dimensions[row[0].row].height = min(120, max(old_height, 16 * lines))
+
+
+def _localize(
+    book: Workbook, language: str, unit: str, brand: ReportBrand, scenarios: Sequence[dict[str, Any]],
+) -> None:
+    names = {sheet.title: translate(sheet.title, language) for sheet in book}
+    for sheet in book:
+        original_name = sheet.title
+        _localize_cells(sheet, names, language, unit, brand)
+        _localized_layout(sheet, language)
+        if original_name == "Comparison" and len(scenarios) == 1:
+            _text(sheet, 5, 3, translate("No comparison", language))
+        if original_name in {"Ledger", "Budget"}:
+            basis = (" · " + translate("Planned requirements, not actual payments/balances", language)
+                     if "Funding events" in names else "")
+            _text(sheet, 4, 1, translate("Baseline: {label} · Nominal {unit}", language,
+                                       label=str(scenarios[0]["label"]), unit=unit) + basis)
+        sheet.oddFooter.right.text = translate("Nominal {unit} · {label}", language,
+                                               unit=unit, label=str(scenarios[0]["label"]))
+        sheet.title = names[original_name]
+    book.properties.title = translate("Neutral financial plan", language)
+
+
+def _style_chart_sheet(sheet: Worksheet, language: str) -> None:
+    for row in sheet:
+        for cell in row:
+            if cell.row != 1:
+                _style_cell(cell)
+    _localized_layout(sheet, language, resize=False)
+
+
+def _chart_sheets(
+    book: Workbook, images: dict[str, str | Path], language: str, unit: str, brand: ReportBrand,
+    goals: list[dict[str, Any]],
+) -> None:
+    names = {"portfolio": "Portfolio chart", "portfolio_log": "Portfolio log chart",
+             "capital": "Capital chart", "capital_log": "Capital log chart"}
+    if set(images) - names.keys():
+        raise ValueError(f"Unknown chart image keys: {sorted(set(images) - names.keys())}")
+    for key, name in names.items():
+        if key not in images:
+            continue
+        sheet = _sheet(book, translate(name, language), brand, [])
+        sheet.freeze_panes = None
+        sheet.unmerge_cells("A1:C1")
+        sheet.merge_cells("A1:P1")
+        sheet.unmerge_cells("A3:C3")
+        contact = f"'{translate('Branding', language)}'!B3"
+        sheet["A2"] = f'=IF({contact}="","",{contact})'
+        _text(sheet, 3, 1, translate(
+            "Nominal {unit}; inflation indexation follows the supplied inputs. "
+            "Values are not expressed in constant purchasing power.", language, unit=unit,
+        ))
+        sheet.merge_cells("A3:P3")
+        sheet.row_dimensions[3].height = 48
+        if key.endswith("_log"):
+            _text(sheet, 4, 1, translate(
+                "Zero and negative values are omitted on the logarithmic scale; affected bands have gaps.",
+                language,
+            ))
+            sheet.merge_cells("A4:P4")
+            sheet.row_dimensions[4].height = 30
+        image = Image(images[key])
+        image.width, image.height = 1200, 720
+        sheet.add_image(image, "A6")
+        for column in range(1, 17):
+            sheet.column_dimensions[get_column_letter(column)].width = 11
+        for row in range(6, 43):
+            sheet.row_dimensions[row].height = 15
+        for index, goal in enumerate(goals, 1):
+            row = 43 + index
+            _text(sheet, row, 1, f"{index} — {goal['label']} ({goal['month']})")
+            sheet.merge_cells(start_row=row, start_column=1, end_row=row, end_column=16)
+            sheet.row_dimensions[row].height = 24
+        sheet.print_area = f"A1:P{43 + len(goals)}"
+        sheet.page_setup.fitToHeight = 1
+        _style_chart_sheet(sheet, language)
+
+
 def export_report(
     scenarios: Sequence[dict[str, Any]],
     path: str | Path,
     *,
     brand: ReportBrand | None = None,
+    language: str = "en",
+    chart_images: dict[str, str | Path] | None = None,
 ) -> Path:
     """Export one saved forecast and optionally a comparison. Calculations are never rerun.
 
     Each scenario has ``label``, ``request`` and ``result``. Only identical units/horizons
     can be compared. Branding and strings are presentation inputs, never Excel formulas.
     """
+    terminology(language)
     requests = _validate(scenarios)
     brand = brand or ReportBrand()
     if not re.fullmatch(r"[0-9a-fA-F]{6}", brand.color):
@@ -526,11 +669,6 @@ def export_report(
     instructions = _sheet(book, "Instructions", brand, ["Topic", "Instruction", ""])
     for row in [
         [
-            "License",
-            "MIT applies to code, neutral layout and synthetic examples; "
-            "retain the license when redistributing.",
-        ],
-        [
             "Edit",
             "Edit Branding B2/B3 for contact text. Rerun the exporter to change "
             "company headings, colors and local logo.",
@@ -547,7 +685,8 @@ def export_report(
         ],
         [
             "Units",
-            f"All monetary amounts are nominal {unit}; rates and probabilities are fractions. "
+            f"All monetary amounts are nominal {unit}; inflation indexation follows the supplied inputs. "
+            "Rates and probabilities are fractions. "
             "Budget expenses and other outflows are negative.",
         ],
         [
@@ -580,6 +719,8 @@ def export_report(
     book.active = book.sheetnames.index("Summary")
     book.properties.creator = "okama Planner"
     book.properties.title = "Neutral financial plan"
+    _localize(book, language, unit, brand, scenarios)
+    _chart_sheets(book, chart_images or {}, language, unit, brand, result["goals"])
     destination = Path(path)
     destination.parent.mkdir(parents=True, exist_ok=True)
     book.save(destination)

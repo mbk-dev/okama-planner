@@ -1,6 +1,6 @@
 # Neutral Excel reports
 
-The optional report exporter creates a new English workbook from a complete request and
+The optional report exporter creates a new workbook (English by default) from a complete request and
 its saved forecast result. It does not use a pre-existing workbook, private registry or
 external template. The neutral layout, code and synthetic examples are distributed under
 the repository's MIT license. Keep that license when redistributing or modifying them.
@@ -25,6 +25,7 @@ export_report(
     "my-plan.xlsx",
     brand=ReportBrand(company="Example Advisory", contact="team@example.invalid",
                       color="244C66", logo=None),
+    language="en",  # en, ru, zh (Simplified Chinese), de, es
 )
 ```
 
@@ -68,10 +69,12 @@ references, macros or hidden source data.
 - Comparison adds actual funding/unmet differences per goal, full-stream differences for
   pensions and history/scenario-row hashes. Differences are second scenario minus baseline;
   matching hashes document shared random draws. They do not remove risk/policy differences.
-- Instructions explains
-  editing, licensing, units, formula recalculation and model boundaries.
+- Instructions explains editing, units, formula recalculation and model boundaries.
+  License information stays in this repository and is not embedded in the workbook.
 
-All monetary values are nominal in the request currency; probabilities and rates are
+All monetary values are nominal in the request currency. Inflation indexation is already
+included according to the request's inputs; nominal values are not deflated into constant
+purchasing power. Probabilities and rates are
 fractions. Budget and Comparison formula values require recalculation in Excel or
 LibreOffice before readers relying on cached values can consume them. Planner's forecast
 numbers are fixed results, not spreadsheet formulas: changing the workbook does not rerun
@@ -101,7 +104,42 @@ tax rules or legal declarations are inferred by the formatter. Supported fees, p
 and assumptions must be explicitly present in the input; formatting does not add a model.
 
 These templates provide a report interface, not an Excel input editor or a country-specific
-advisory document. Russian localization is a separate packaging step.
+advisory document.
+
+## Language editions and Excel charts
+
+`language` selects `en`, `ru`, `zh`, `de` or `es`. The single packaged
+[`terminology.csv`](../src/okama_planner/terminology.csv) table has columns
+`key,en,ru,zh,de,es`; edit that table to maintain translated captions and instructions.
+Localized sheet names keep their formula references. User-supplied company, scenario,
+goal and ledger labels remain exactly as supplied, as do technical assumption/provenance
+keys and machine-readable enum identifiers. Chinese sheets use Microsoft YaHei; Excel
+may substitute an installed CJK font. Table sheets freeze only their header rows, while
+chart sheets have no frozen panes.
+
+`export_report(..., chart_images=...)` optionally embeds local PNGs on four separate
+localized sheets. The accepted keys are `portfolio`, `portfolio_log`, `capital` and
+`capital_log`; each value is a local image path. The report exporter itself starts no
+browser. Produce the images using the same ECharts renderer as the standalone charts:
+
+```python
+from okama_planner.charts import export_charts
+
+images = {}
+for logarithmic in (False, True):
+    paths = export_charts(result, f"charts/{logarithmic}", format="png",
+                          language="de", logarithmic=logarithmic)
+    images.update({p.stem + ("_log" if logarithmic else ""): p for p in paths})
+export_report(scenarios, "plan-de.xlsx", language="de", chart_images=images)
+```
+
+The blue median and nested p25–p75 / p10–p90 bands use actual saved percentile values.
+Logarithmic exports omit zero and negative points, with gaps rather than epsilon values.
+If either forecast has no positive values, requesting a log export raises `ValueError`.
+Numbered goal annotations below each Excel chart identify the saved goal labels and dates.
+Run `poetry run python examples/multilingual_reports.py` to create all five synthetic
+language editions with four charts each in `tmp/multilingual-reports/`; PNG generation
+requires a local Chrome or Chromium installation.
 
 ## Export charts separately
 

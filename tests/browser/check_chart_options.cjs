@@ -9,7 +9,7 @@ const rows = [
   { month: '2028-02', p10: 1, p25: 10, p50: 100, p75: 1000, p90: 10000 },
   { month: '2028-03', p10: 10, p25: 100, p50: 1000, p75: 10000, p90: 100000 }
 ];
-function run(capital = rows, portfolio = rows) {
+function run(capital = rows, portfolio = rows, logarithmic = false) {
   const elements = new Map();
   const get = id => {
     if (!elements.has(id)) elements.set(id, { clientWidth: 1000, style: {}, hidden: true,
@@ -17,7 +17,7 @@ function run(capital = rows, portfolio = rows) {
       addEventListener(event, fn) { this[event] = fn; } });
     return elements.get(id);
   };
-  const input = { currency: 'USD', charts: { portfolio, capital }, goals: [
+  const input = { currency: 'USD', logarithmic, charts: { portfolio, capital }, goals: [
     { number: 1, month: '2028-02', label: '<img src=x>' },
     { number: 2, month: '2028-02', label: 'Retirement' }
   ] };
@@ -45,6 +45,13 @@ assert.equal(charts.get(get('capital')).option.yAxis.type, 'value');
 assert.equal(get('portfolio-scale-note').hidden, false);
 const lower = portfolio.option.series.find(s => s.name === 'p10');
 assert.deepEqual(Array.from(lower.data), [null, 1, 10], 'Log axis extent must include every positive lower bound');
+const initialLog = run(rows, rows, true);
+const initialOption = initialLog.charts.get(initialLog.get('portfolio')).option;
+assert.equal(initialOption.yAxis.type, 'log', 'Static exports must initialize the selected scale');
+assert.equal(initialLog.get('portfolio-toggle').checked, true);
+assert.equal(initialOption.yAxis.axisLabel.showMinLabel, false,
+  'The exact fractional lower bound must not overlap percentile endpoint labels');
+assert.deepEqual(Array.from(initialOption.series.find(s => s.name === 'p10').data), [null, 1, 10]);
 const median = portfolio.option.series.find(s => s.name === 'Median');
 assert.deepEqual(Array.from(median.data), [10, 100, 1000]);
 const band = portfolio.option.series.find(s => s.name === 'outer-band');

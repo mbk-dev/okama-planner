@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>okama Planner — forecast charts</title>
+<title>okama Planner · forecast charts</title>
 <style>
 * { box-sizing: border-box; }
 body { margin: 0; background: #f4f5f7; color: #111827; font: 15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
@@ -30,8 +30,7 @@ summary { cursor: pointer; color: #4b5563; } pre { white-space: pre-wrap; font-s
 <body>
 <main>
 <h1>okama Planner · forecast charts</h1>
-<p>Saved Monte Carlo forecast · nominal values · median and percentile ranges p25–p75 / p10–p90.
-Net capital includes assets outside the portfolio and subtracts debt. Values are not recalculated here.</p>
+<p>Saved Monte Carlo forecast · nominal values · median and percentile ranges p25–p75 / p10–p90. Net capital includes assets outside the portfolio and subtracts debt. Inflation indexation follows the supplied inputs; values are not expressed in constant purchasing power. Values are not recalculated here.</p>
 <section class="card" aria-label="Portfolio forecast">
 <div id="portfolio" class="chart" role="img" aria-label="Portfolio median and percentile ranges"></div>
 <div class="controls">
@@ -50,8 +49,7 @@ Net capital includes assets outside the portfolio and subtracts debt. Values are
 <ul id="capital-goals" class="goals" aria-label="Goal annotations"></ul>
 </div>
 </section>
-<p>Resize the window to change chart proportions. Image exports preserve the current chart dimensions;
-PNG uses twice the pixel resolution, SVG remains vector. Negative net capital is retained.</p>
+<p>Resize the window to change chart proportions. Image exports preserve the current chart dimensions; PNG uses twice the pixel resolution, SVG remains vector. Negative net capital is retained.</p>
 <pre hidden id="license-notices"><!-- LICENSES --></pre>
 </main>
 <pre id="render-output"></pre>

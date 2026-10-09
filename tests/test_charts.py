@@ -284,3 +284,28 @@ def test_license_notices_are_embedded_without_visible_ui_and_labels_are_safe(tmp
     assert 'Apache License' in document
     assert '</script><img' not in document
     assert payload(document)['goals'][0]['label'] == result['goals'][0]['label']
+
+
+def test_log_export_initializes_scale_and_localizes_captions(tmp_path: Path) -> None:
+    from okama_planner.charts import export_charts
+
+    document = export_charts(saved_result(), tmp_path, logarithmic=True, language="ru")[0].read_text()
+    data = payload(document)
+    assert data["logarithmic"] is True
+    assert data["labels"]["Portfolio forecast"] == "Прогноз портфеля"
+    assert 'scales.set(key, input.logarithmic === true)' in document
+    assert '<html lang="ru">' in document
+
+
+@pytest.mark.skipif(BROWSER is None, reason="Chrome or Chromium required for static exports")
+def test_log_static_export_changes_projection_and_keeps_zero_as_gaps(tmp_path: Path) -> None:
+    from okama_planner.charts import export_charts
+
+    result = saved_result()
+    for key in ("portfolio", "capital"):
+        result["charts"][key][0] = {"month": "2025-12", "p10": -100, "p25": 0,
+                                    "p50": 100, "p75": 500, "p90": 1000}
+    linear = export_charts(result, tmp_path / "linear", format="svg")
+    log = export_charts(result, tmp_path / "log", format="svg", logarithmic=True)
+    assert linear[0].read_text() != log[0].read_text()
+    assert "NaN" not in log[0].read_text()

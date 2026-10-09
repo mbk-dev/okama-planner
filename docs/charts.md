@@ -24,6 +24,7 @@ from okama_planner.charts import export_charts
 paths = export_charts(result, "my-charts")  # my-charts/forecast.html
 paths = export_charts(result, "my-charts/png", format="png", width=1200, height=720)
 paths = export_charts(result, "my-charts/svg", format="svg", width=1200, height=720)
+paths = export_charts(result, "my-charts/log", format="png", logarithmic=True, language="ru")
 ```
 
 HTML automatically adapts the charts to the window's width and height. There is no size
@@ -84,6 +85,11 @@ with nonpositive lower endpoints are gaps, with an explanatory note beneath the 
 The underlying data and tooltip values remain unchanged. Log bands project the actual
 saved low/high endpoints, rather than stacking additive differences on a log axis.
 A chart with no positive values has a disabled logarithmic checkbox and an explanation.
+The `logarithmic=True` export option initializes both plots in logarithmic mode, including
+direct PNG/SVG rendering. It rejects an all-nonpositive forecast before writing files.
+`language` supports `en` (default), `ru`, `zh`, `de` and `es`, using the shared packaged
+terminology table. Saved goal labels are preserved. Inflation indexation follows the
+supplied inputs; the nominal figures are not expressed in constant purchasing power.
 These exports format saved data; they do not authenticate result files or change any financial assumptions.
 
 ## Developer verification

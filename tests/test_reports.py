@@ -199,3 +199,81 @@ def test_joint_report_rejects_incomplete_actual_horizon(tmp_path: Path, series: 
     with pytest.raises(ValueError, match="horizon"):
         export_report([item], tmp_path / "bad.xlsx")
     assert not (tmp_path / "bad.xlsx").exists()
+
+
+@pytest.mark.parametrize("language,summary,budget,ledger", [
+    ("en", "Summary", "Budget", "Ledger"),
+    ("ru", "Итоги", "Бюджет", "Операции"),
+    ("zh", "摘要", "预算", "流水账"),
+    ("de", "Übersicht", "Budget", "Buchungen"),
+    ("es", "Resumen", "Presupuesto", "Movimientos"),
+])
+def test_localized_reports_preserve_labels_formulas_and_money(
+    tmp_path: Path, language: str, summary: str, budget: str, ledger: str,
+) -> None:
+    from okama_planner.reports import export_report
+
+    item = scenario()
+    item["label"] = "Summary"  # A user label coinciding with a template term must survive.
+    target = export_report([item], tmp_path / f"{language}.xlsx", language=language)
+    book = load_workbook(target)
+    assert book[summary]["B7"].value == pytest.approx(item["result"]["metrics"]["terminal_p50"])
+    assert f"'{ledger}'!" in book[budget]["B6"].value
+    assert all(sheet.freeze_panes in (None, "A6") for sheet in book)
+    assert book[book.sheetnames[5]]["A6"].value == "Summary"  # Assumptions.
+    assert len(set(book.sheetnames)) == len(book.sheetnames)
+    assert all(len(name) <= 31 for name in book.sheetnames)
+    assert not any(cell.value == "License" for sheet in book for row in sheet for cell in row)
+    if language != "en":
+        comparison = {"ru": "Сравнение", "zh": "比较", "de": "Vergleich", "es": "Comparación"}[language]
+        assert book[comparison]["C5"].value != "No comparison"
+        assert book[summary]["A5"].value != "Indicator"
+        assert book[summary]["A3"].value != (
+            "Saved forecast; edit the request and rerun Planner to change calculations."
+        )
+
+
+def test_report_embeds_four_chart_images_without_freeze_panes(tmp_path: Path) -> None:
+    from PIL import Image
+
+    from okama_planner.reports import export_report
+
+    image = tmp_path / "chart.png"
+    Image.new("RGB", (1200, 720), "white").save(image)
+    keys = ("portfolio", "portfolio_log", "capital", "capital_log")
+    target = export_report([scenario()], tmp_path / "charts.xlsx",
+                           chart_images=dict.fromkeys(keys, image))
+    book = load_workbook(target)
+    charts = [sheet for sheet in book if sheet._images]
+    assert len(charts) == 4
+    assert all(sheet.freeze_panes is None for sheet in charts)
+    assert all("inflation" in sheet["A3"].value for sheet in charts)
+    assert "Zero" in charts[1]["A4"].value
+
+
+def test_empty_contact_is_blank_formula_not_zero(tmp_path: Path) -> None:
+    from okama_planner.reports import ReportBrand, export_report
+
+    book = load_workbook(export_report([scenario()], tmp_path / "blank.xlsx",
+                                     brand=ReportBrand(contact="")))
+    assert book["Summary"]["A2"].value == '=IF(\'Branding\'!B3="","",\'Branding\'!B3)'
+
+
+def test_unsupported_report_language_fails_before_writing(tmp_path: Path) -> None:
+    from okama_planner.reports import export_report
+
+    with pytest.raises(ValueError, match="language"):
+        export_report([scenario()], tmp_path / "bad.xlsx", language="fr")
+    assert not (tmp_path / "bad.xlsx").exists()
+
+
+@pytest.mark.parametrize("language", ["en", "ru", "zh", "de", "es"])
+def test_localized_company_headings_are_literal_text(tmp_path: Path, language: str) -> None:
+    from okama_planner.reports import ReportBrand, export_report
+
+    book = load_workbook(export_report([scenario()], tmp_path / "headings.xlsx", language=language,
+                                      brand=ReportBrand(company="=1+1")))
+    assert all(sheet["A1"].data_type == "s" for sheet in book)
+    assert all(sheet["A1"].value.startswith("=1+1 | ") for sheet in book if sheet.title != {
+        "en": "Branding", "ru": "Оформление", "zh": "品牌设置", "de": "Gestaltung", "es": "Marca",
+    }[language])

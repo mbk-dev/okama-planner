@@ -2,6 +2,7 @@
 (() => {
   'use strict';
   const input = JSON.parse(document.getElementById('forecast-data').textContent);
+  const t = text => input.labels?.[text] || text;
   const font = 'system-ui,-apple-system,Segoe UI,Roboto,sans-serif';
   const blue = '#2a78d6';
   const muted = '#898781';
@@ -61,7 +62,7 @@
       lineStyle: { width: 0, opacity: 0 }, showSymbol: false, silent: true, endLabel: ['p90', 'p75'].includes(p) ? endLabel(p) : { show: false }
     });
     const median = {
-      name: 'Median', type: 'line', data: rows.map(row => value(row, 'p50')),
+      name: t('Median'), type: 'line', data: rows.map(row => value(row, 'p50')),
       showSymbol: false, z: 10, lineStyle: { width: 2.5, color: blue }, itemStyle: { color: blue },
       endLabel: { show: !mobile, formatter: params => money(Number(params.value)), color: '#ffffff',
         backgroundColor: blue, padding: [3, 6], borderRadius: 5, fontFamily: font,
@@ -79,7 +80,7 @@
     }));
     return {
       animation: false, backgroundColor: '#ffffff',
-      title: { text: (key === 'portfolio' ? 'Portfolio forecast' : 'Net capital forecast') + ` (${input.currency})`,
+      title: { text: t(key === 'portfolio' ? 'Portfolio forecast' : 'Net capital forecast') + ` (${input.currency})` + (logarithmic ? ' · ' + t('Logarithmic scale') : ''),
         left: mobile ? 12 : 18, top: mobile ? 12 : 16,
         textStyle: { fontFamily: font, fontSize: mobile ? 14 : 15, fontWeight: 'bold', color: '#111827' } },
       grid: { left: mobile ? 8 : 16, right: mobile ? 14 : 74,
@@ -98,7 +99,8 @@
           ['p10', 'p25', 'p50', 'p75', 'p90'].map(p => row[p]).filter(number => number > 0))) : undefined,
         axisLine: { show: false, onZero: false }, axisTick: { show: false },
         splitLine: { show: true, lineStyle: { color: '#eceef2' } },
-        axisLabel: { color: muted, fontFamily: font, fontSize: mobile ? 10 : 11 } },
+        axisLabel: { color: muted, fontFamily: font, fontSize: mobile ? 10 : 11,
+          showMinLabel: !logarithmic } },
       series: [...(logarithmic ? [logBand('p10', 'p90', 'outer', 0.12, 1),
         logBand('p25', 'p75', 'inner', 0.25, 2), logBoundary('p90'), logBoundary('p75'), logBoundary('p25'), logBoundary('p10')] :
         [...band('p10', 'p90', 'outer', 0.12, 1), ...band('p25', 'p75', 'inner', 0.25, 2)]), median, ...labels],
@@ -111,7 +113,7 @@
           if (index < 0) return '';
           const row = rows[index];
           return `<strong>${row.month}</strong><br>` + ['p90', 'p75', 'p50', 'p25', 'p10'].map(p =>
-            p === 'p50' ? `<strong>Median: ${money(row[p])}</strong>` : `${p}: ${money(row[p])}`).join('<br>');
+            p === 'p50' ? `<strong>${t('Median')}: ${money(row[p])}</strong>` : `${p}: ${money(row[p])}`).join('<br>');
         } }
     };
   }
@@ -125,6 +127,7 @@
   }
 
   for (const key of ['portfolio', 'capital']) {
+    scales.set(key, input.logarithmic === true);
     const host = document.getElementById(key);
     if (input.render) {
       host.style.width = input.render.width + 'px';
@@ -147,17 +150,22 @@
     const note = document.getElementById(key + '-scale-note');
     const hasPositive = rows.some(row => row.p90 > 0);
     toggle.disabled = !hasPositive;
+    toggle.checked = scales.get(key) === true;
     if (!hasPositive) {
       note.hidden = false;
-      note.textContent = 'Logarithmic scale is unavailable: this forecast has no positive values.';
+      note.textContent = t('Logarithmic scale is unavailable: this forecast has no positive values.');
     }
     toggle.addEventListener('change', () => {
       scales.set(key, toggle.checked);
       const chart = charts.get(key);
       chart.setOption(option(key, document.getElementById(key).clientWidth), { notMerge: true });
       note.hidden = !toggle.checked || !rows.some(row => row.p10 <= 0);
-      note.textContent = 'Zero and negative values are omitted on the logarithmic scale; affected bands have gaps.';
+      note.textContent = t('Zero and negative values are omitted on the logarithmic scale; affected bands have gaps.');
     });
+    if (toggle.checked && rows.some(row => row.p10 <= 0)) {
+      note.hidden = false;
+      note.textContent = t('Zero and negative values are omitted on the logarithmic scale; affected bands have gaps.');
+    }
     const annotations = document.getElementById(key + '-goals');
     for (const goal of input.goals) {
       const item = document.createElement('li');

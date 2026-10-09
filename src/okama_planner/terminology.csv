@@ -1,0 +1,143 @@
+key,en,ru,zh,de,es
+branding,Branding,Оформление,品牌设置,Gestaltung,Marca
+summary,Summary,Итоги,摘要,Übersicht,Resumen
+budget,Budget,Бюджет,预算,Budget,Presupuesto
+balance,Balance,Баланс,资产负债,Bilanz,Balance
+goals,Goals,Цели,目标,Ziele,Objetivos
+assumptions,Assumptions,Параметры,假设,Annahmen,Supuestos
+comparison,Comparison,Сравнение,比较,Vergleich,Comparación
+ledger,Ledger,Операции,流水账,Buchungen,Movimientos
+instructions,Instructions,Как читать,阅读说明,Lesehilfe,Cómo leer
+segments,Segments,Сегменты,分账户,Segmente,Segmentos
+allocation,Allocation,Распределение,配置,Allokation,Asignación
+segment_balances,Segment balances,Балансы сегментов,分账户余额,Segmentstände,Saldos por segmento
+funding_events,Funding events,Финансирование целей,目标资金事件,Finanzierungsereignisse,Financiación de objetivos
+transfers,Transfers,Переводы,转账,Transfers,Transferencias
+portfolio_chart,Portfolio chart,График портфеля,投资组合图,Portfoliodiagramm,Gráfico de cartera
+portfolio_log_chart,Portfolio log chart,Портфель лог. шкала,投资组合对数图,Portfolio logarithmisch,Cartera logarítmica
+capital_chart,Capital chart,График капитала,净资产图,Kapitaldiagramm,Gráfico de capital
+capital_log_chart,Capital log chart,Капитал лог. шкала,净资产对数图,Kapital logarithmisch,Capital logarítmico
+presentation_settings,Presentation settings,Настройки оформления,展示设置,Darstellungseinstellungen,Ajustes de presentación
+company,Company,Компания,公司,Unternehmen,Empresa
+contact,Contact,Контакты,联系方式,Kontakt,Contacto
+color,Color,Цвет,颜色,Farbe,Color
+editable,Editable,Редактирование,可编辑项,Bearbeitbar,Editable
+b2_b3_text_only_rerun_exporter_for_logo_color_changes,B2/B3: text only; rerun exporter for logo/color changes,B2/B3: только текст; для изменения логотипа и цвета повторите экспорт,B2/B3：仅文本；更改标志或颜色请重新导出,B2/B3: nur Text; für Logo-/Farbänderungen erneut exportieren,B2/B3: solo texto; repita la exportación para cambiar el logotipo o el color
+local_example_logo,Local example logo,Пример локального логотипа,本地示例标志,Lokales Beispiellogo,Logotipo local de ejemplo
+saved_forecast_edit_the_request_and_rerun_planner_to_change_calculations,Saved forecast; edit the request and rerun Planner to change calculations.,Сохранённый прогноз; для изменения расчётов измените запрос и повторно запустите Planner.,已保存的预测；如需更改计算，请修改请求并重新运行 Planner。,Gespeicherte Prognose; für neue Berechnungen die Anfrage ändern und Planner erneut ausführen.,Pronóstico guardado; modifique la solicitud y vuelva a ejecutar Planner para cambiar los cálculos.
+indicator,Indicator,Показатель,指标,Kennzahl,Indicador
+baseline_unit,Baseline ({unit}),Базовый сценарий ({unit}),基准情景（{unit}）,Basisszenario ({unit}),Escenario base ({unit})
+month,Month,Месяц,月份,Monat,Mes
+income,Income,Доходы,收入,Einnahmen,Ingresos
+expenses,Expenses,Расходы,支出,Ausgaben,Gastos
+other_flows,Other flows,Прочие операции,其他流水,Sonstige Zahlungsströme,Otros flujos
+other_ledger_flows,Other ledger flows,Прочие операции,其他流水,Sonstige Buchungen,Otros movimientos
+net_ledger_flow,Net ledger flow,Сальдо операций,净流水,Nettobuchungsfluss,Flujo neto de movimientos
+portfolio_flow,Portfolio flow,Поток в портфель,投资组合资金流,Portfolio-Zahlungsstrom,Flujo de cartera
+portfolio_flow_after_reserves,Portfolio flow after reserves,Поток в портфель после резервов,扣除储备后的投资组合资金流,Portfoliofluss nach Rücklagen,Flujo de cartera tras reservas
+portfolio_p50,Portfolio p50,Портфель p50,投资组合 p50,Portfolio p50,Cartera p50
+net_capital_p50,Net capital p50,Чистый капитал p50,净资产 p50,Nettokapital p50,Capital neto p50
+purchase_buffer,Purchase buffer,Буфер покупки,购买缓冲资金,Kaufpuffer,Reserva para compras
+reserve_account,Reserve account,Резервный счёт,储备账户,Rücklagenkonto,Cuenta de reserva
+non_working_assets,Non-working assets,Неинвестиционные активы,非投资资产,Nicht investierte Vermögenswerte,Activos no invertidos
+debt,Debt,Долг,债务,Schulden,Deuda
+scenario,Scenario,Сценарий,情景,Szenario,Escenario
+goal,Goal,Цель,目标,Ziel,Objetivo
+nominal_amount_unit,Nominal amount ({unit}),Номинальная сумма ({unit}),名义金额（{unit}）,Nominalbetrag ({unit}),Importe nominal ({unit})
+affordable_probability,Affordable probability,Вероятность доступности,可负担概率,Finanzierbarkeitswahrscheinlichkeit,Probabilidad de asequibilidad
+alive_probability,Alive probability,Вероятность сохранения портфеля,投资组合存续概率,Portfolio-Überlebenswahrscheinlichkeit,Probabilidad de supervivencia
+parameter,Parameter,Параметр,参数,Parameter,Parámetro
+supplied_value,Supplied value,Заданное значение,输入值,Angegebener Wert,Valor indicado
+no_comparison,No comparison,Без сравнения,无比较情景,Kein Vergleich,Sin comparación
+difference,Difference,Разница,差异,Differenz,Diferencia
+kind,Kind,Тип,类型,Art,Tipo
+label,Label,Название,名称,Bezeichnung,Nombre
+amount_unit,Amount ({unit}),Сумма ({unit}),金额（{unit}）,Betrag ({unit}),Importe ({unit})
+resolved_rate,Resolved rate,Применённая ставка,应用利率,Angewandter Satz,Tasa aplicada
+topic,Topic,Тема,主题,Thema,Tema
+instruction,Instruction,Пояснение,说明,Hinweis,Instrucción
+full_plan_success,Full-plan success,Успех всего плана,全计划成功率,Erfolg des Gesamtplans,Éxito del plan completo
+terminal_portfolio_p50,Terminal portfolio p50,Портфель p50 в конце срока,期末投资组合 p50,Portfolio p50 am Laufzeitende,Cartera p50 al final
+portfolio_mode,Portfolio mode,Режим портфеля,投资组合模式,Portfoliomodus,Modo de cartera
+total_unmet_mean,Total unmet mean,Средний общий дефицит,平均总缺口,Mittlerer Gesamtfehlbetrag,Déficit total medio
+gamma,Gamma,Гамма,伽马,Gamma,Gamma
+equivalent_annual_alpha,Equivalent annual alpha,Эквивалентная годовая альфа,等效年化阿尔法,Äquivalentes jährliches Alpha,Alfa anual equivalente
+not_available,Not available,Недоступно,不可用,Nicht verfügbar,No disponible
+not_supplied,Not supplied,Не задано,未提供,Nicht angegeben,No indicado
+unavailable,Unavailable,Недоступно,不可用,Nicht verfügbar,No disponible
+not_comparable,Not comparable,Несопоставимо,不可比较,Nicht vergleichbar,No comparable
+legacy_unavailable,Legacy: unavailable,Старый формат: недоступно,旧格式：不可用,Altes Format: nicht verfügbar,Formato anterior: no disponible
+same,Same,Совпадает,相同,Gleich,Igual
+different,Different,Различается,不同,Unterschiedlich,Diferente
+first_month,First month,Первый месяц,首月,Erster Monat,Primer mes
+first_required_amount_unit,First required amount ({unit}),Первый необходимый платёж ({unit}),首笔所需金额（{unit}）,Erster erforderlicher Betrag ({unit}),Primer importe requerido ({unit})
+fully_funded_probability,Fully funded probability,Вероятность полного финансирования,全额资金到位概率,Wahrscheinlichkeit vollständiger Finanzierung,Probabilidad de financiación completa
+full_stream_probability,Full-stream probability,Вероятность всех выплат,全期支付成功概率,Wahrscheinlichkeit aller Zahlungen,Probabilidad de todos los pagos
+funded_mean_whole_goal,Funded mean (whole goal),Среднее финансирование всей цели,整个目标的平均融资额,Mittlere Finanzierung des gesamten Ziels,Financiación media del objetivo completo
+unmet_mean_whole_goal,Unmet mean (whole goal),Средний дефицит всей цели,整个目标的平均缺口,Mittlerer Fehlbetrag des gesamten Ziels,Déficit medio del objetivo completo
+funding_basis,Funding basis,Основа финансирования,融资依据,Finanzierungsbasis,Base de financiación
+legacy_see_affordability_in_saved_json,Legacy: see affordability in saved JSON,Старый формат: доступность указана в сохранённом JSON,旧格式：请查看已保存 JSON 中的可负担性,Altes Format: Finanzierbarkeit im gespeicherten JSON prüfen,Formato anterior: consulte la asequibilidad en el JSON guardado
+fully_funded_probability_label,fully funded probability,вероятность полного финансирования,全额资金到位概率,Wahrscheinlichkeit vollständiger Finanzierung,probabilidad de financiación completa
+full_stream_probability_label,full-stream probability,вероятность всех выплат,全期支付成功概率,Wahrscheinlichkeit aller Zahlungen,probabilidad de todos los pagos
+funded_mean_label,funded mean,среднее финансирование,平均融资额,mittlere Finanzierung,financiación media
+unmet_mean_label,unmet mean,средний дефицит,平均缺口,mittlerer Fehlbetrag,déficit medio
+shared_history_hash,Shared history hash,Хеш общей истории,共享历史哈希,Hash der gemeinsamen Historie,Hash del historial compartido
+shared_scenario_rows_hash,Shared scenario rows hash,Хеш общих строк сценариев,共享情景行哈希,Hash gemeinsamer Szenariozeilen,Hash de filas de escenarios compartidas
+segment,Segment,Сегмент,分账户,Segment,Segmento
+goal_id,Goal ID,ID цели,目标 ID,Ziel-ID,ID del objetivo
+opening_amount,Opening amount,Начальная сумма,期初金额,Anfangsbetrag,Importe inicial
+full_funding_probability,Full-funding probability,Вероятность полного финансирования,全额资金到位概率,Wahrscheinlichkeit vollständiger Finanzierung,Probabilidad de financiación completa
+completion,Completion,Завершение,完成规则,Abschluss,Finalización
+policy_schedule,Policy / schedule,Правило / расписание,规则／时间表,Regel / Zeitplan,Política / calendario
+explicit_value,Explicit value,Заданное значение,明确值,Expliziter Wert,Valor explícito
+required_mean,Required mean,Средняя необходимая сумма,平均所需金额,Mittlerer erforderlicher Betrag,Importe requerido medio
+funded_mean,Funded mean,Среднее финансирование,平均融资额,Mittlere Finanzierung,Financiación media
+unmet_mean,Unmet mean,Средний дефицит,平均缺口,Mittlerer Fehlbetrag,Déficit medio
+funding_sources_mean,Funding sources (mean),Источники финансирования (среднее),资金来源（平均值）,Finanzierungsquellen (Mittelwert),Fuentes de financiación (media)
+mode,Mode,Режим,模式,Modus,Modo
+source,Source,Откуда,来源,Quelle,Origen
+destination,Destination,Куда,目的地,Ziel,Destino
+reason,Reason,Причина,原因,Grund,Motivo
+amount_mean,Amount mean,Средняя сумма,平均金额,Mittlerer Betrag,Importe medio
+edit,Edit,Редактирование,编辑,Bearbeiten,Editar
+calculations,Calculations,Расчёты,计算,Berechnungen,Cálculos
+units,Units,Единицы,单位,Einheiten,Unidades
+limits,Limits,Ограничения,限制,Grenzen,Límites
+country_rules,Country rules,Правила страны,国家规则,Länderregeln,Reglas del país
+recalculate,Recalculate,Пересчёт,重新计算,Neu berechnen,Recalcular
+baseline_label_nominal_unit,Baseline: {label} · Nominal {unit},Базовый сценарий: {label} · Номинальные {unit},基准情景：{label} · 名义 {unit},Basisszenario: {label} · Nominale {unit},Escenario base: {label} · Valores nominales en {unit}
+nominal_unit_label,Nominal {unit} · {label},Номинальные {unit} · {label},名义 {unit} · {label},Nominale {unit} · {label},Valores nominales en {unit} · {label}
+planned_requirements_not_actual_payments_balances,"Planned requirements, not actual payments/balances","Плановые потребности, не фактические выплаты или балансы",计划需求，而非实际付款或余额,"Geplante Bedarfe, keine tatsächlichen Zahlungen/Salden","Necesidades previstas, no pagos o saldos reales"
+portfolio_forecast,Portfolio forecast,Прогноз портфеля,投资组合预测,Portfolioprognose,Pronóstico de cartera
+net_capital_forecast,Net capital forecast,Прогноз чистого капитала,净资产预测,Nettokapitalprognose,Pronóstico de capital neto
+median,Median,Медиана,中位数,Median,Mediana
+logarithmic_scale,Logarithmic scale,Логарифмическая шкала,对数刻度,Logarithmische Skala,Escala logarítmica
+zero_and_negative_values_are_omitted_on_the_logarithmic_scale_affected_bands_have_gaps,Zero and negative values are omitted on the logarithmic scale; affected bands have gaps.,На логарифмической шкале нулевые и отрицательные значения пропущены; в соответствующих диапазонах есть разрывы.,对数刻度省略零值和负值；相关区间显示为缺口。,Null- und negative Werte werden auf der logarithmischen Skala ausgelassen; betroffene Bänder haben Lücken.,Los valores cero y negativos se omiten en la escala logarítmica; las bandas afectadas tienen huecos.
+logarithmic_scale_is_unavailable_this_forecast_has_no_positive_values,Logarithmic scale is unavailable: this forecast has no positive values.,Логарифмическая шкала недоступна: в прогнозе нет положительных значений.,对数刻度不可用：此预测没有正值。,Logarithmische Skala nicht verfügbar: Diese Prognose enthält keine positiven Werte.,Escala logarítmica no disponible: este pronóstico no tiene valores positivos.
+nominal_unit_inflation_indexation_follows_the_supplied_inputs_values_are_not_expressed_in_constant_purchasing_power,Nominal {unit}; inflation indexation follows the supplied inputs. Values are not expressed in constant purchasing power.,Номинальные {unit}; индексация на инфляцию учитывается согласно входным данным. Суммы не выражены в постоянной покупательной способности.,名义 {unit}；通胀指数调整按输入数据计入。金额不以固定购买力表示。,Nominale {unit}; die Inflationsindexierung folgt den Eingaben. Beträge sind nicht in konstanter Kaufkraft angegeben.,Valores nominales en {unit}; la indexación por inflación sigue los datos de entrada. Los importes no se expresan en poder adquisitivo constante.
+neutral_financial_plan,Neutral financial plan,Финансовый план,财务计划,Finanzplan,Plan financiero
+opening_component_balances_are_omitted_p50_series_include_the_opening_point,Opening component balances are omitted; p50 series include the opening point.,Начальные балансы компонентов не показаны; ряды p50 включают начальную точку.,未显示各组成部分的期初余额；p50 序列包含期初点。,Anfangssalden der Komponenten fehlen; p50-Reihen enthalten den Anfangspunkt.,Se omiten los saldos iniciales de los componentes; las series p50 incluyen el punto inicial.
+actual_scenario_p50_balances_including_opening_balances_component_medians_are_not_additive,"Actual scenario p50 balances, including opening balances; component medians are not additive.","Фактические балансы сценариев p50, включая начальные; медианы компонентов не складываются.",实际情景 p50 余额，包括期初余额；各组成部分的中位数不能相加。,Tatsächliche p50-Szenariosalden einschließlich Anfangssalden; Komponentenmediane sind nicht additiv.,"Saldos reales p50 de los escenarios, incluidos los iniciales; las medianas de componentes no son aditivas."
+affordability_and_survival_use_the_month_before_the_goal_neither_is_full_plan_success,Affordability and survival use the month before the goal; neither is full-plan success.,Доступность и сохранение портфеля оцениваются за месяц до цели; это не успех всего плана.,可负担性和存续率按目标前一个月计算；均不代表全计划成功。,Finanzierbarkeit und Überleben beziehen sich auf den Monat vor dem Ziel; keines ist der Erfolg des Gesamtplans.,La asequibilidad y la supervivencia usan el mes anterior al objetivo; ninguna equivale al éxito del plan completo.
+actual_funding_covers_every_required_goal_event_pension_success_covers_the_full_stream,Actual funding covers every required goal event; pension success covers the full stream.,Фактическое финансирование учитывает все платежи по цели; успех пенсионной цели охватывает весь поток выплат.,实际融资涵盖目标的每笔所需付款；养老金成功率涵盖整个支付流。,Tatsächliche Finanzierung umfasst jedes Zielereignis; Rentenerfolg umfasst den gesamten Zahlungsstrom.,La financiación real cubre cada pago requerido del objetivo; el éxito de la pensión cubre todos los pagos.
+monte_carlo_percentiles_describe_separate_distributions_not_one_jointly_realised_path,"Monte Carlo percentiles describe separate distributions, not one jointly realised path.","Перцентили Монте-Карло описывают отдельные распределения, а не единую реализованную траекторию.",蒙特卡洛分位数描述各自的分布，而非一条联合实现的路径。,"Monte-Carlo-Perzentile beschreiben einzelne Verteilungen, keinen gemeinsam realisierten Pfad.","Los percentiles de Monte Carlo describen distribuciones separadas, no una trayectoria realizada conjunta."
+differences_are_descriptive_changed_goals_or_cash_flows_prevent_a_like_for_like_investment_ranking,Differences are descriptive; changed goals or cash flows prevent a like-for-like investment ranking.,Различия приведены для описания; при разных целях или денежных потоках прямое ранжирование инвестиций некорректно.,差异仅作描述；目标或现金流不同，无法进行同条件的投资排名。,Differenzen sind beschreibend; geänderte Ziele oder Zahlungsströme verhindern eine vergleichbare Investmentrangfolge.,Las diferencias son descriptivas; cambiar objetivos o flujos impide clasificar inversiones en condiciones iguales.
+single_mode_segment_balances_are_a_display_attribution_within_one_pooled_portfolio,Single mode segment balances are a display attribution within one pooled portfolio.,В режиме single балансы сегментов показывают условное распределение внутри общего портфеля.,single 模式下，分账户余额是同一资金池内的展示归属。,Im Modus single sind Segmentstände eine Darstellung innerhalb eines gemeinsamen Portfolios.,"En modo single, los saldos de segmentos representan una atribución dentro de una cartera común."
+edit_branding_b2_b3_for_contact_text_rerun_the_exporter_to_change_company_headings_colors_and_local_logo,"Edit Branding B2/B3 for contact text. Rerun the exporter to change company headings, colors and local logo.","Измените B2/B3 на листе «Оформление» для обновления контактов. Для изменения заголовков компании, цветов и локального логотипа повторите экспорт.",修改“品牌设置”工作表 B2/B3 中的联系文本。更改公司标题、颜色及本地标志请重新导出。,"Kontakttext in Gestaltung B2/B3 bearbeiten. Für Firmenüberschriften, Farben und lokales Logo erneut exportieren.","Edite B2/B3 de Marca para cambiar el contacto. Repita la exportación para cambiar los encabezados de empresa, colores y logotipo local."
+request_result_are_snapshots_change_the_full_request_and_rerun_forecast_before_exporting_editing_workbook_numbers_does_not_rerun_monte_carlo,Request/result are snapshots. Change the full request and rerun forecast before exporting; editing workbook numbers does not rerun Monte Carlo.,Запрос и результат — снимки расчёта. Перед экспортом измените полный запрос и повторите прогноз; изменение чисел в книге не запускает Монте-Карло.,请求和结果均为快照。导出前请修改完整请求并重跑预测；编辑工作簿数字不会重跑蒙特卡洛。,Anfrage und Ergebnis sind Momentaufnahmen. Vor dem Export die vollständige Anfrage ändern und Prognose erneut ausführen; Zahlenänderungen starten Monte Carlo nicht neu.,La solicitud y el resultado son instantáneas. Modifique la solicitud completa y repita el pronóstico antes de exportar; editar cifras no ejecuta Monte Carlo.
+every_scenario_has_its_own_full_plan_and_provenance_return_histories_are_identified_by_hashes_keep_the_original_request_result_json_files,Every scenario has its own full plan and provenance. Return histories are identified by hashes; keep the original request/result JSON files.,У каждого сценария есть полный план и сведения о расчёте. Истории доходности идентифицируются хешами; сохраняйте исходные JSON запроса и результата.,每个情景都有完整计划和计算来源。收益历史用哈希标识；请保留原始请求及结果 JSON 文件。,Jedes Szenario hat einen vollständigen Plan und Herkunftsdaten. Renditehistorien werden durch Hashes identifiziert; ursprüngliche Anfrage-/Ergebnis-JSON-Dateien aufbewahren.,Cada escenario tiene un plan completo y datos de procedencia. Los historiales se identifican con hashes; conserve los JSON originales de solicitud y resultado.
+all_monetary_amounts_are_nominal_unit_inflation_indexation_follows_the_supplied_inputs_rates_and_probabilities_are_fractions_budget_expenses_and_other_outflows_are_negative,All monetary amounts are nominal {unit}; inflation indexation follows the supplied inputs. Rates and probabilities are fractions. Budget expenses and other outflows are negative.,Все денежные суммы — номинальные {unit}; индексация на инфляцию учитывается согласно входным данным. Ставки и вероятности записаны долями. Расходы и другие оттоки бюджета отрицательны.,所有金额均为名义 {unit}；通胀指数调整按输入数据计入。利率和概率为小数。预算支出和其他流出为负数。,Alle Geldbeträge sind nominale {unit}; die Inflationsindexierung folgt den Eingaben. Sätze und Wahrscheinlichkeiten sind Bruchteile. Budgetausgaben und andere Abflüsse sind negativ.,Todos los importes son nominales en {unit}; la indexación por inflación sigue las entradas. Tasas y probabilidades son fracciones. Gastos y otras salidas son negativos.
+legacy_single_or_joint_single_per_goal_investments_fixed_rate_savings_are_separate_reserves_no_jurisdictional_tax_fx_gamma_alpha_or_white_label_legal_declaration_is_inferred,"Legacy single or joint single/per_goal investments; fixed-rate savings are separate reserves. No jurisdictional tax, FX, gamma/alpha or white label legal declaration is inferred.","Инвестиции старого формата single или совместного single/per_goal; сбережения с фиксированной ставкой — отдельные резервы. Налоги страны, валютный обмен, гамма/альфа и юридическая декларация автоматически не добавляются.",支持旧版 single 或联合 single/per_goal 投资；固定利率储蓄为独立储备。不自动推断辖区税制、外汇、伽马／阿尔法或品牌法律声明。,"Alte single- oder gemeinsame single/per_goal-Anlagen; Festzinssparen sind separate Rücklagen. Landessteuern, Devisen, Gamma/Alpha oder rechtliche White-Label-Erklärungen werden nicht abgeleitet.","Inversiones single anteriores o conjuntas single/per_goal; ahorros a tasa fija son reservas separadas. No se infieren impuestos nacionales, divisas, gamma/alfa ni declaraciones legales de marca."
+supply_supported_budgets_and_cash_flows_explicitly_fees_taxes_absent_from_inputs_are_not_modelled_formatting_does_not_change_financial_assumptions,Supply supported budgets and cash flows explicitly. Fees/taxes absent from inputs are not modelled. Formatting does not change financial assumptions.,"Задавайте поддерживаемые бюджеты и денежные потоки явно. Комиссии и налоги, отсутствующие во входных данных, не моделируются. Оформление не меняет финансовые предпосылки.",请明确提供受支持的预算和现金流。输入中缺失的费用／税款不会建模。格式不会改变财务假设。,Unterstützte Budgets und Zahlungsströme ausdrücklich angeben. Nicht eingegebene Gebühren/Steuern werden nicht modelliert. Gestaltung ändert keine Finanzannahmen.,Indique explícitamente los presupuestos y flujos admitidos. No se modelan comisiones o impuestos ausentes de las entradas. El formato no cambia los supuestos financieros.
+recalculate_excel_summary_formulas_before_using_cached_values_compare_numeric_series_separately_percentile_components_are_not_additive,Recalculate Excel summary formulas before using cached values. Compare numeric series separately; percentile components are not additive.,Перед использованием сохранённых значений пересчитайте итоговые формулы Excel. Сравнивайте числовые ряды отдельно; компоненты перцентилей не складываются.,使用缓存值前请重新计算 Excel 汇总公式。分别比较数值序列；各组成部分分位数不能相加。,Excel-Zusammenfassungsformeln vor Verwendung zwischengespeicherter Werte neu berechnen. Zahlenreihen getrennt vergleichen; Perzentilkomponenten sind nicht additiv.,Recalcule las fórmulas de resumen de Excel antes de usar valores en caché. Compare las series por separado; los componentes de percentiles no son aditivos.
+source_supplied_saved_forecast_see_assumptions_for_request_hash_and_provenance,Source: supplied saved forecast; see Assumptions for request hash and provenance.,Источник: предоставленный сохранённый прогноз; хеш запроса и сведения о расчёте — на листе «Параметры».,来源：提供的已保存预测；请求哈希及计算来源见“假设”。,Quelle: bereitgestellte gespeicherte Prognose; Anfrage-Hash und Herkunft siehe Annahmen.,Fuente: pronóstico guardado proporcionado; consulte Supuestos para el hash de solicitud y procedencia.
+okama_planner_forecast_charts,okama Planner · forecast charts,okama Planner · графики прогноза,okama Planner · 预测图,okama Planner · Prognosediagramme,okama Planner · gráficos de pronóstico
+portfolio_median_and_percentile_ranges,Portfolio median and percentile ranges,Медиана и диапазоны перцентилей портфеля,投资组合中位数和分位区间,Portfoliomedian und Perzentilbereiche,Mediana y rangos de percentiles de la cartera
+net_capital_median_and_percentile_ranges,Net capital median and percentile ranges,Медиана и диапазоны перцентилей чистого капитала,净资产中位数和分位区间,Nettokapitalmedian und Perzentilbereiche,Mediana y rangos de percentiles del capital neto
+goal_annotations,Goal annotations,Обозначения целей,目标标注,Zielmarkierungen,Anotaciones de objetivos
+save_portfolio_png,Save portfolio PNG,Сохранить портфель PNG,保存投资组合 PNG,Portfolio als PNG speichern,Guardar cartera PNG
+save_portfolio_svg,Save portfolio SVG,Сохранить портфель SVG,保存投资组合 SVG,Portfolio als SVG speichern,Guardar cartera SVG
+save_capital_png,Save capital PNG,Сохранить капитал PNG,保存净资产 PNG,Kapital als PNG speichern,Guardar capital PNG
+save_capital_svg,Save capital SVG,Сохранить капитал SVG,保存净资产 SVG,Kapital als SVG speichern,Guardar capital SVG
+saved_monte_carlo_forecast_nominal_values_median_and_percentile_ranges_p25_p75_p10_p90_net_capital_includes_assets_outside_the_portfolio_and_subtracts_debt_inflation_indexation_follows_the_supplied_inputs_values_are_not_expressed_in_constant_purchasing_power_values_are_not_recalculated_here,Saved Monte Carlo forecast · nominal values · median and percentile ranges p25–p75 / p10–p90. Net capital includes assets outside the portfolio and subtracts debt. Inflation indexation follows the supplied inputs; values are not expressed in constant purchasing power. Values are not recalculated here.,Сохранённый прогноз Монте-Карло · номинальные суммы · медиана и диапазоны p25–p75 / p10–p90. Чистый капитал включает активы вне портфеля за вычетом долга. Индексация на инфляцию учитывается согласно входным данным; суммы не выражены в постоянной покупательной способности. Здесь пересчёт не выполняется.,已保存的蒙特卡洛预测 · 名义金额 · 中位数及 p25–p75／p10–p90 区间。净资产包括投资组合外的资产并扣除债务。通胀指数调整按输入数据计入；金额不以固定购买力表示。此处不重新计算。,Gespeicherte Monte-Carlo-Prognose · Nominalwerte · Median und Perzentilbereiche p25–p75 / p10–p90. Nettokapital umfasst Vermögen außerhalb des Portfolios abzüglich Schulden. Die Inflationsindexierung folgt den Eingaben; Werte sind nicht in konstanter Kaufkraft angegeben. Hier wird nicht neu berechnet.,Pronóstico de Monte Carlo guardado · valores nominales · mediana y rangos p25–p75 / p10–p90. El capital neto incluye activos fuera de la cartera y resta la deuda. La indexación por inflación sigue las entradas; los valores no se expresan en poder adquisitivo constante. Aquí no se recalculan.
+resize_the_window_to_change_chart_proportions_image_exports_preserve_the_current_chart_dimensions_png_uses_twice_the_pixel_resolution_svg_remains_vector_negative_net_capital_is_retained,"Resize the window to change chart proportions. Image exports preserve the current chart dimensions; PNG uses twice the pixel resolution, SVG remains vector. Negative net capital is retained.","Измените размер окна для настройки пропорций графиков. Экспорт сохраняет текущие размеры; PNG имеет удвоенное разрешение, SVG остаётся векторным. Отрицательный чистый капитал сохраняется.",调整窗口大小可改变图表比例。图像导出保留当前尺寸；PNG 使用双倍像素分辨率，SVG 保持矢量格式。负净资产值会保留。,"Fenstergröße ändern, um Diagrammproportionen anzupassen. Bildexporte behalten die aktuellen Maße; PNG hat doppelte Pixelauflösung, SVG bleibt vektorbasiert. Negatives Nettokapital bleibt erhalten.",Cambie el tamaño de la ventana para ajustar las proporciones. Las imágenes conservan las dimensiones actuales; PNG duplica la resolución y SVG sigue siendo vectorial. Se mantiene el capital neto negativo.
