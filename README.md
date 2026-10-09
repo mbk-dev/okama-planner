@@ -89,6 +89,7 @@ export_report(
     [{"label": "Family plan", "request": request, "result": result}],
     "family-plan.xlsx",
     brand=ReportBrand(company="Example Advisory", color="244C66"),
+    language="en",  # en, ru, zh, de, es
 )
 ```
 
@@ -153,8 +154,13 @@ registry is planned after the storage API is implemented.
 
 ## Languages
 
-**Available today:** English workbook labels and chart interface text.
-**In progress:** multilingual Excel reports. The broader localization goal covers:
+**Available today:** Excel reports and chart interface text in **English, Russian,
+German, Spanish and Simplified Chinese** (`en`, `ru`, `de`, `es`, `zh`). Select a language
+with `export_report(..., language="ru")` or `export_charts(..., language="ru")`.
+The shared [terminology table](src/okama_planner/terminology.csv) supplies translated captions.
+See the [five-language report example](examples/multilingual_reports.py).
+
+The broader localization roadmap covers:
 
 - Excel and future HTML/PDF report headings, sheet names, instructions and template text.
 - Chart titles, controls, annotations and number, currency and date formatting.
@@ -164,8 +170,8 @@ registry is planned after the storage API is implemented.
 
 SQL column names, JSON keys and API identifiers will remain stable across languages.
 Client names and other user-entered text are not automatically translated. Localized wording
-does not imply support for a country's tax or pension rules. Additional languages and these
-broader interfaces are roadmap items until their implementation is published.
+does not imply support for a country's tax or pension rules. Additional languages and localization beyond the implemented
+Excel/chart captions are roadmap items until their implementation is published.
 
 ## Model boundaries & next steps
 
