@@ -105,6 +105,7 @@ class _Group:
         self.returns = _strategy_returns(request, scenarios, months, paths)
         self.priorities = {key: i for i, key in enumerate(spec.event_priority)}
         self.planned = _planned_flows(self.ledger)
+        self.share_expenses: dict[str, float] = {}
         self.snapshot(0)
 
     def start(self, n: int, month: str) -> _Funding:
@@ -508,6 +509,55 @@ def _pay_goals(
         group.events.append(event)
 
 
+def _configure_shared_pensions(group: _Group, household_sources: dict[str, list[LedgerLine]]) -> None:
+    """Keep only actual expense-share dates and their pathwise native obligations."""
+    shares = {g.goal_id: g.amount_pv for g in group.request.plan.goals if g.amount_basis == "expense_share"}
+    if not shares:
+        return
+    expenses = {
+        month: -sum(line.amount for line in lines if line.line_kind == "expense")
+        for month, lines in household_sources.items()
+    }
+    lines = tuple(
+        line
+        for line in group.ledger.lines
+        if line.goal_id not in shares or expenses[line.month] * shares[line.goal_id] > 0
+    )
+    group.ledger = replace(group.ledger, lines=lines)
+    group.sources, group.reserves = _source_events(group.request.plan, group.ledger)
+    group.state.last_goal_events = _last_goal_events(group.ledger)
+    group.planned = _planned_flows(group.ledger)
+    for month, events in group.sources.items():
+        amount = sum(expenses[month] * shares[event.goal_id] for event in events if event.goal_id in shares)
+        group.share_expenses[month] = amount
+
+
+def _rebalance_native_buffer(group: _Group, funding: _Funding, n: int, quote: Array) -> None:
+    """Size future known base expenses at the current path quote, never at future simulated FX."""
+    if not group.share_expenses:
+        _rebalance_buffer(funding, n, group.ledger, group.planned)
+        return
+    if funding.spec.buffer_policy != "planned_targets":
+        return
+    plan = group.request.plan
+    stop = (
+        len(group.ledger.months)
+        if not plan.reserves_until_retirement
+        else year_index(plan.t0, plan.retirement_year)
+    )
+    future = group.ledger.months[n + 1 : min(n + 1 + plan.buffer_lookahead_months, stop)]
+    target = sum(
+        (np.maximum(0, group.share_expenses[month] / quote - group.planned[month]) for month in future),
+        np.zeros(group.request.mc_number),
+    )
+    released = np.maximum(0, funding.buffer - target)
+    funding.buffer -= released
+    funding.cash += released
+    deposited = np.minimum(funding.cash, np.maximum(0, target - funding.buffer))
+    funding.buffer += deposited
+    funding.cash -= deposited
+
+
 def _household_ledger(ledger: Ledger, replaced_months: set[str]) -> Ledger:
     """The common ledger owns external income/spending, never native account allocations."""
     lines = tuple(
@@ -545,6 +595,7 @@ def _attach_context(
             if any(g.amount_basis == "expense_share" for g in groups[result["group_id"]].request.plan.goals)
             else "planned_native_requirements"
         )
+        native["buffer_fx_basis"] = "current_quote_at_buffer_decision"
         native["ledger_zero_skeleton_goal_ids"] = [
             g.goal_id
             for g in groups[result["group_id"]].request.plan.goals
@@ -575,6 +626,8 @@ def _simulate(request: MulticurrencyRequest) -> dict[str, Any]:
     household_ledger = build_ledger(request.household)
     household_sources, _ = _source_events(request.household, household_ledger)
     months = household_ledger.months
+    for group in groups.values():
+        _configure_shared_pensions(group, household_sources)
     household_events: list[FundingEvent] = []
     fx_transfers: list[dict[str, Any]] = []
     flows = []
@@ -643,7 +696,7 @@ def _simulate(request: MulticurrencyRequest) -> dict[str, Any]:
         for key, group in groups.items():
             funding = fundings[key]
             _pay_goals(group, funding, pending[key], expense_amount, rates, month)
-            _rebalance_buffer(funding, n, group.ledger, group.planned)
+            _rebalance_native_buffer(group, funding, n, rates[group.request.currency])
             funding.invest()
             group.snapshot(n + 1)
         flows.append(

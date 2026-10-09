@@ -316,3 +316,85 @@ def test_native_result_discloses_original_input_and_coupled_fx_context() -> None
     assert dollar["actual"]["fx_transfers"][0]["native_amount_mean"] == 5
     assert dollar["actual"]["monthly_summaries"][1]["contribution_mean"] == 5
     assert json.loads(json.dumps(result, allow_nan=False))["schema_version"] == "2.0"
+
+
+def test_share_pension_completes_when_household_expense_stream_ends() -> None:
+    raw = multicurrency_request()
+    monthly_budget(raw, 0, 0)
+    raw["household"]["budget_items"][1].update(monthly_amount=100, start_month="2027-01", end_month="2027-01")
+    raw["household"]["pension_replaces_expenses"] = True
+    group = add_goal(raw, 1, 1, 1, kind="retirement_income", amount_basis="expense_share")
+    group["plan"]["goals"][0].pop("target_year")
+    group["plan"]["pension_replaces_expenses"] = True
+    add_goal(raw, 1, 2, 50, target_year=2027, target_month=2)
+    group["allocation"]["transfer_policy"] = "none"
+    group["allocation"]["transfer_order"] = []
+    group["allocation"]["segments"][0]["opening_amount"] = 0
+    group["allocation"]["segments"][1]["opening_amount"] = 100
+    group["allocation"]["segments"][1]["completion"] = {"action": "transfer_to", "destination": "g2"}
+    result = native(run(raw), "dollar")
+    pension_events = [e for e in result["actual"]["event_funding"] if e["goal_id"] == 1]
+    assert [(e["month"], e["required_mean"]) for e in pension_events] == [("2027-01", 1)]
+    assert result["actual"]["transfers"] == [
+        {"month": "2027-01", "source": "g1", "destination": "g2", "reason": "completion", "amount_mean": 99}
+    ]
+    assert next(g for g in result["goals"] if g["goal_id"] == 2)["p_funded"] == 1
+
+
+def test_share_pension_planned_buffer_uses_current_fx_for_future_base_requirements() -> None:
+    raw = multicurrency_request()
+    monthly_budget(raw, 2000, 0)
+    raw["household"]["budget_items"][0].update(start_month="2026-12", end_month="2026-12")
+    raw["household"]["budget_items"][1].update(monthly_amount=100, start_month="2027-01", end_month="2027-01")
+    raw["household"]["pension_replaces_expenses"] = True
+    raw["contribution_schedule"][0]["weights"] = {"ruble": 0, "dollar": 1}
+    group = add_goal(raw, 1, 1, 1, kind="retirement_income", amount_basis="expense_share")
+    group["plan"]["goals"][0].pop("target_year")
+    group["plan"].update(
+        pension_replaces_expenses=True, reserves_until_retirement=False, buffer_lookahead_months=1
+    )
+    group["allocation"]["buffer_policy"] = "planned_targets"
+    raw["fx"]["monthly_returns"]["USD"] = [0.1, -0.1] * 6
+    result = run(raw)
+    december = native(result, "dollar")["actual"]["monthly_summaries"][12]
+    import numpy as np
+
+    from okama_planner.multicurrency import MulticurrencyRequest, sample_multicurrency
+
+    _, quotes, _ = sample_multicurrency(MulticurrencyRequest.model_validate(raw))
+    assert december["buffer_mean"] == pytest.approx(np.mean(100 / quotes["USD"][12]))
+    assert december["buffer"]["p10"] != december["buffer"]["p90"]
+
+
+def test_planned_share_pension_buffer_survives_subsequent_portfolio_loss(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import numpy as np
+
+    import okama_planner.multicurrency_engine as engine
+    from okama_planner.multicurrency import MulticurrencyRequest, sample_multicurrency
+    from okama_planner.scenarios import JointScenarios
+
+    raw = multicurrency_request()
+    monthly_budget(raw, 100, 0)
+    raw["household"]["budget_items"][0].update(start_month="2026-12", end_month="2026-12")
+    raw["household"]["budget_items"][1].update(monthly_amount=100, start_month="2027-01", end_month="2027-01")
+    raw["household"]["pension_replaces_expenses"] = True
+    raw["contribution_schedule"][0]["weights"] = {"ruble": 0, "dollar": 1}
+    group = add_goal(raw, 1, 1, 1, kind="retirement_income", amount_basis="expense_share")
+    group["plan"]["goals"][0].pop("target_year")
+    group["plan"].update(
+        pension_replaces_expenses=True, reserves_until_retirement=False, buffer_lookahead_months=1
+    )
+    group["allocation"]["buffer_policy"] = "planned_targets"
+    scenarios, quotes, common = sample_multicurrency(MulticurrencyRequest.model_validate(raw))
+    dollar = scenarios["dollar"]
+    returns = np.zeros_like(dollar.returns)
+    returns[12] = -1
+    scenarios["dollar"] = JointScenarios(dollar.assets, returns, dollar.row_indices, dollar.history_sha256)
+    monkeypatch.setattr(engine, "sample_multicurrency", lambda request: (scenarios, quotes, common))
+    result = native(run(raw), "dollar")
+    assert result["actual"]["monthly_summaries"][12]["buffer_mean"] == 1
+    assert result["charts"]["portfolio"][13]["p50"] == 0
+    assert result["goals"][0]["p_full_stream"] == 1
+    assert result["actual"]["event_funding"][0]["funding_sources"]["buffer"] == 1
