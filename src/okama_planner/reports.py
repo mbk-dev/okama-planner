@@ -623,6 +623,8 @@ def _template_cell(sheet: str, row: int, column: int) -> bool:
         return column == 1 or (row in (1, 5) and column == 2) or (row == 5 and column == 4)
     if row <= 5:
         return not (sheet == "Comparison" and row == 5 and column in (2, 3))
+    if sheet.startswith("Cash Flow ") or sheet in {"Currency groups", "FX transfers"}:
+        return False
     if sheet in {"Assumptions", "Ledger", "Balance", "Budget", "Allocation", "Segments",
                  "Segment balances", "Funding events", "Transfers", "Cash Flow", "Current amounts"}:
         return False
@@ -722,7 +724,7 @@ def _style_chart_sheet(sheet: Worksheet, language: str) -> None:
 
 def _chart_sheets(
     book: Workbook, images: dict[str, str | Path], language: str, unit: str, brand: ReportBrand,
-    goals: list[dict[str, Any]],
+    goals: list[dict[str, Any]], title_suffix: str = "",
 ) -> None:
     names = {"portfolio": "Portfolio chart", "portfolio_log": "Portfolio log chart",
              "capital": "Capital chart", "capital_log": "Capital log chart"}
@@ -731,7 +733,7 @@ def _chart_sheets(
     for key, name in names.items():
         if key not in images:
             continue
-        sheet = _sheet(book, translate(name, language), brand, [])
+        sheet = _sheet(book, translate(name, language)[:31 - len(title_suffix)] + title_suffix, brand, [])
         sheet.freeze_panes = None
         sheet.unmerge_cells("A1:C1")
         sheet.merge_cells("A1:P1")
@@ -799,7 +801,7 @@ def _current_amounts(book: Workbook, request: ForecastRequest, brand: ReportBran
             sheet.cell(sheet.max_row, 3).number_format = PERCENT
 
 
-def export_report(
+def _export_legacy_report(
     scenarios: Sequence[dict[str, Any]],
     path: str | Path,
     *,
@@ -976,3 +978,18 @@ def export_report(
     destination.parent.mkdir(parents=True, exist_ok=True)
     book.save(destination)
     return destination
+
+
+def export_report(
+    scenarios: Sequence[dict[str, Any]], path: str | Path, *, brand: ReportBrand | None = None,
+    language: str = "en", chart_images: dict[str, str | Path] | None = None,
+) -> Path:
+    """Export saved financial plans, including native-currency groups in schema 2.0."""
+    terminology(language)
+    if any(item["result"].get("schema_version") == "2.0" for item in scenarios):
+        from okama_planner.multicurrency_reports import export_multicurrency_report
+
+        return export_multicurrency_report(
+            scenarios, path, brand=brand, language=language, chart_images=chart_images,
+        )
+    return _export_legacy_report(scenarios, path, brand=brand, language=language, chart_images=chart_images)

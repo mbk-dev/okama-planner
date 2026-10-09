@@ -159,3 +159,5 @@ labels use the shared terminology system; names, notes, broker names and scenari
 labels remain user input and are not automatically translated. The storage API
 returns data rather than a translated client form; registry UI localization is
 tracked separately.
+
+Multi-currency snapshots preserve native group ownership and one household budget; see [Multi-currency plans](multicurrency.md).

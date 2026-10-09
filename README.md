@@ -236,8 +236,10 @@ Excel/chart captions are roadmap items until their implementation is published.
 
 ## Model boundaries & next steps
 
-The current model does not perform FX conversion or implement jurisdiction-specific taxes or
-transaction fees. Inputs must already reflect externally modelled taxes and fees.
+The single-currency `ForecastRequest` does not perform FX conversion. The new
+`MulticurrencyRequest` models joint asset/FX risk and explicit currency-conversion fees; see
+[the multi-currency contract](docs/multicurrency.md). Jurisdiction-specific taxes and other
+transaction fees must be reflected in supplied inputs.
 Monte Carlo probabilities describe the supplied model and assumptions, not guaranteed outcomes.
 
 Retirement consumption **CE, gamma and equivalent-alpha helpers** exist as a separate module;
@@ -250,3 +252,5 @@ MBK documents, internal skills or dependency on the closed lfp application.
 
 Explore the family: [okama library](https://github.com/mbk-dev/okama) ·
 [okama.io](https://okama.io/) · [okama-mcp](https://github.com/mbk-dev/okama-mcp).
+
+Multi-currency household plans are described in [docs/multicurrency.md](docs/multicurrency.md), with an offline [RUB/USD/EUR example](examples/multicurrency.py).

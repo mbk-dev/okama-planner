@@ -206,3 +206,5 @@ generating another edition.
 Responsive offline HTML (default), PNG and SVG chart exports are also available via
 `okama_planner.charts.export_charts`, without the optional Excel dependencies.
 See [Forecast chart exports](charts.md) for the API, examples and browser requirements.
+
+For native currency groups, horizontal group Cash Flow sheets and native chart images, see [Multi-currency plans](multicurrency.md).

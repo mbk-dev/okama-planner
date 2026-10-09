@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from okama_planner.api import ForecastRequest
+from okama_planner.api import ForecastRequest, _validate_structure, _validate_values
 from okama_planner.horizon import effective_horizon_years
 from okama_planner.inputs import PlanInputs
 from okama_planner.scenarios import JointHistory, JointScenarios, sample_joint_returns
@@ -61,6 +61,8 @@ class MulticurrencyRequest(BaseModel):
     @model_validator(mode="after")
     def valid_groups(self) -> MulticurrencyRequest:
         household = self.household
+        _validate_structure(household)
+        _validate_values(household)
         if household.goals or household.assets or household.liabilities:
             raise ValueError(
                 "Household owns the budget/persons; assets, liabilities and goals belong to groups"
@@ -93,7 +95,9 @@ class MulticurrencyRequest(BaseModel):
             if plan.budget_items:
                 raise ValueError("Group budget items would duplicate the household budget")
             if (plan.t0, effective_horizon_years(plan), plan.retirement_year) != (
-                self.household.t0, effective_horizon_years(self.household), self.household.retirement_year,
+                self.household.t0,
+                effective_horizon_years(self.household),
+                self.household.retirement_year,
             ):
                 raise ValueError("Currency groups must share household start, horizon and retirement")
             if native.joint_history.start_month != self.fx.start_month:
@@ -119,8 +123,9 @@ class MulticurrencyRequest(BaseModel):
         for step in self.contribution_schedule:
             if set(step.weights) != set(ids):
                 raise ValueError("Contribution weights must reference each currency group")
-            if (any(not math.isfinite(w) or w < 0 for w in step.weights.values())
-                    or not math.isclose(sum(step.weights.values()), 1, abs_tol=1e-12, rel_tol=0)):
+            if any(not math.isfinite(w) or w < 0 for w in step.weights.values()) or not math.isclose(
+                sum(step.weights.values()), 1, abs_tol=1e-12, rel_tol=0
+            ):
                 raise ValueError("Contribution weights must be nonnegative and sum to one")
 
 
@@ -130,11 +135,19 @@ def sample_multicurrency(
     """Draw the same historical row for every native asset and FX change."""
     data = {}
     for group in request.groups:
-        data.update({f"group/{group.group_id}/{asset}": values
-                     for asset, values in group.request.joint_history.asset_returns.items()})
+        data.update(
+            {
+                f"group/{group.group_id}/{asset}": values
+                for asset, values in group.request.joint_history.asset_returns.items()
+            }
+        )
     data.update({f"fx/{currency}": values for currency, values in request.fx.monthly_returns.items()})
-    history = JointHistory(start_month=request.fx.start_month, currency=request.currency,
-                           method="synchronized_bootstrap", asset_returns=data)
+    history = JointHistory(
+        start_month=request.fx.start_month,
+        currency=request.currency,
+        method="synchronized_bootstrap",
+        asset_returns=data,
+    )
     months = 12 * effective_horizon_years(request.household)
     common = sample_joint_returns(history, months=months, paths=request.mc_number, seed=request.seed)
     groups = {}
@@ -142,7 +155,10 @@ def sample_multicurrency(
         assets = tuple(sorted(group.request.joint_history.asset_returns))
         indices = [common.assets.index(f"group/{group.group_id}/{asset}") for asset in assets]
         groups[group.group_id] = JointScenarios(
-            assets, common.returns[:, :, indices], common.row_indices, common.history_sha256,
+            assets,
+            common.returns[:, :, indices],
+            common.row_indices,
+            common.history_sha256,
         )
     quotes = {request.currency: np.ones((months + 1, request.mc_number))}
     for currency, opening in request.fx.opening_rates.items():
@@ -151,8 +167,9 @@ def sample_multicurrency(
         values = common.returns[:, :, common.assets.index(f"fx/{currency}")]
         with np.errstate(over="raise", invalid="raise", under="raise"):
             try:
-                quotes[currency] = np.vstack((np.full(request.mc_number, opening),
-                                              opening * np.cumprod(1 + values, axis=0)))
+                quotes[currency] = np.vstack(
+                    (np.full(request.mc_number, opening), opening * np.cumprod(1 + values, axis=0))
+                )
             except FloatingPointError as error:
                 raise ValueError("Simulated FX quotes must stay finite and positive") from error
         if not np.isfinite(quotes[currency]).all() or np.any(quotes[currency] <= 0):

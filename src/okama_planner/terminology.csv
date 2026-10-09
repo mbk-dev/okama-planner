@@ -203,3 +203,17 @@ income_calibration,Monthly employment income,Месячный трудовой �
 mc_paths,Monte Carlo paths,Число траекторий Монте-Карло,蒙特卡洛路径数,Monte-Carlo-Pfade,Trayectorias de Monte Carlo
 distribution,Distribution,Распределение,分布,Verteilung,Distribución
 annual_contributions,Annual contributions,Годовые взносы,年度存款,Jährliche Einzahlungen,Aportaciones anuales
+multicurrency_currency_groups,Currency groups,Валютные группы,币种组,Währungsgruppen,Grupos de divisas
+multicurrency_group,Group,Группа,组,Gruppe,Grupo
+multicurrency_fx_transfers,FX transfers,Валютные переводы,外汇转账,Währungsumtausch,Transferencias de divisas
+multicurrency_source_currency,Source currency,Исходная валюта,源币种,Ausgangswährung,Moneda de origen
+multicurrency_destination_currency,Destination currency,Валюта назначения,目标币种,Zielwährung,Moneda de destino
+multicurrency_source_amount,Source amount,Исходная сумма,源金额,Ausgangsbetrag,Importe de origen
+multicurrency_destination_amount,Destination amount,Сумма после обмена,兑换后金额,Zielbetrag,Importe de destino
+multicurrency_exchange_rate,Exchange rate,Курс обмена,汇率,Wechselkurs,Tipo de cambio
+multicurrency_currency_contributions,Currency contributions,Взносы в валютную группу,币种组供款,Beiträge zur Währungsgruppe,Aportaciones al grupo
+multicurrency_household_support,Household support,На семейный бюджет,家庭预算支出,Für das Haushaltsbudget,Para el presupuesto familiar
+multicurrency_amount,Amount,Сумма,金额,Betrag,Importe
+multicurrency_group_amounts_stay_in_native_currencies;_totals_are_converted_pathwise.,Group amounts stay in native currencies; totals are converted pathwise.,Суммы групп приведены в их валютах; общие итоги пересчитаны по каждой траектории.,各组金额采用各自币种；总额按每条路径换算。,Gruppenbeträge bleiben in ihrer Währung; Gesamtwerte werden je Pfad umgerechnet.,Los importes de cada grupo se mantienen en su moneda; los totales se convierten por trayectoria.
+multicurrency_fx_transfers_are_internal;_fees_reduce_capital._snapshots_retain_histories.,FX transfers are internal; fees reduce capital. Snapshots retain histories.,Валютные переводы — внутренние операции; комиссии уменьшают капитал. История сохранена в снимках плана.,外汇转账为内部操作；费用减少资本。计划快照保留历史数据。,Währungsumtausch ist intern; Gebühren mindern das Kapital. Planschnappschüsse speichern die Historien.,Las transferencias son internas; las comisiones reducen el capital. Las instantáneas guardan los históricos.
+multicurrency_loan_financing,Loan financing,Средства на погашение кредита,贷款偿还资金,Mittel zur Kredittilgung,Fondos para amortizar el préstamo

@@ -4,6 +4,8 @@ This page describes the unchanged legacy FinPlan path. Requests with explicit jo
 and allocation return schema 1.1 in either portfolio mode; see
 [the goal-portfolio contract](portfolio-modes.md) for actual funding and comparison semantics.
 
+Multi-currency household requests return schema 2.0; see [the multi-currency contract](multicurrency.md).
+
 The entry point is `okama_planner.forecast(ForecastRequest | dict) -> dict`.
 The request schema is available from `ForecastRequest.model_json_schema()` and as
 `examples/request-schema.json`. Models reject unknown fields. Errors are Python

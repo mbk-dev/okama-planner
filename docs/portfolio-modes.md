@@ -257,8 +257,9 @@ full-horizon event funding basis.
 
 ## Unsupported combinations and size
 
-Joint funding requires one currency for the household, segments and provided
-history; no FX conversion occurs. Histories must end strictly before `t0` and
+Each joint `ForecastRequest` requires one currency for its accounts, segments and provided
+history. Combine native requests under [MulticurrencyRequest](multicurrency.md) for a common
+household budget and explicit FX conversion. Histories must end strictly before `t0` and
 contain at least 12 aligned monthly observations for each asset. Explicit legacy
 `distribution`/`match_moments` options, legacy stage samples or holdings,
 nonmonthly/corridor rebalancing, separate purchase-savings accounts and automatic

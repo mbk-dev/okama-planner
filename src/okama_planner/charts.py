@@ -53,7 +53,7 @@ def _chart_rows(rows: Any) -> list[dict[str, Any]]:
 def _chart_data(result: dict[str, Any]) -> dict[str, Any]:
     """Validate and select only plotted values; never embed the full financial plan."""
     try:
-        if result["schema_version"] not in {"1.0", "1.1"}:
+        if result["schema_version"] not in {"1.0", "1.1", "2.0"}:
             raise ValueError("Unsupported forecast schema")
         currency = result["currency"]
         if not isinstance(currency, str) or not re.fullmatch(r"[A-Z]{3}", currency):
@@ -166,7 +166,7 @@ def _run_browser(command: list[str]) -> tuple[str, int]:
         return stdout, process.returncode
 
 
-def export_charts(
+def _export_single_charts(
     result: dict[str, Any],
     output_dir: str | Path,
     *,
@@ -235,3 +235,41 @@ def export_charts(
         destination.write_bytes(content)
         destinations.append(destination)
     return destinations
+
+
+def _export_currency_charts(
+    result: dict[str, Any], output_dir: str | Path, **options: Any,
+) -> list[Path]:
+    """Validate all native charts before writing them into safe group directories."""
+    groups = result.get("currency_groups")
+    if not isinstance(groups, list) or not groups:
+        raise ValueError("Multi-currency forecasts require currency groups")
+    seen = set()
+    for group in groups:
+        identifier = group.get("group_id")
+        if (not isinstance(identifier, str) or not re.fullmatch(r"[A-Za-z0-9_-]+", identifier)
+                or identifier in seen):
+            raise ValueError("Chart currency group IDs must be unique and safe directory names")
+        seen.add(identifier)
+        if group["currency"] != group["result"]["currency"]:
+            raise ValueError("Chart group currency does not match its native result")
+        _chart_data(group["result"])
+    overall = {**result, "schema_version": "1.1"}
+    _chart_data(overall)
+    paths = export_charts(overall, output_dir, **options)
+    for group in groups:
+        paths.extend(export_charts(group["result"], Path(output_dir) / group["group_id"], **options))
+    return paths
+
+
+def export_charts(
+    result: dict[str, Any], output_dir: str | Path, *,
+    format: Literal["html", "png", "svg"] = "html", width: int = 1200, height: int = 720,
+    browser_executable: str | Path | None = None, logarithmic: bool = False, language: str = "en",
+) -> list[Path]:
+    """Export the saved family forecast and, for schema 2.0, each native currency group."""
+    options = {"format": format, "width": width, "height": height,
+               "browser_executable": browser_executable, "logarithmic": logarithmic, "language": language}
+    if result.get("schema_version") == "2.0":
+        return _export_currency_charts(result, output_dir, **options)
+    return _export_single_charts(result, output_dir, **options)

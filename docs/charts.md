@@ -116,3 +116,5 @@ coincident goals and safe annotation text without launching a browser. It also u
 real bundled ECharts SVG renderer to verify monetary axis limits and polygon coordinates
 after skipping a nonpositive interval. The Playwright
 check closes its own browser after the checks.
+
+Schema 2.0 exports an overall base-currency view and separate native group views; see [Multi-currency plans](multicurrency.md).

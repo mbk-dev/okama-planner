@@ -28,3 +28,5 @@ jobs:
         run: poetry run python examples/charts.py
       - name: Synthetic family portfolio modes
         run: poetry run python examples/portfolio_modes.py
+      - name: Synthetic multi-currency family
+        run: poetry run python examples/multicurrency.py
