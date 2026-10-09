@@ -8,7 +8,7 @@ import math
 import os
 from dataclasses import asdict
 from importlib.metadata import version
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 os.environ.setdefault("MPLBACKEND", "Agg")
 
@@ -32,6 +32,9 @@ from okama_planner.inputs import PlanInputs  # noqa: E402
 from okama_planner.history import HistoryPortfolio  # noqa: E402
 from okama_planner.ledger.build import build_ledger  # noqa: E402
 from okama_planner.ledger.mortgage import liability_track  # noqa: E402
+
+if TYPE_CHECKING:
+    from okama_planner.multicurrency import MulticurrencyRequest
 
 PERCENTILES = (10, 25, 50, 75, 90)
 _MONTH = r"^\d{4}-(0[1-9]|1[0-2])$"
@@ -188,11 +191,27 @@ def _digest(value: Any) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
-def forecast(request: ForecastRequest | dict[str, Any]) -> dict[str, Any]:
+def _parse_request(
+    request: ForecastRequest | MulticurrencyRequest | dict[str, Any],
+) -> ForecastRequest | MulticurrencyRequest:
+    """Normalize either contract without changing legacy serialization."""
+    from okama_planner.multicurrency import MulticurrencyRequest
+
+    data = request.model_dump(mode="json") if isinstance(
+        request, (ForecastRequest, MulticurrencyRequest)
+    ) else request
+    if isinstance(data, dict) and "groups" in data and "household" in data:
+        return MulticurrencyRequest.model_validate(data)
+    return ForecastRequest.model_validate(data)
+
+
+def forecast(request: ForecastRequest | MulticurrencyRequest | dict[str, Any]) -> dict[str, Any]:
     """Return household flows, goal outcomes, forecast metrics, chart series and provenance."""
-    request = ForecastRequest.model_validate(
-        request.model_dump(mode="json") if isinstance(request, ForecastRequest) else request
-    )
+    from okama_planner.multicurrency import MulticurrencyRequest, forecast_multicurrency
+
+    request = _parse_request(request)
+    if isinstance(request, MulticurrencyRequest):
+        return forecast_multicurrency(request)
     if request.joint_history is not None:
         from okama_planner.scenarios import sample_joint_returns
         from okama_planner.segmented import joint_forecast_result

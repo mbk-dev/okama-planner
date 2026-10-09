@@ -8,7 +8,8 @@ from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from okama_planner.api import ForecastRequest
+from okama_planner.api import ForecastRequest, _parse_request
+from okama_planner.multicurrency import MulticurrencyRequest
 
 from .models import (
     Asset,
@@ -30,10 +31,8 @@ def digest(value: dict[str, Any]) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
-def snapshot(request: ForecastRequest | dict[str, Any]) -> dict[str, Any]:
-    if isinstance(request, ForecastRequest):
-        request = request.model_dump(mode="json")
-    data = ForecastRequest.model_validate(request).model_dump(mode="json")
+def snapshot(request: ForecastRequest | MulticurrencyRequest | dict[str, Any]) -> dict[str, Any]:
+    data = _parse_request(request).model_dump(mode="json")
     # Enforce finite JSON across fields as well as the forecast request's validation.
     digest(data)
     return data
@@ -49,13 +48,29 @@ def require_row(session: Session, model: Any, identifier: int) -> Any:
 
 
 def portfolio_components(data: dict[str, Any]) -> list[dict[str, Any]]:
+    if "groups" in data:
+        return [
+            {
+                "role": "currency_group",
+                "group_id": group["group_id"],
+                "currency": group["request"]["currency"],
+                "portfolio_mode": group["request"]["portfolio_mode"],
+                "allocation": group["request"]["allocation"],
+                "stages": stage_components(group["request"]["plan"]),
+            }
+            for group in data["groups"]
+        ]
     if data.get("allocation") is not None:
         allocation = data["allocation"]
         return [
             {"role": "single", "strategy": allocation["single_strategy"]},
             *[{"role": "segment", **segment} for segment in allocation["segments"]],
         ]
-    plan = data["plan"]
+    return stage_components(data["plan"])
+
+
+def stage_components(plan: dict[str, Any]) -> list[dict[str, Any]]:
+    """Preserve the complete native stage definitions in component rows."""
     return [
         {
             "role": stage,
@@ -67,11 +82,24 @@ def portfolio_components(data: dict[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
+def input_components(data: dict[str, Any], key: str) -> list[dict[str, Any]]:
+    """Keep household rows once and mark native rows with their currency owner."""
+    if "groups" not in data:
+        return data["plan"][key]
+    if key in {"persons", "budget_items"}:
+        return data["household"][key]
+    return [
+        {**item, "group_id": group["group_id"], "currency": group["request"]["currency"]}
+        for group in data["groups"]
+        for item in group["request"]["plan"][key]
+    ]
+
+
 class PlanMethods:
     def save_plan(
         self,
         code: str,
-        request: ForecastRequest | dict[str, Any],
+        request: ForecastRequest | MulticurrencyRequest | dict[str, Any],
         note: str | None = None,
     ) -> int:
         data = snapshot(request)
@@ -97,16 +125,16 @@ class PlanMethods:
                 (BudgetItem, "budget_items"),
                 (Goal, "goals"),
             ):
-                for position, payload in enumerate(data["plan"][key]):
+                for position, payload in enumerate(input_components(data, key)):
                     session.add(model(client_id=row.id, position=position, payload=payload))
             for position, payload in enumerate(portfolio_components(data)):
                 session.add(Portfolio(client_id=row.id, position=position, payload=payload))
             return row.id
 
-    def load_plan(self, plan_id: int) -> ForecastRequest:
+    def load_plan(self, plan_id: int) -> ForecastRequest | MulticurrencyRequest:
         with self._transaction() as session:
             row = require_row(session, PlanSnapshot, plan_id)
-            return ForecastRequest.model_validate(row.request)
+            return _parse_request(row.request)
 
     def list_plans(self, code: str) -> list[dict[str, Any]]:
         with self._transaction() as session:
@@ -122,7 +150,7 @@ class PlanMethods:
         self,
         plan_id: int,
         label: str,
-        request: ForecastRequest | dict[str, Any],
+        request: ForecastRequest | MulticurrencyRequest | dict[str, Any],
     ) -> int:
         data = snapshot(request)
         if not isinstance(label, str) or not label.strip():
@@ -134,9 +162,9 @@ class PlanMethods:
             session.flush()
             return row.id
 
-    def load_scenario(self, scenario_id: int) -> ForecastRequest:
+    def load_scenario(self, scenario_id: int) -> ForecastRequest | MulticurrencyRequest:
         with self._transaction() as session:
-            return ForecastRequest.model_validate(require_row(session, Scenario, scenario_id).request)
+            return _parse_request(require_row(session, Scenario, scenario_id).request)
 
     def save_result(self, scenario_id: int, result: dict[str, Any]) -> int:
         # Serialize now so NaN, Infinity and non-JSON payloads fail before any write.
