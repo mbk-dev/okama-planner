@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "okama-planner"
-version = "0.3.0"
+version = "0.4.0"
 description = "Personal and family financial planning powered by okama"
 authors = ["Sergey Kikevich"]
 license = "MIT"

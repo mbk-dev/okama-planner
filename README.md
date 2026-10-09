@@ -57,7 +57,7 @@ Requests, results and an Excel comparison are saved under `tmp/`; neither exampl
 market data or needs a client database.
 
 **Prefer to browse first?** Open the [saved family inputs](examples/family-single-request.json),
-[results](examples/family-single-result.json) and [Excel report examples](https://github.com/mbk-dev/okama-planner/releases/tag/v0.2.0).
+[results](examples/family-single-result.json) and [Excel report examples](https://github.com/mbk-dev/okama-planner/releases/tag/v0.4.0).
 The [three-goal hero input](examples/readme-request.json) and [result](examples/readme-result.json)
 are included with [dated assumptions and validation metadata](examples/readme-metadata.json).
 The USD example uses 5,000 Monte Carlo paths; its independent validation estimates plan success
