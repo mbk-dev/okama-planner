@@ -42,6 +42,16 @@ references, macros or hidden source data.
 - Budget contains baseline **planned** monthly ledger flows, a formula sum and the flow reaching the
   portfolio after reserve movements. Expenses are negative; other flows include goals,
   loan payments and asset receipts. These are different from income minus expenses alone.
+- Current amounts shows supplied assets, liabilities, goals and monthly budgets in the
+  request currency. Expense-share goals are explicitly marked and formatted as ratios.
+- Cash Flow is the main annual budget view: calendar years run across columns. Planned
+  household flows are summed from Ledger with formulas; year-end balances select the last
+  available month of each year, including partial years. Goal and income captions come from
+  inputs. Income labels differing only in letter case share one annual row, matching
+  Excel SUMIFS comparison semantics; original input captions remain in Current amounts
+  and Ledger. Opening ages appear only when birth years are supplied. No total-assets median or
+  investment income is inferred by adding marginal percentiles. Technical Budget retains
+  the monthly detail.
 - Balance contains separate baseline portfolio and net-capital median series. For schema
   1.1, buffer, reserve, non-working assets and debt are actual scenario medians from saved
   monthly summaries, including opening balances. Failed purchases do not create property.
@@ -140,6 +150,25 @@ Numbered goal annotations below each Excel chart identify the saved goal labels 
 Run `poetry run python examples/multilingual_reports.py` to create all five synthetic
 language editions with four charts each in `tmp/multilingual-reports/`; PNG generation
 requires a local Chrome or Chromium installation.
+
+Language does not choose the currency in the report API: every unit comes from the validated
+request/result. The demonstration maps English to USD, Russian to RUB, Chinese to CNY and
+German/Spanish to EUR. Each uses independently authored synthetic amounts and base-currency
+return histories, never a relabelled USD result. Plans start in October 2026, retire in 2040
+and include 30 withdrawal years. Current input amounts and explicit fictional state pension
+payments are assumptions, not client data.
+
+[`currency-assumptions.json`](../examples/currency-assumptions.json) records the dated geometric
+10-year inflation mean, reference rate, sources, return/risk moments and complete monthly
+portfolio samples. All indexation rates use that inflation mean; buffer interest uses the
+reference rate as an explicit example assumption. USD uses the effective federal funds rate,
+EUR the ECB deposit facility rate, RUB the central-bank rate. CNY uses the user-selected
+one-year lending prime rate, explicitly distinguished from a policy or risk-free rate.
+FX observations are retained as provenance; the authored amounts are not converted with them.
+Visible Economic data rows in Assumptions expose rates and portfolio moments as percentages.
+Reproduce the dated snapshot with `poetry run python examples/collect_currency_assumptions.py`;
+its default output is `tmp/currency-assumptions/`. A snapshot without a reference rate is rejected; update its dated input explicitly before
+generating another edition.
 
 ## Export charts separately
 

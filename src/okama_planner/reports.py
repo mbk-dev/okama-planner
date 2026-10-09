@@ -16,6 +16,7 @@ import pandas as pd
 from openpyxl import Workbook
 from openpyxl.comments import Comment
 from openpyxl.drawing.image import Image
+from openpyxl.formula import Tokenizer
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
@@ -50,7 +51,7 @@ def _append(sheet: Worksheet, values: Sequence[Any]) -> None:
         _text(sheet, row, column, value)
 
 
-def _sheet(book: Workbook, name: str, brand: ReportBrand, headers: list[str]) -> Worksheet:
+def _sheet(book: Workbook, name: str, brand: ReportBrand, headers: list[Any]) -> Worksheet:
     sheet = book.create_sheet(name)
     sheet.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max(3, len(headers)))
     _text(sheet, 1, 1, f"{brand.company} | {name}")
@@ -175,6 +176,185 @@ def _budget(sheet: Worksheet, result: dict[str, Any]) -> None:
         sheet.cell(row, 5, f"=SUM(B{row}:D{row})")
     sheet["D5"] = "Other ledger flows"
     sheet["F5"] = "Portfolio flow after reserves"
+
+
+def annual_cash_flow(result: dict[str, Any]) -> list[dict[str, Any]]:
+    """Group supplied months into calendar years; balances use each group's last month.
+
+    Flow kinds stay separate: buffer bookkeeping must never be added to household flows.
+    The last forecast year may be partial and still has a valid final balance.
+    """
+    years: dict[int, dict[str, Any]] = {}
+    for index, month in enumerate(result["ledger"]["months"]):
+        year = int(month[:4])
+        years.setdefault(year, {"year": year, "end_index": index, "flows": {}})["end_index"] = index
+    for line in result["ledger"]["lines"]:
+        flows = years[int(line["month"][:4])]["flows"]
+        kind = line["line_kind"]
+        flows[kind] = flows.get(kind, 0) + line["amount"]
+    return list(years.values())
+
+
+def _annual_formula(
+    year: int, end: int, kinds: tuple[str, ...], source: str | None, goal_id: int | None,
+) -> str:
+    extra = ""
+    if goal_id is not None:
+        extra = f",'Ledger'!$F$6:$F${end},{goal_id}"
+    elif source is not None:
+        escaped = source.replace('"', '""').replace("~", "~~")
+        escaped = escaped.replace("*", "~*").replace("?", "~?")
+        extra = f",'Ledger'!$C$6:$C${end},\"={escaped}\""
+    return "=" + "+".join(
+        f"SUMIFS('Ledger'!$D$6:$D${end},'Ledger'!$A$6:$A${end},\">={year}-01\","
+        f"'Ledger'!$A$6:$A${end},\"<={year}-12\",'Ledger'!$B$6:$B${end},\"{kind}\"{extra})"
+        for kind in kinds
+    )
+
+
+def _annual_balance_rows(
+    request: ForecastRequest, result: dict[str, Any], language: str,
+) -> list[tuple[str, list[Any], bool]]:
+    joint = result["schema_version"] == "1.1"
+
+    def side(key: str) -> list[Any]:
+        if joint:
+            return [row[key]["p50"] for row in result["actual"]["monthly_summaries"]][1:]
+        return list(result["ledger"][f"{key}_balance"])
+
+    rows = [("Emergency reserve balance", side("reserve"), False),
+            ("Purchase buffer", side("buffer"), False)]
+    if joint:
+        goals = {goal.goal_id: goal.label for goal in request.plan.goals}
+        rows.extend(
+            (f"{translate('Savings', language)}: {goals.get(segment['goal_id'], segment['segment_id'])}",
+             [point["p50"] for point in segment["chart"]][1:], True)
+            for segment in result["segments"]
+        )
+    rows.extend([
+        ("Investment portfolio", [row["p50"] for row in result["charts"]["portfolio"]][1:], False),
+        ("Other assets", side("non_working"), False),
+        ("Liabilities", side("liability"), False),
+        ("Capital", [row["p50"] for row in result["charts"]["capital"]][1:], False),
+    ])
+    return rows
+
+
+def _annual_goal_row(goal: Any, flow: Any) -> None:
+    kinds = ("reserve_topup",) if goal.kind == "reserve_topup" else ("goal_outflow",)
+    flow(goal.label, kinds, source=goal.label, literal=True, goal_id=goal.goal_id)
+
+
+def _annual_income_labels(request: ForecastRequest) -> list[str]:
+    """SUMIFS text criteria are case insensitive; print each matched group once."""
+    labels: dict[str, str] = {}
+    for item in request.plan.budget_items:
+        if item.kind == "income":
+            labels.setdefault(item.label.casefold(), item.label)
+    return list(labels.values())
+
+
+def _annual_planned_rows(request: ForecastRequest, flow: Any) -> None:
+    flow("Household expenses", ("expense",))
+    purchases = [goal for goal in request.plan.goals if goal.kind != "retirement_income"]
+    for goal in purchases[:1]:
+        _annual_goal_row(goal, flow)
+    flow("Replenishing reserve", ("reserve_topup",))
+    for goal in purchases[1:]:
+        _annual_goal_row(goal, flow)
+    for goal in request.plan.goals:
+        if goal.kind == "retirement_income":
+            _annual_goal_row(goal, flow)
+    flow("TOTAL EXPENSES", ("expense", "goal_outflow", "reserve_topup", "mortgage_payment"))
+    for label in _annual_income_labels(request):
+        flow(label, ("income",), source=label, literal=True)
+    flow("TOTAL INCOME", ("income", "asset_sale"))
+    flow("Surplus cash", ("income", "asset_sale", "expense", "goal_outflow",
+                          "reserve_topup", "mortgage_payment"))
+
+
+def _annual_ages(
+    sheet: Worksheet, request: ForecastRequest, annual: list[dict[str, Any]], language: str,
+) -> None:
+    for person in request.plan.persons:
+        row = sheet.max_row + 1
+        _text(sheet, row, 1, f"{person.name}: {translate('Age', language)}")
+        for column, point in enumerate(annual, 2):
+            sheet.cell(row, column, point["year"] - person.birth_year).number_format = "0"
+
+
+def _annual_principal(sheet: Worksheet, result: dict[str, Any], annual: list[dict[str, Any]],
+                      language: str) -> None:
+    principal = result["ledger"].get("principal_repaid", [])
+    if not principal:
+        return
+    row = sheet.max_row + 1
+    _text(sheet, row, 1, translate("Loan principal payments", language))
+    for column, point in enumerate(annual, 2):
+        sheet.cell(row, column, -sum(
+            value for month, value in zip(result["ledger"]["months"], principal, strict=True)
+            if int(month[:4]) == point["year"]
+        ))
+
+
+def _ambiguous_reserve(kinds: tuple[str, ...], literal: bool, goal_id: int | None,
+                       goal_ids: dict[int | None, int | None]) -> bool:
+    return literal and kinds == ("reserve_topup",) and (goal_id is None or goal_id not in goal_ids)
+
+
+def _cash_flow(
+    book: Workbook, request: ForecastRequest, result: dict[str, Any], brand: ReportBrand,
+    language: str,
+) -> Worksheet:
+    """Annual client view: planned ledger requirements and saved year-end balances."""
+    annual = annual_cash_flow(result)
+    sheet = _sheet(book, "Cash Flow", brand, [
+        f"Cash flow ({request.currency})", *[point["year"] for point in annual],
+    ])
+    sheet.column_dimensions["A"].width = 48
+    for column in range(2, len(annual) + 2):
+        sheet.column_dimensions[get_column_letter(column)].width = 18
+    _text(sheet, 4, 1, translate(
+        "Annual flows are summed; balances are at year end (last available month). "
+        "Flows are planned requirements; actual p50 balances are separate and not additive.", language,
+    ))
+    sheet.merge_cells(start_row=4, start_column=1, end_row=4, end_column=max(3, len(annual) + 1))
+    sheet.row_dimensions[4].height = 48
+    end = max(6, 5 + len(result["ledger"]["lines"]))
+
+    goal_ids = {line.get("goal_id"): line.get("goal_id") for line in result["ledger"]["lines"]}
+
+    def caption(label: str, literal: bool) -> int:
+        row = sheet.max_row + 1
+        _text(sheet, row, 1, label if literal else translate(label, language))
+        return row
+
+    def flow(label: str, kinds: tuple[str, ...], *, source: str | None = None,
+             literal: bool = False, goal_id: int | None = None) -> int | None:
+        if _ambiguous_reserve(kinds, literal, goal_id, goal_ids):
+            return None
+        row = caption(label, literal)
+        goal_id = goal_ids.get(goal_id)
+        for column, point in enumerate(annual, 2):
+            year = point["year"]
+            sheet.cell(row, column, _annual_formula(year, end, kinds, source, goal_id))
+        return row
+
+    def balance(label: str, values: list[Any], *, literal: bool = False) -> None:
+        row = caption(label, literal)
+        for column, point in enumerate(annual, 2):
+            sheet.cell(row, column, values[point["end_index"]])
+
+    _annual_ages(sheet, request, annual, language)
+    _annual_planned_rows(request, flow)
+    balance_rows = _annual_balance_rows(request, result, language)
+    for label, values, literal in balance_rows[:-2]:
+        balance(label, values, literal=literal)
+    _annual_principal(sheet, result, annual, language)
+    for label, values, literal in balance_rows[-2:]:
+        balance(label, values, literal=literal)
+    flow("Portfolio contributions / withdrawals", ("portfolio_flow",))
+    return sheet
 
 
 def _balance(sheet: Worksheet, result: dict[str, Any]) -> None:
@@ -423,7 +603,7 @@ def _template_cell(sheet: str, row: int, column: int) -> bool:
     if row <= 5:
         return not (sheet == "Comparison" and row == 5 and column in (2, 3))
     if sheet in {"Assumptions", "Ledger", "Balance", "Budget", "Allocation", "Segments",
-                 "Segment balances", "Funding events", "Transfers"}:
+                 "Segment balances", "Funding events", "Transfers", "Cash Flow", "Current amounts"}:
         return False
     if sheet == "Goals":
         return column in (5, 6, 7, 8)
@@ -443,15 +623,28 @@ def _localized_text(value: str, language: str, unit: str, goal_metric: bool = Fa
     return value
 
 
+def _localized_formula(value: str, names: dict[str, str]) -> str:
+    """Rename reference tokens only; text criteria contain opaque user labels."""
+    tokens = Tokenizer(value).items
+    for token in tokens:
+        if token.type != "OPERAND" or token.subtype != "RANGE":
+            continue
+        for old, new in names.items():
+            prefix = f"'{old}'!"
+            if token.value.startswith(prefix):
+                escaped = new.replace("'", "''")
+                token.value = f"'{escaped}'!" + token.value[len(prefix):]
+                break
+    return "=" + "".join(token.value for token in tokens)
+
+
 def _localize_cells(
     sheet: Worksheet, names: dict[str, str], language: str, unit: str, brand: ReportBrand,
 ) -> None:
     for row in sheet:
         for cell in row:
             if cell.data_type == "f":
-                for old, new in names.items():
-                    escaped = new.replace("'", "''")
-                    cell.value = cell.value.replace(f"'{old}'!", f"'{escaped}'!")
+                cell.value = _localized_formula(cell.value, names)
             elif isinstance(cell.value, str) and _template_cell(sheet.title, cell.row, cell.column):
                 value = (f"{brand.company} | {names[sheet.title]}"
                          if sheet.title != "Branding" and cell.coordinate == "A1"
@@ -554,6 +747,37 @@ def _chart_sheets(
         _style_chart_sheet(sheet, language)
 
 
+def _current_amounts(book: Workbook, request: ForecastRequest, brand: ReportBrand, language: str) -> None:
+    sheet = _sheet(book, "Current amounts", brand, [
+        "Category", "Label", f"Current amount ({request.currency})", "Period / basis", "Annual rate",
+    ])
+    sheet.column_dimensions["B"].width = 42
+    sheet.column_dimensions["D"].width = 30
+    plan = request.plan
+    records = [
+        ("Asset", asset.label, asset.amount, "Opening balance", asset.growth_rate, False)
+        for asset in plan.assets
+    ] + [
+        ("Liability", loan.label, loan.principal, "Opening principal", loan.annual_rate, False)
+        for loan in plan.liabilities
+    ] + [
+        ("Goal", goal.label, goal.amount_pv,
+         f"{goal.pv_year}: " + translate(
+             "Expense share" if goal.amount_basis == "expense_share" else "Present value", language),
+         goal.indexation_rate, goal.amount_basis == "expense_share")
+        for goal in plan.goals
+    ] + [
+        ({"income": "Income", "expense": "Expenses"}.get(item.kind, item.kind),
+         item.label, item.monthly_amount, "Monthly", item.indexation_rate, False)
+        for item in plan.budget_items
+    ]
+    for category, label, amount, basis, rate, ratio in records:
+        _append(sheet, [translate(category, language), label, amount, translate(basis, language), rate])
+        sheet.cell(sheet.max_row, 5).number_format = PERCENT
+        if ratio:
+            sheet.cell(sheet.max_row, 3).number_format = PERCENT
+
+
 def export_report(
     scenarios: Sequence[dict[str, Any]],
     path: str | Path,
@@ -593,6 +817,7 @@ def export_report(
         image.height, image.width = 48, 144
         branding.add_image(image, "D2")
         branding["D5"] = "Local example logo"
+    _current_amounts(book, requests[0], brand, language)
     result = scenarios[0]["result"]
     unit = requests[0].currency
     summary = _sheet(book, "Summary", brand, ["Indicator", f"Baseline ({unit})", "", ""])
@@ -661,9 +886,14 @@ def export_report(
         ),
         scenarios,
     )
-    raw = _sheet(book, "Ledger", brand, ["Month", "Kind", "Label", f"Amount ({unit})", "Resolved rate"])
+    raw = _sheet(book, "Ledger", brand, [
+        "Month", "Kind", "Label", f"Amount ({unit})", "Resolved rate", "Goal ID",
+    ])
     for line in result["ledger"]["lines"]:
-        _append(raw, [line["month"], line["line_kind"], line["label"], line["amount"], line["resolved_rate"]])
+        _append(raw, [line["month"], line["line_kind"], line["label"], line["amount"],
+                      line["resolved_rate"], line.get("goal_id")])
+    cash_flow = _cash_flow(book, requests[0], result, brand, language)
+    book.move_sheet(cash_flow, offset=2 - book.sheetnames.index("Cash Flow"))
     if joint:
         _joint_details(book, scenarios, brand)
     instructions = _sheet(book, "Instructions", brand, ["Topic", "Instruction", ""])

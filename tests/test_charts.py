@@ -309,3 +309,18 @@ def test_log_static_export_changes_projection_and_keeps_zero_as_gaps(tmp_path: P
     log = export_charts(result, tmp_path / "log", format="svg", logarithmic=True)
     assert linear[0].read_text() != log[0].read_text()
     assert "NaN" not in log[0].read_text()
+
+
+@pytest.mark.parametrize("language,currency", [
+    ("en", "EUR"), ("ru", "USD"), ("de", "RUB"), ("es", "CNY"),
+])
+def test_chart_units_follow_saved_result_independently_of_language(
+    tmp_path: Path, language: str, currency: str,
+) -> None:
+    from okama_planner.charts import export_charts
+
+    result = saved_result()
+    result["currency"] = currency
+    document = export_charts(result, tmp_path, language=language)[0].read_text()
+    assert payload(document)["currency"] == currency
+    assert payload(document)["language"] == language

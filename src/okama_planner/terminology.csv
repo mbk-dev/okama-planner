@@ -141,3 +141,46 @@ save_capital_png,Save capital PNG,Сохранить капитал PNG,保存�
 save_capital_svg,Save capital SVG,Сохранить капитал SVG,保存净资产 SVG,Kapital als SVG speichern,Guardar capital SVG
 saved_monte_carlo_forecast_nominal_values_median_and_percentile_ranges_p25_p75_p10_p90_net_capital_includes_assets_outside_the_portfolio_and_subtracts_debt_inflation_indexation_follows_the_supplied_inputs_values_are_not_expressed_in_constant_purchasing_power_values_are_not_recalculated_here,Saved Monte Carlo forecast · nominal values · median and percentile ranges p25–p75 / p10–p90. Net capital includes assets outside the portfolio and subtracts debt. Inflation indexation follows the supplied inputs; values are not expressed in constant purchasing power. Values are not recalculated here.,Сохранённый прогноз Монте-Карло · номинальные суммы · медиана и диапазоны p25–p75 / p10–p90. Чистый капитал включает активы вне портфеля за вычетом долга. Индексация на инфляцию учитывается согласно входным данным; суммы не выражены в постоянной покупательной способности. Здесь пересчёт не выполняется.,已保存的蒙特卡洛预测 · 名义金额 · 中位数及 p25–p75／p10–p90 区间。净资产包括投资组合外的资产并扣除债务。通胀指数调整按输入数据计入；金额不以固定购买力表示。此处不重新计算。,Gespeicherte Monte-Carlo-Prognose · Nominalwerte · Median und Perzentilbereiche p25–p75 / p10–p90. Nettokapital umfasst Vermögen außerhalb des Portfolios abzüglich Schulden. Die Inflationsindexierung folgt den Eingaben; Werte sind nicht in konstanter Kaufkraft angegeben. Hier wird nicht neu berechnet.,Pronóstico de Monte Carlo guardado · valores nominales · mediana y rangos p25–p75 / p10–p90. El capital neto incluye activos fuera de la cartera y resta la deuda. La indexación por inflación sigue las entradas; los valores no se expresan en poder adquisitivo constante. Aquí no se recalculan.
 resize_the_window_to_change_chart_proportions_image_exports_preserve_the_current_chart_dimensions_png_uses_twice_the_pixel_resolution_svg_remains_vector_negative_net_capital_is_retained,"Resize the window to change chart proportions. Image exports preserve the current chart dimensions; PNG uses twice the pixel resolution, SVG remains vector. Negative net capital is retained.","Измените размер окна для настройки пропорций графиков. Экспорт сохраняет текущие размеры; PNG имеет удвоенное разрешение, SVG остаётся векторным. Отрицательный чистый капитал сохраняется.",调整窗口大小可改变图表比例。图像导出保留当前尺寸；PNG 使用双倍像素分辨率，SVG 保持矢量格式。负净资产值会保留。,"Fenstergröße ändern, um Diagrammproportionen anzupassen. Bildexporte behalten die aktuellen Maße; PNG hat doppelte Pixelauflösung, SVG bleibt vektorbasiert. Negatives Nettokapital bleibt erhalten.",Cambie el tamaño de la ventana para ajustar las proporciones. Las imágenes conservan las dimensiones actuales; PNG duplica la resolución y SVG sigue siendo vectorial. Se mantiene el capital neto negativo.
+cash_flow,Cash Flow,Денежные потоки,现金流,Cashflow,Flujo de caja
+cash_flow_units,Cash flow ({unit}),Денежные потоки ({unit}),现金流（{unit}）,Cashflow ({unit}),Flujo de caja ({unit})
+annual_legend,Annual flows are summed; balances are at year end (last available month). Flows are planned requirements; actual p50 balances are separate and not additive.,Потоки — сумма за год; остатки — на конец года (последний доступный месяц). Потоки — плановые потребности; фактические остатки p50 показаны отдельно и не складываются.,流量按年合计；余额为年末（最后可用月份）。流量是计划需求；实际 p50 余额分别显示，不能相加。,Flüsse sind Jahressummen; Bestände gelten zum Jahresende (letzter verfügbarer Monat). Flüsse sind geplante Bedarfe; tatsächliche p50-Bestände sind separat und nicht additiv.,Los flujos se suman por año; los saldos corresponden al cierre (último mes disponible). Los flujos son necesidades previstas; los saldos reales p50 son independientes y no se suman.
+household_expenses,Household expenses,Расходы общие,家庭支出,Haushaltsausgaben,Gastos familiares
+replenishing_reserve,Replenishing reserve,Пополнение резервного фонда,补充应急储备,Reserve auffüllen,Aportación a la reserva
+total_expenses,TOTAL EXPENSES,ИТОГ расходы,支出合计,AUSGABEN GESAMT,TOTAL GASTOS
+total_income,TOTAL INCOME,ИТОГ доходы,收入合计,EINNAHMEN GESAMT,TOTAL INGRESOS
+surplus_cash,Surplus cash,Свободные средства,剩余现金,Freie Mittel,Fondos disponibles
+emergency_reserve_balance,Emergency reserve balance,Резервный фонд,应急储备余额,Notfallreserve,Fondo de reserva
+savings,Savings,Накопления,储蓄,Sparguthaben,Ahorros
+age,Age,Возраст,年龄,Alter,Edad
+principal_payments,Loan principal payments,Выплата тела долга,偿还贷款本金,Tilgung,Amortización del principal
+portfolio_contributions_withdrawals,Portfolio contributions / withdrawals,Изъятия/пополнения портфеля,投资组合入金／提款,Portfolioeinzahlungen / Entnahmen,Aportaciones / retiradas de cartera
+investments,Investment portfolio,Инвестиции,投资组合,Investitionen,Inversiones
+capital,Capital,Капитал,净资产,Kapital,Capital
+liabilities,Liabilities,Пассивы,负债,Verbindlichkeiten,Pasivos
+other_assets,Other assets,Другие активы,其他资产,Sonstige Vermögenswerte,Otros activos
+car,Car,Автомобиль,汽车,Auto,Automóvil
+home,Home purchase,Покупка дома,购房,Hauskauf,Compra de vivienda
+early_retirement,Early retirement,Ранняя пенсия,提前退休,Vorzeitiger Ruhestand,Jubilación anticipada
+employment_income,Employment income,Доходы (ЗП),工资收入,Einkommen (Gehalt),Ingresos (salario)
+state_pension,State pension,Пенсия государственная,国家养老金,Gesetzliche Rente,Pensión pública
+participant,Participant 1,Участник 1,参与者 1,Person 1,Participante 1
+economic_data,Economic data,Экономические предпосылки,经济假设,Wirtschaftliche Annahmen,Supuestos económicos
+inflation_rate,Average inflation,Средняя инфляция,平均通胀,Durchschnittliche Inflation,Inflación media
+reference_rate,Reference rate,Опорная ставка,参考利率,Referenzzins,Tipo de referencia
+annual_return,Annual return,Годовая доходность,年收益率,Jahresrendite,Rentabilidad anual
+annual_risk,Annual risk,Годовой риск,年风险,Jährliches Risiko,Riesgo anual
+history_cagr,Historical CAGR,Исторический CAGR,历史复合年增长率,Historische CAGR,CAGR histórico
+current_amounts,Current amounts,Текущие суммы,当前金额,Aktuelle Beträge,Importes actuales
+current_amount_units,Current amount ({unit}),Текущая сумма ({unit}),当前金额（{unit}）,Aktueller Betrag ({unit}),Importe actual ({unit})
+category,Category,Категория,类别,Kategorie,Categoría
+period_basis,Period / basis,Период / основание,期间／基准,Zeitraum / Basis,Periodo / base
+annual_rate,Annual rate,Годовая ставка,年利率,Jahreszins,Tipo anual
+asset,Asset,Актив,资产,Vermögenswert,Activo
+liability,Liability,Обязательство,负债,Verbindlichkeit,Pasivo
+opening_balance,Opening balance,Остаток на начало,期初余额,Anfangsbestand,Saldo inicial
+opening_principal,Opening principal,Долг на начало,期初本金,Anfängliche Restschuld,Principal inicial
+present_value,Present value,Сумма в текущих ценах,现值,Heutiger Wert,Valor actual
+expense_share,Expense share,Доля расходов (%),支出占比（%）,Ausgabenanteil (%),Proporción de gastos (%)
+monthly,Monthly,За месяц,每月,Monatlich,Mensual
+baseline,Baseline,Базовый сценарий,基准情景,Basisszenario,Escenario base
+synthetic_invested_capital,Synthetic invested capital,Условный инвестиционный капитал,示例投资本金,Beispielanlagevermögen,Capital invertido de ejemplo
