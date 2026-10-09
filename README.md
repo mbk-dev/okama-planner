@@ -12,9 +12,10 @@
 
 ![Synthetic financial plan with three goals, a logarithmic USD axis, median and Monte Carlo percentile bands](docs/images/financial-plan-three-goals.png)
 
-*Three goals, one household: **1 Education** (September 2027), **2 Home purchase** (July 2028),
-**3 Retirement income** (January 2029). Logarithmic scale; blue median, shaded p25–p75 and p10–p90
-ranges. All inputs and returns are fictional. Zero and negative values are not shown on a log axis.*
+*Three goals, one household: **1 Car** (October 2029), **2 Home purchase** (October 2031),
+**3 Early retirement** (October 2040). Forecast in USD through 2070, on a logarithmic scale;
+blue median, shaded p25–p75 and p10–p90 ranges. Household inputs are fictional; returns use
+frozen historical observations. Zero and negative values are not shown on a log axis.*
 
 Build a monthly household plan, explore uncertainty, compare alternatives and export results
 under your own brand. Designed for financial planners, technically comfortable individuals and
@@ -58,7 +59,9 @@ market data or needs a client database.
 **Prefer to browse first?** Open the [saved family inputs](examples/family-single-request.json),
 [results](examples/family-single-result.json) and [Excel report examples](https://github.com/mbk-dev/okama-planner/releases/tag/v0.2.0).
 The [three-goal hero input](examples/readme-request.json) and [result](examples/readme-result.json)
-are included too. For exact numerical replay, use the versions in [examples/versions.json](examples/versions.json);
+are included with [dated assumptions and validation metadata](examples/readme-metadata.json).
+The USD example uses 5,000 Monte Carlo paths; its independent validation estimates plan success
+at 95.92% under the supplied assumptions. For exact numerical replay, use the versions in [examples/versions.json](examples/versions.json);
 a seed alone does not freeze data or dependencies. [Calculation contract →](docs/contract.md)
 
 ### Use the Python API

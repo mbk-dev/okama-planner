@@ -1,135 +1,31 @@
 {
   "currency": "USD",
-  "seed": 1707,
-  "mc_number": 5000,
-  "distribution": "norm",
-  "match_moments": true,
-  "plan": {
-    "t0": "2026-10",
-    "horizon_years": 44,
-    "retirement_year": 2040,
-    "buffer_lookahead_months": 12,
-    "pension_replaces_expenses": true,
-    "rates": {
-      "inflation_rate": 0.03355484599306768,
-      "expense_indexation_rate": 0.03355484599306768,
-      "income_indexation_rate": 0.03355484599306768,
-      "goal_indexation_rate": 0.03355484599306768,
-      "discount_rate": 0.03355484599306768,
-      "buffer_rate": 0.0388
-    },
-    "assets": [
-      {
-        "label": "Synthetic invested capital",
-        "amount": 100000,
-        "currency": "USD",
-        "asset_class": "portfolio",
-        "growth_rate": null
-      },
-      {
-        "label": "Emergency reserve balance",
-        "amount": 100000,
-        "currency": "USD",
-        "asset_class": "reserve",
-        "growth_rate": 0.0388
-      },
-      {
-        "label": "Apartment",
-        "amount": 180000,
-        "currency": "USD",
-        "asset_class": "non_working",
-        "growth_rate": 0.03355484599306768
-      },
-      {
-        "label": "Current car",
-        "amount": 60000,
-        "currency": "USD",
-        "asset_class": "non_working",
-        "growth_rate": -0.1
-      },
-      {
-        "label": "Long-term savings",
-        "amount": 10000,
-        "currency": "USD",
-        "asset_class": "savings",
-        "growth_rate": null
-      }
-    ],
-    "budget_items": [
-      {
-        "kind": "income",
-        "label": "Employment income",
-        "monthly_amount": 15000,
-        "end_rule": "until_retirement"
-      },
-      {
-        "kind": "expense",
-        "label": "Household expenses",
-        "monthly_amount": 5000
-      }
-    ],
-    "goals": [
-      {
-        "goal_id": 1,
-        "label": "Car",
-        "kind": "lump",
-        "amount_pv": 130000,
-        "pv_year": 2026,
-        "target_year": 2029,
-        "target_month": 10,
-        "becomes_asset": true,
-        "replaces_asset": "Current car"
-      },
-      {
-        "goal_id": 2,
-        "label": "Home purchase",
-        "kind": "lump",
-        "amount_pv": 400000,
-        "pv_year": 2026,
-        "target_year": 2031,
-        "target_month": 10,
-        "becomes_asset": true
-      },
-      {
-        "goal_id": 3,
-        "label": "Early retirement",
-        "kind": "retirement_income",
-        "amount_pv": 1,
-        "amount_basis": "expense_share",
-        "pv_year": 2026
-      }
-    ],
-    "accumulation_last_date_pin": "2026-09",
-    "withdrawal_last_date_pin": "2026-09",
-    "withdrawal_years": 30,
-    "savings_horizon_years": 10,
-    "reserves_until_retirement": true,
-    "savings_mode": "separate",
-    "liabilities": [
-      {
-        "label": "Mortgage",
-        "principal": 25000,
-        "annual_rate": 0.05,
-        "monthly_payment": 300,
-        "term_months": 120,
-        "start_month": "2026-10"
-      }
-    ],
-    "persons": [
-      {
-        "name": "Participant 1",
-        "birth_year": 1995,
-        "role": "adult"
-      }
-    ],
-    "goal_savings_rates": {
-      "Car": 0.0388,
-      "Home purchase": 0.0388
-    }
-  },
-  "return_samples": {
+  "inflation_rate": 0.03355484599306768,
+  "inflation_period": [
+    "2016-09",
+    "2026-08"
+  ],
+  "inflation_method": "okama.Inflation.describe(years=(10,)): annual inflation, geometric annual mean",
+  "risk_free_rate": 0.0388,
+  "rate_symbol": "US_EFFR.RATE",
+  "rate_date": "2026-10-09",
+  "fx_rub_per_unit": 85.4173,
+  "fx_date": "2026-10-09",
+  "portfolios": {
     "accumulation": {
+      "assets": [
+        "SPY.US",
+        "AGG.US",
+        "GLD.US"
+      ],
+      "weights": [
+        0.6,
+        0.3,
+        0.1
+      ],
+      "currency": "USD",
       "start_month": "2016-09",
+      "end_month": "2026-09",
       "monthly_returns": [
         0.0009000000000000001,
         -0.01578,
@@ -252,10 +148,27 @@
         -0.0028599999999999997,
         0.027180000000000003,
         -0.016560000000000002
-      ]
+      ],
+      "annual_return": 0.11329955738675102,
+      "annual_risk": 0.11393881098348344,
+      "cagr": 0.10750419946317336,
+      "rebalancing": "monthly",
+      "method": "okama.Portfolio: monthly total returns converted to base currency; Monte Carlo normal moments annualized using okama.common.helpers.helpers.Float"
     },
     "withdrawal": {
+      "assets": [
+        "SPY.US",
+        "AGG.US",
+        "GLD.US"
+      ],
+      "weights": [
+        0.3,
+        0.6,
+        0.1
+      ],
+      "currency": "USD",
       "start_month": "2016-09",
+      "end_month": "2026-09",
       "monthly_returns": [
         0.00102,
         -0.013049999999999999,
@@ -378,7 +291,38 @@
         -0.00685,
         0.02031,
         -0.023400000000000004
-      ]
+      ],
+      "annual_return": 0.06756804391541382,
+      "annual_risk": 0.07559529879438649,
+      "cagr": 0.06490870624412359,
+      "rebalancing": "monthly",
+      "method": "okama.Portfolio: monthly total returns converted to base currency; Monte Carlo normal moments annualized using okama.common.helpers.helpers.Float"
     }
+  },
+  "risk_free_rate_source": "https://api.okama.io/api/ts/macro/US_EFFR.RATE?first_date=2026-10-01&last_date=2026-10-09&period=D",
+  "fx_rub_per_unit_source": "https://api.okama.io/api/ts/close/USDRUB.FX?first_date=2026-10-01&last_date=2026-10-09&period=D",
+  "amount_method": "Independently authored synthetic amounts; no FX conversion; not a client plan",
+  "savings_method": "Separate car/home savings accounts at the dated reference rate; this public adaptation does not reproduce a private custom bond-purchase/reserve policy.",
+  "portfolio_method": "Same USD asset mix in every currency, with historical returns measured in the plan currency. Currency exposure is unhedged; this is not a reproduction of a domestic RUB portfolio.",
+  "calibration": {
+    "parameter": "opening_capital",
+    "baseline_value": 100000,
+    "calibrated_value": 100000,
+    "target_success": 0.9,
+    "selection_target": 0.92,
+    "selection_probability": 0.956,
+    "validation_probability": 0.9592,
+    "selection_seed": 707,
+    "validation_seed": 1707,
+    "mc_number": 5000,
+    "distribution": "norm",
+    "match_moments": true,
+    "max_multiplier": 32,
+    "attempts": [
+      {
+        "value": 100000,
+        "probability": 0.956
+      }
+    ]
   }
 }
