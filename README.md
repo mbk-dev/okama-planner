@@ -1,158 +1,185 @@
+<div align="center">
+
 # okama Planner
 
-A standalone Python library for personal and family financial planning, powered by
-`okama.FinPlan` and explicit joint market scenarios. It turns a household budget, assets,
-fixed-payment loans and dated goals into a monthly ledger and a forecast with pooled or
-goal-specific investment portfolios. No client registry, database,
-Excel template or MCP server is required.
+**Open-source personal and family financial planning powered by okama.**
 
-Released under the [MIT license](LICENSE). This repository contains the independently usable
-calculation library and synthetic examples, with a clean project history.
+[![CI](https://github.com/mbk-dev/okama-planner/actions/workflows/ci.yml/badge.svg)](https://github.com/mbk-dev/okama-planner/actions/workflows/ci.yml) [![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](pyproject.toml) [![MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-## Install and run the offline example
+[Quick start](#quick-start) · [Reports & charts](#reports--charts) · [MCP](#use-with-an-ai-assistant) · [Client records](#client-records) · [Languages](#languages)
 
-Use Python 3.11 and Poetry. From this directory:
+</div>
+
+![Synthetic financial plan with three goals, a logarithmic USD axis, median and Monte Carlo percentile bands](docs/images/financial-plan-three-goals.png)
+
+*Three goals, one household: **1 Education** (September 2027), **2 Home purchase** (July 2028),
+**3 Retirement income** (January 2029). Logarithmic scale; blue median, shaded p25–p75 and p10–p90
+ranges. All inputs and returns are fictional. Zero and negative values are not shown on a log axis.*
+
+Build a monthly household plan, explore uncertainty, compare alternatives and export results
+under your own brand. Designed for financial planners, technically comfortable individuals and
+integration developers. Calculation quality comes first; Excel, charts and MCP provide ways to
+use the application while a future web interface is explored.
+
+## What you can do
+
+| Task | Available today |
+|---|---|
+| Model a household | Income, expenses, assets, fixed-payment loans, reserves and dated goals |
+| Choose a portfolio approach | One pooled portfolio or explicitly allocated portfolios for each goal |
+| Compare plans | Shared market scenarios, goal funding, unmet payments and portfolio/capital outcomes |
+| Present results | Configurable Excel reports and interactive offline HTML charts |
+| Share visuals | PNG and SVG charts, goal markers and independent logarithmic scales |
+| Automate calculations | Python API and optional tools in the existing okama-mcp server |
+
+Separate goal portfolios share synchronized market scenarios. Fixed-rate savings accounts are
+also supported, but are a different concept from investment portfolios for goals.
+See [portfolio modes](docs/portfolio-modes.md) for allocation, transfers and funding rules.
+
+## Quick start
+
+Use **Python 3.11+** and [Poetry](https://python-poetry.org/). From a local source checkout:
 
 ```bash
+git clone https://github.com/mbk-dev/okama-planner.git
+cd okama-planner
 poetry env use python3.11
-poetry install
+poetry install --extras reports
 poetry run python examples/demo.py
-poetry run pytest -q
+poetry run python examples/portfolio_modes.py
 ```
 
-The example writes two requests, two full results and the request JSON Schema to
-`tmp/planner-demo/` under the working directory. Its inputs and monthly return samples
-are entirely synthetic. It performs no market-data downloads. Ready-made results are in
-`examples/baseline-result.json` and `examples/deferred-result.json`.
+The first example compares a purchase now versus a deferred purchase. The second compares a
+pooled portfolio with home and retirement portfolios on the same synthetic market scenarios.
+Requests, results and an Excel comparison are saved under `tmp/`; neither example downloads
+market data or needs a client database.
 
-For numerical reproduction of those saved results, install the versions recorded in
-`examples/versions.json`:
+**Prefer to browse first?** Open the [saved family inputs](examples/family-single-request.json),
+[results](examples/family-single-result.json) and [Excel report examples](https://github.com/mbk-dev/okama-planner/releases/tag/v0.2.0).
+The [three-goal hero input](examples/readme-request.json) and [result](examples/readme-result.json)
+are included too. For exact numerical replay, use the versions in [examples/versions.json](examples/versions.json);
+a seed alone does not freeze data or dependencies. [Calculation contract →](docs/contract.md)
 
-```bash
-poetry add 'okama==3.0.0' 'pydantic==2.13.5' 'numpy==2.4.6' 'pandas==3.0.5' 'scipy==1.17.1'
-poetry run python examples/demo.py
-```
-
-Python 3.11.15 was used for the saved example. Frozen histories, inputs, package versions,
-Monte Carlo parameters and seed all matter; a seed alone does not freeze live data.
-An exact cross-platform binary match is not asserted.
-
-## Python API
+### Use the Python API
 
 ```python
 import json
 from pathlib import Path
-from okama_planner import ForecastRequest, forecast
+from okama_planner import forecast
 
-request = json.loads(Path("examples/family.json").read_text())
-validated = ForecastRequest.model_validate(request)
-result = forecast(validated)  # a JSON-compatible dict; no persistence
-schema = ForecastRequest.model_json_schema()
+request = json.loads(Path("examples/readme-request.json").read_text())
+result = forecast(request)
 ```
 
-`forecast` also accepts the request dict directly. The full request includes `plan`,
-explicit `currency`, `mc_number` (1–10,000), `seed`, `distribution` (`norm`, `lognorm`,
-`t`), `match_moments` and optional `return_samples`. Each supplied stage sample is a
-contiguous monthly total-return series with a `start_month` and at least 12 observations,
-already in the plan currency. The history must end no later than the plan start and match
-any declared last-date pin. Histories replace stage holdings; providing both is rejected.
+The result is a JSON-compatible dictionary containing cash flows, goals, forecast metrics,
+chart series and provenance. Complete input validation uses `ForecastRequest`; its JSON Schema
+is available through `ForecastRequest.model_json_schema()`.
 
-Without `return_samples`, both stages require `*_holdings` (symbols and weights) and
-`*_last_date_pin`; okama downloads their return histories. That live path requires network
-access. Last dates constrain the sample end, but cannot freeze later revisions to historical
-data. The release acceptance example and controls use supplied samples.
+## Reports & charts
 
-See [the API and calculation contract](docs/contract.md) for output semantics and assumptions.
-There is no separate product CLI. The example script is a usage helper.
+### Excel under your own brand
 
-## Example and current scope
+Set your company name, contacts, logo and accent color. The exporter creates a new workbook;
+it does not require a private template or a pre-existing client file.
 
-The example invests synthetic USD 75,000, saves household surplus for three years, buys
-synthetic property in July 2028, then withdraws retirement spending from January 2029.
-The second request changes only the purchase year to 2029. The same frozen histories and
-seed are used. The purchase price is indexed, so postponement also changes its nominal cost.
-Saved results include a positive portfolio median while total capital additionally includes
-the acquired property. Sample probabilities are Monte Carlo estimates from 500 paths, not
-claims about real investment returns or a guarantee that deferral improves a plan.
+```python
+from okama_planner.reports import ReportBrand, export_report
 
-Implemented: a legacy single investment portfolio with accumulation and withdrawal
-strategies, plus joint-bootstrap `single` and `per_goal` investment portfolios with actual
-event funding. Annual indexation, fixed-payment debt, liquid buffers, pooled/separate
-fixed-rate savings, reserve targets and non-working assets remain supported. Separate
-fixed-rate savings accounts differ from goal-specific investment portfolios.
-
-The richer offline family example compares home and pension portfolios against one pooled
-portfolio on one shared scenario cube. Its empty household account, opening allocations,
-dated strategies, surplus weights, payment order, transfers and completion rules are explicit:
-
-```bash
-poetry install --extras reports
-poetry run python examples/portfolio_modes.py
+export_report(
+    [{"label": "Family plan", "request": request, "result": result}],
+    "family-plan.xlsx",
+    brand=ReportBrand(company="Example Advisory", color="244C66"),
+)
 ```
 
-It saves both requests/results, `comparison.json` and a neutral workbook under
-`tmp/portfolio-modes/`. Ready-made synthetic snapshots are
-`examples/family-single-request.json`, `examples/family-single-result.json`,
-`examples/family-per-goal-request.json` and `examples/family-per-goal-result.json`.
-The family, amounts and synchronized histories are fictional. See
-[portfolio mode semantics](docs/portfolio-modes.md) and [report semantics](docs/reports.md).
-Risk differs between the two modes, so their differences describe these explicit
-strategies and policies, not an isolated benefit of account separation.
+| Workbook sections | What they show |
+|---|---|
+| Summary, Budget, Balance | Plan outcomes, planned monthly cash flows, portfolio and net capital |
+| Goals, Assumptions, Comparison | Goal funding, model inputs and differences between scenarios |
+| Ledger | Detailed planned cash-flow requirements |
+| Segments, Allocation, Segment balances | Portfolio assignments, strategies and account projections |
+| Funding events, Transfers | Actual funded/unmet payments and transfers in joint portfolio modes |
+| Branding, Instructions | Your presentation settings and guidance for reading the workbook |
 
-To replay two complete requests without changing the example:
+The optional sheets reflect the result schema and portfolio mode. Excel presents saved forecast
+results: editing a cell does not rerun Monte Carlo. Change the input, recalculate and export again.
+[Report details and fictional-brand examples →](docs/reports.md)
 
-```bash
-poetry run python examples/portfolio_modes.py \
-  --single-request path/to/single.json --per-goal-request path/to/per-goal.json \
-  --output-dir path/to/results
+### Interactive and shareable charts
+
+```python
+from okama_planner.charts import export_charts
+
+export_charts(result, "charts")                # offline interactive HTML
+export_charts(result, "charts/png", format="png")
+export_charts(result, "charts/svg", format="svg")
 ```
 
-Both requests must describe the same household, history, currency, seed and path count.
-The helper writes snapshots only to the selected output directory and does not print their
-contents. Keep personal requests/results outside the public repository.
+Portfolio and net capital are separate charts. HTML includes hover values, goal markers,
+logarithmic-scale controls and image download buttons. Direct PNG/SVG rendering requires
+Chrome or Chromium; HTML generation does not. This is a **chart export**, not a complete
+HTML financial-plan report or a hosted web application. [Chart options →](docs/charts.md)
 
-FX conversion, jurisdictional taxes, transaction fees and a web UI are outside the current
-model. Net budget/returns must already reflect any externally modelled taxes and fees.
-The legacy FinPlan path requires positive initial invested capital and two non-empty stages;
-joint funding supports empty segments. Undated purchases are rejected; dated goals outside
-the forecast horizon are excluded from its ledger and goal results. Loan proceeds are not
-created automatically: any corresponding asset or receipt must be supplied explicitly.
+## Use with an AI assistant
 
-## Neutral Excel reports
+Install Planner into the same environment as the existing **okama-mcp** server. Its current
+source branch exposes `planner_forecast` and `planner_compare_modes`, while preserving the
+existing portfolio tools. The adapter calls Planner rather than duplicating its calculations.
 
-An optional exporter produces an English financial-plan workbook with configurable
-company, contacts, local logo and colors. Two fictional-brand examples, configuration
-instructions, licensing and financial boundaries are described in [docs/reports.md](docs/reports.md).
-Run `poetry install --extras reports` and `poetry run python examples/reports.py`.
-Formatting preserves saved forecasts; it does not rerun calculations in Excel.
+[Local installation, client setup and worked MCP examples →](https://github.com/mbk-dev/okama-mcp/blob/main/docs/planner.md)
 
-## Forecast charts
+Planner reports, chart rendering and consumption-utility helpers are not yet exposed through
+these MCP tools. The published MCP package and public HTTP server have not been updated for
+this integration; use the source installation described in the linked guide.
 
-Export portfolio and net-capital charts in **HTML** (default), **PNG** or **SVG** with
-Apache ECharts and the styling of okama-web Portfolio's Monte Carlo forecast.
-HTML works offline, automatically adapts to the window dimensions and has PNG/SVG save buttons.
+## Client records
 
-```bash
-poetry run python examples/charts.py
-poetry run python examples/charts.py --format png --out tmp/forecast-charts/png
-poetry run python examples/charts.py --format svg --out tmp/forecast-charts/svg
-```
+**Planned:** an optional local SQLite client registry linked to versions of financial plans.
+The database template will contain the schema and **no client, plan or result records**.
+Calculations will remain usable without a database.
 
-Direct image exports require Chrome or Chromium; HTML creation needs no extra dependencies.
-See [the chart API and saved-result examples](docs/charts.md).
+The table below illustrates how records could look. These people are fictional; their records
+exist **only in this README**, not in a bundled database or an automatic seed script.
+Field names illustrate the proposed registry; the final schema is not implemented yet.
 
-## Package boundary
+| Client code | Name | Birth year | Email |
+|---|---|---|---|
+| demo-001 | Alex Morgan | 1985 | alex@example.invalid |
+| demo-002 | Priya Rao | 1990 | priya@example.invalid |
+| demo-003 | Jordan Lee | 1978 | jordan@example.invalid |
 
-`extraction-manifest.json` lists the exact reviewed public-file inventory.
-The package imports neither the private `lfp`
-application nor `okama-mcp`; there is no dependency cycle when the optional MCP adapter imports
-this library. Private registries, database writers, templates, investment declarations,
-client files, internal skills, tax reserve policies and repository history are excluded.
+Each advisor will keep their actual database outside the public repository. MCP access to the
+registry is planned after the storage API is implemented.
 
-## MCP integration
+## Languages
 
-An optional `planner_forecast` tool is available in the okama-mcp source main branch.
-See [local installation, client configuration and two ready scenarios](https://github.com/mbk-dev/okama-mcp/blob/main/docs/planner.md).
-Install this library into the same environment as that server. Existing published okama-mcp
-package versions and the public HTTP server have not been updated for this integration.
-The adapter delegates calculations to this library and preserves the existing finplan tools.
+**Available today:** English workbook labels and chart interface text.
+**In progress:** multilingual Excel reports. The broader localization goal covers:
+
+- Excel and future HTML/PDF report headings, sheet names, instructions and template text.
+- Chart titles, controls, annotations and number, currency and date formatting.
+- Client-registry field labels, descriptions, forms and user-facing views.
+- Validation messages, tool descriptions shown by MCP clients, guides and demonstration materials.
+- Future web interface labels and help text.
+
+SQL column names, JSON keys and API identifiers will remain stable across languages.
+Client names and other user-entered text are not automatically translated. Localized wording
+does not imply support for a country's tax or pension rules. Additional languages and these
+broader interfaces are roadmap items until their implementation is published.
+
+## Model boundaries & next steps
+
+The current model does not perform FX conversion or implement jurisdiction-specific taxes or
+transaction fees. Inputs must already reflect externally modelled taxes and fees.
+Monte Carlo probabilities describe the supplied model and assumptions, not guaranteed outcomes.
+
+Retirement consumption **CE, gamma and equivalent-alpha helpers** exist as a separate module;
+they are not yet integrated into forecasts, MCP or reports.
+[Method and applicability →](docs/retirement-utility.md)
+
+Next steps include the client registry, broader MCP exports and multilingual presentation.
+A web interface is a later direction. The standalone package contains no private client data,
+MBK documents, internal skills or dependency on the closed lfp application.
+
+Explore the family: [okama library](https://github.com/mbk-dev/okama) ·
+[okama.io](https://okama.io/) · [okama-mcp](https://github.com/mbk-dev/okama-mcp).
