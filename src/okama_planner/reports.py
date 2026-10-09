@@ -231,6 +231,12 @@ def _annual_balance_rows(
              [point["p50"] for point in segment["chart"]][1:], True)
             for segment in result["segments"]
         )
+    elif request.plan.savings_mode == "separate":
+        rows.extend(
+            (f"{translate('Savings', language)}: {account['goal_label']}", list(account["balance"]), True)
+            for account in result["ledger"].get("buffer_by_goal", [])
+            if account["goal_label"] is not None
+        )
     rows.extend([
         ("Investment portfolio", [row["p50"] for row in result["charts"]["portfolio"]][1:], False),
         ("Other assets", side("non_working"), False),
@@ -297,6 +303,20 @@ def _annual_principal(sheet: Worksheet, result: dict[str, Any], annual: list[dic
         ))
 
 
+def _annual_savings_contributions(
+    request: ForecastRequest, result: dict[str, Any], language: str, flow: Any,
+) -> None:
+    """Show internal account deposits separately from household spending and income."""
+    if result["schema_version"] != "1.0" or request.plan.savings_mode != "separate":
+        return
+    goals = {goal.label: goal.goal_id for goal in request.plan.goals}
+    for account in result["ledger"].get("buffer_by_goal", []):
+        label = account["goal_label"]
+        if label is not None:
+            flow(f"{translate('Annual contributions', language)}: {label}", ("buffer_in",),
+                 source=label, literal=True, goal_id=goals.get(label))
+
+
 def _ambiguous_reserve(kinds: tuple[str, ...], literal: bool, goal_id: int | None,
                        goal_ids: dict[int | None, int | None]) -> bool:
     return literal and kinds == ("reserve_topup",) and (goal_id is None or goal_id not in goal_ids)
@@ -354,6 +374,7 @@ def _cash_flow(
     for label, values, literal in balance_rows[-2:]:
         balance(label, values, literal=literal)
     flow("Portfolio contributions / withdrawals", ("portfolio_flow",))
+    _annual_savings_contributions(request, result, language, flow)
     return sheet
 
 

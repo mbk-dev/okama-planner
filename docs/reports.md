@@ -155,8 +155,37 @@ Language does not choose the currency in the report API: every unit comes from t
 request/result. The demonstration maps English to USD, Russian to RUB, Chinese to CNY and
 German/Spanish to EUR. Each uses independently authored synthetic amounts and base-currency
 return histories, never a relabelled USD result. Plans start in October 2026, retire in 2040
-and include 30 withdrawal years. Current input amounts and explicit fictional state pension
-payments are assumptions, not client data.
+and include 30 withdrawal years. Each fictional household includes an investment portfolio,
+an emergency reserve, long-term savings, an apartment, an existing car and a mortgage.
+Income is about three times household expenses. Goals are a car in 2029, a home in 2031
+and early retirement in 2040, replacing 100% of indexed household expenses. The existing
+car is sold when its replacement is bought. No state pension starts at early retirement.
+Separate car/home savings accounts use explicitly assumed reference rates. This public
+adaptation does not reproduce a private custom bond-purchase/reserve policy. The RUB
+demonstration is independently fictional, not a client's reference workbook.
+
+The example increases only opening investment capital by default until the fixed selection
+seed reaches 92% full-plan success, then evaluates the unchanged plan once with an independent
+seed and requires at least 90%. It uses 5,000 paths per run, normal draws, matched historical
+moments, selection seed 707 and validation seed 1707. The search uses fixed 25% increases,
+rounded up to hundreds, stops at the first passing candidate, and refuses to exceed 32 times
+the baseline. It never changes goals, dates, expenses, rates or the withdrawal horizon and
+does not search for a favourable seed. Independent validation failure aborts generation.
+These percentages describe this simulation, not a guarantee of real-world outcomes.
+
+`--calibrate-parameter income` instead changes only monthly employment income.
+`--target-success` changes the validation threshold (selection keeps a two-percentage-point
+margin). `--mc-number` accepts at least 2,000 paths. `--forecast-only` saves complete validated
+request/result/metadata JSON files without rendering charts or workbooks. Metadata records
+the baseline and calibrated value, every selection attempt and independent validation result;
+the result retains its actual input SHA256 and full forecast. Report assumptions display
+the baseline, chosen parameter, final value, targets, seeds and validation probability.
+For legacy separate-account plans, Cash Flow also shows each goal account's deterministic
+year-end balance and annual contributions. Contributions sum `buffer_in` ledger entries,
+filtered by goal ID (literal labels for older ledgers), after portfolio transfers. These
+internal savings transfers are informational and are excluded from household income and
+expense totals; purchase outflows are counted once. The account balances are fixed-rate
+ledger balances, not additional Monte Carlo quantiles.
 
 [`currency-assumptions.json`](../examples/currency-assumptions.json) records the dated geometric
 10-year inflation mean, reference rate, sources, return/risk moments and complete monthly
@@ -164,6 +193,8 @@ portfolio samples. All indexation rates use that inflation mean; buffer interest
 reference rate as an explicit example assumption. USD uses the effective federal funds rate,
 EUR the ECB deposit facility rate, RUB the central-bank rate. CNY uses the user-selected
 one-year lending prime rate, explicitly distinguished from a policy or risk-free rate.
+Every currency uses the same USD asset mix, with historical returns measured in that currency.
+Exposure is unhedged; the RUB example does not reproduce a domestic RUB portfolio mix.
 FX observations are retained as provenance; the authored amounts are not converted with them.
 Visible Economic data rows in Assumptions expose rates and portfolio moments as percentages.
 Reproduce the dated snapshot with `poetry run python examples/collect_currency_assumptions.py`;

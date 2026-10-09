@@ -184,3 +184,22 @@ expense_share,Expense share,Доля расходов (%),支出占比（%）,Au
 monthly,Monthly,За месяц,每月,Monatlich,Mensual
 baseline,Baseline,Базовый сценарий,基准情景,Basisszenario,Escenario base
 synthetic_invested_capital,Synthetic invested capital,Условный инвестиционный капитал,示例投资本金,Beispielanlagevermögen,Capital invertido de ejemplo
+apartment,Apartment,Квартира,公寓,Wohnung,Apartamento
+current_car,Current car,Текущий автомобиль,现有汽车,Aktuelles Auto,Automóvil actual
+long_term_savings,Long-term savings,Долгосрочные накопления,长期储蓄,Langfristige Ersparnisse,Ahorros a largo plazo
+mortgage,Mortgage,Ипотека,房贷,Hypothek,Hipoteca
+calibrated_example,Calibrated synthetic example,Условный пример после подбора капитала,校准后的虚构示例,Kalibriertes fiktives Beispiel,Ejemplo ficticio calibrado
+calibration,Calibration,Подбор параметра,参数校准,Kalibrierung,Calibración
+calibration_parameter,Calibration parameter,Подбираемый параметр,校准参数,Kalibrierungsparameter,Parámetro de calibración
+baseline_value,Baseline value,Исходное значение,初始值,Ausgangswert,Valor inicial
+calibrated_value,Calibrated value,Подобранное значение,校准值,Kalibrierter Wert,Valor calibrado
+selection_target,Selection target,Порог при подборе,筛选阈值,Auswahlschwelle,Umbral de selección
+selection_probability,Selection probability,Вероятность при подборе,筛选成功率,Auswahlwahrscheinlichkeit,Probabilidad de selección
+validation_probability,Independent validation probability,Вероятность при независимой проверке,独立验证成功率,Unabhängige Validierungswahrscheinlichkeit,Probabilidad de validación independiente
+selection_seed,Selection seed,Seed подбора,筛选随机种子,Auswahl-Seed,Semilla de selección
+validation_seed,Validation seed,Seed независимой проверки,独立验证随机种子,Validierungs-Seed,Semilla de validación
+opening_capital,Opening investment capital,Начальный инвестиционный капитал,初始投资本金,Anfängliches Anlagekapital,Capital de inversión inicial
+income_calibration,Monthly employment income,Месячный трудовой доход,每月劳动收入,Monatliches Erwerbseinkommen,Ingresos laborales mensuales
+mc_paths,Monte Carlo paths,Число траекторий Монте-Карло,蒙特卡洛路径数,Monte-Carlo-Pfade,Trayectorias de Monte Carlo
+distribution,Distribution,Распределение,分布,Verteilung,Distribución
+annual_contributions,Annual contributions,Годовые взносы,年度存款,Jährliche Einzahlungen,Aportaciones anuales

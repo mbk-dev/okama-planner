@@ -474,3 +474,76 @@ def test_annual_income_labels_share_excel_case_insensitive_groups(tmp_path: Path
     assert captions.count("Salary") == 1
     assert "salary" not in captions
     assert any(row[1].value == "salary" for row in book["Current amounts"])
+
+
+def separate_savings_scenario() -> dict:
+    from okama_planner import forecast
+
+    item = scenario()
+    request = item["request"]
+    request["mc_number"] = 20
+    plan = request["plan"]
+    plan.update(savings_mode="separate", reserves_until_retirement=True)
+    plan["rates"] = dict.fromkeys(plan["rates"], 0.0)
+    plan["goals"][0].update(label='Car*?"', amount_pv=1200, target_year=2027, target_month=1)
+    plan["goals"].insert(1, {
+        "goal_id": 3, "label": "Home", "kind": "lump", "amount_pv": 2400,
+        "pv_year": 2026, "target_year": 2028, "target_month": 1,
+    })
+    item["result"] = forecast(request)
+    return item
+
+
+@pytest.mark.parametrize("legacy_ids", [False, True])
+def test_annual_separate_accounts_show_balances_and_contributions_without_double_counting(
+    tmp_path: Path, legacy_ids: bool,
+) -> None:
+    from okama_planner.reports import export_report
+
+    item = separate_savings_scenario()
+    if legacy_ids:
+        for line in item["result"]["ledger"]["lines"]:
+            line.pop("goal_id", None)
+    sheet = load_workbook(export_report([item], tmp_path / "separate.xlsx"))["Cash Flow"]
+    rows = {row[0].value: row[0].row for row in sheet}
+    assert [sheet.cell(rows['Savings: Car*?"'], column).value for column in (2, 3)] == [1200, 0]
+    assert [sheet.cell(rows["Savings: Home"], column).value for column in (2, 3, 4)] == [1200, 2400, 0]
+    contribution_row = rows['Annual contributions: Car*?"']
+    assert contribution_row > rows["Portfolio contributions / withdrawals"]
+    formula = sheet.cell(contribution_row, 2).value
+    assert '"buffer_in"' in formula
+    assert '"buffer_out"' not in formula
+    assert '"goal_outflow"' not in formula
+    assert '\">=2026-01\"' in formula and '\"<=2026-12\"' in formula
+    if legacy_ids:
+        assert '"=Car~*~?"""' in formula
+        assert "'Ledger'!$F$6:" not in formula
+    else:
+        assert "'Ledger'!$F$6:" in formula
+        assert formula.endswith(",1)")
+    lines = item["result"]["ledger"]["lines"]
+    deposits = [line["amount"] for line in lines if line["line_kind"] == "buffer_in"
+                and line["label"] == 'Car*?"' and line["month"].startswith("2026")]
+    assert sum(deposits) == pytest.approx(1200)
+    # Account deposits and withdrawals must never enter household income/expense totals.
+    for caption in ("TOTAL INCOME", "TOTAL EXPENSES", "Surplus cash"):
+        total_formula = sheet.cell(rows[caption], 2).value
+        assert '"buffer_in"' not in total_formula
+        assert '"buffer_out"' not in total_formula
+    from okama_planner.reports import annual_cash_flow
+
+    annual = annual_cash_flow(item["result"])
+    assert annual[0]["flows"]["income"] == 36000
+    assert annual[0]["flows"]["expense"] == -27600
+    assert annual[1]["flows"]["goal_outflow"] == -1200
+
+
+def test_separate_account_rows_are_localized_and_ignore_expense_buffer(tmp_path: Path) -> None:
+    from okama_planner.reports import export_report
+
+    item = separate_savings_scenario()
+    sheet = load_workbook(export_report([item], tmp_path / "russian.xlsx", language="ru"))["Денежные потоки"]
+    labels = [row[0].value for row in sheet]
+    assert 'Накопления: Car*?"' in labels
+    assert 'Годовые взносы: Car*?"' in labels
+    assert not any(label.endswith(": None") for label in labels if isinstance(label, str))
