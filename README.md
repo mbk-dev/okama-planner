@@ -135,22 +135,66 @@ this integration; use the source installation described in the linked guide.
 
 ## Client records
 
-**Planned:** an optional local SQLite client registry linked to versions of financial plans.
-The database template will contain the schema and **no client, plan or result records**.
-Calculations will remain usable without a database.
+**Designed for professional client work by financial advisors and financial planners.**
+The planned local SQLite registry brings client identity, contacts, broker relationships and
+planning history together: one stable client record can be linked to multiple versions of
+financial inputs, scenarios and saved calculations. It supports ongoing work with a client,
+from collecting information and choosing how to communicate to revisiting their financial plan.
 
-The table below illustrates how records could look. These people are fictional; their records
-exist **only in this README**, not in a bundled database or an automatic seed script.
-Field names illustrate the proposed registry; the final schema is not implemented yet.
+**Status: planned for Planner.** The reference architecture already exists in the private lfp
+application; the standalone Planner registry is not implemented yet. The database template
+will contain the schema and **no client, plan or result records**. Calculations remain usable
+without a database.
 
-| Client code | Name | Birth year | Email |
+### Complete client record
+
+The table below shows **all 16 columns of lfp's `client_registry`**, with three entirely
+fictional records. Fields run down the table so the complete record remains readable.
+These examples exist **only in this README**, not in a bundled database or a seed script.
+They describe the reference schema for the planned registry, rather than a published storage API.
+
+| Field | Alex Morgan | Priya Rao | Jordan Lee |
 |---|---|---|---|
-| demo-001 | Alex Morgan | 1985 | alex@example.invalid |
-| demo-002 | Priya Rao | 1990 | priya@example.invalid |
-| demo-003 | Jordan Lee | 1978 | jordan@example.invalid |
+| `id` — internal identifier | 1 | 2 | 3 |
+| `code` — stable client code | c-0001 | c-0002 | c-0003 |
+| `full_name` — full name | Alex Morgan | Priya Rao | Jordan Lee |
+| `sex` — recorded sex | male | female | — |
+| `birth_year` — year of birth | 1985 | 1990 | 1978 |
+| `email` — email address | alex@example.invalid | priya@example.invalid | jordan@example.invalid |
+| `phone` — telephone | — | — | — |
+| `telegram` — Telegram handle | — | — | — |
+| `telegram_id` — stable numeric Telegram ID | — | — | — |
+| `whatsapp` — WhatsApp contact | — | — | — |
+| `max_messenger` — MAX messenger contact | — | — | — |
+| `brokers` — ordered broker list | ["Example Broker A"] | [] | — |
+| `primary_channel` — main communication channel | email | email | email |
+| `ips_sent_at` — date the investment policy statement was sent | 2026-09-15 | — | 2026-10-01 |
+| `note` — advisor's working notes | Annual plan review | First planning meeting | Retirement scenarios |
+| `created_at` — record creation timestamp (UTC) | 2026-09-01T09:00:00Z | 2026-09-08T10:00:00Z | 2026-09-20T08:30:00Z |
+
+A dash means the value has not been recorded. For `brokers`, an empty list means the client
+explicitly has no broker; a missing value means this is unknown. `primary_channel` points to
+a contact that has been filled in. `telegram_id` preserves identity when a handle changes.
+`ips_sent_at` records delivery of the investment policy statement, not automatic document creation.
+
+### Identity, versions and planning history
+
+The reference database separates the person from their changing financial information:
+
+| Related table | All columns | Role in the advisor's workflow |
+|---|---|---|
+| `client` | `id`, `registry_id`, `version`, `source_digest`, `note`, `created_at` | A version of the client's financial inputs; linked by `registry_id`, with a source fingerprint |
+| `tax_residency` | `id`, `registry_id`, `year`, `country`, `note` | Tax-residence country by calendar year, using an ISO two-letter country code |
+
+Family members, assets, liabilities, budget items, goals, portfolios and scenarios belong to
+versions of client data in lfp. Saved calculation runs hold the input snapshot and model settings.
+This structure lets an advisor keep earlier inputs and compare later plans without treating
+an updated financial situation as a different person. Recording tax residency does not itself
+calculate jurisdiction-specific taxes.
 
 Each advisor will keep their actual database outside the public repository. MCP access to the
-registry is planned after the storage API is implemented.
+registry is planned after the storage API is implemented. Private advisory documents and internal
+skills are not part of the public package.
 
 ## Languages
 
