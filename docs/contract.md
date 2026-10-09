@@ -8,7 +8,8 @@ The entry point is `okama_planner.forecast(ForecastRequest | dict) -> dict`.
 The request schema is available from `ForecastRequest.model_json_schema()` and as
 `examples/request-schema.json`. Models reject unknown fields. Errors are Python
 `ValueError`/Pydantic validation errors; adapters should translate them at their own boundary.
-The library does not read or write client files or a database.
+The forecast API does not read or write client files or a database. Optional local persistence
+is provided separately by [the storage API](storage.md).
 
 ## Inputs and timing
 
@@ -72,7 +73,7 @@ unconstrained fits can change expected return. Distribution choice is an explici
 ## Adapter handoff
 
 A thin MCP adapter can validate the complete request, call `forecast` once and return this dict.
-For legacy comparisons, make independent calls with copied requests; the library has no mutable
-scenario/session storage. Example baseline/deferred requests and results fix the purchase-date
+For legacy comparisons, make independent calls with copied requests; the forecast API has no mutable
+scenario/session state. Optional stored scenarios contain full immutable input snapshots. Example baseline/deferred requests and results fix the purchase-date
 comparison without adding an MCP implementation here. Market-backed stages may share okama
 portfolio cache entries within a process; offline calculation has no market downloads.

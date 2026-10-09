@@ -31,6 +31,7 @@ use the application while a future web interface is explored.
 | Present results | Configurable Excel reports and interactive offline HTML charts |
 | Share visuals | PNG and SVG charts, goal markers and independent logarithmic scales |
 | Automate calculations | Python API and optional tools in the existing okama-mcp server |
+| Keep client history | Local SQLite registry, versioned plans, scenarios and saved results |
 
 Separate goal portfolios share synchronized market scenarios. Fixed-rate savings accounts are
 also supported, but are a different concept from investment portfolios for goals.
@@ -136,22 +137,35 @@ this integration; use the source installation described in the linked guide.
 ## Client records
 
 **Designed for professional client work by financial advisors and financial planners.**
-The planned local SQLite registry brings client identity, contacts, broker relationships and
-planning history together: one stable client record can be linked to multiple versions of
+The local SQLite registry brings client identity, contacts, broker relationships and
+planning history together: one stable client record is linked to multiple versions of
 financial inputs, scenarios and saved calculations. It supports ongoing work with a client,
 from collecting information and choosing how to communicate to revisiting their financial plan.
 
-**Status: planned for Planner.** The reference architecture already exists in the private lfp
-application; the standalone Planner registry is not implemented yet. The database template
-will contain the schema and **no client, plan or result records**. Calculations remain usable
-without a database.
+**Status: implemented in the Python API.** `okama_planner.storage` provides client
+creation, reading and updates, financial versions, scenarios and saved forecast results.
+The shipped SQLite template contains schema and zero client records, plans or results.
+Access to this registry through okama-mcp is a separate planned integration.
+
+```python
+from pathlib import Path
+from okama_planner.storage import PlannerStore
+
+path = Path.home() / "planner-data" / "clients.sqlite3"
+path.parent.mkdir(parents=True, exist_ok=True)
+with PlannerStore.initialize(path) as store:
+    assert store.list_clients() == []
+```
+
+`initialize` refuses to overwrite a file; `PlannerStore.open(path)` reopens an existing
+database. [Storage API, versioned snapshots and migrations →](docs/storage.md)
 
 ### Complete client record
 
-The table below shows **all 16 columns of lfp's `client_registry`**, with three entirely
+The table below shows **all 16 columns of Planner's `client_registry`**, with three entirely
 fictional records. Fields run down the table so the complete record remains readable.
 These examples exist **only in this README**, not in a bundled database or a seed script.
-They describe the reference schema for the planned registry, rather than a published storage API.
+They illustrate the registry supported by the storage API.
 
 | Field | Alex Morgan | Priya Rao | Jordan Lee |
 |---|---|---|---|
@@ -179,7 +193,7 @@ a contact that has been filled in. `telegram_id` preserves identity when a handl
 
 ### Identity, versions and planning history
 
-The reference database separates the person from their changing financial information:
+The database separates the person from their changing financial information:
 
 | Related table | All columns | Role in the advisor's workflow |
 |---|---|---|
@@ -187,13 +201,13 @@ The reference database separates the person from their changing financial inform
 | `tax_residency` | `id`, `registry_id`, `year`, `country`, `note` | Tax-residence country by calendar year, using an ISO two-letter country code |
 
 Family members, assets, liabilities, budget items, goals, portfolios and scenarios belong to
-versions of client data in lfp. Saved calculation runs hold the input snapshot and model settings.
+versions of client financial data in Planner. Saved calculation runs hold the input snapshot and model settings.
 This structure lets an advisor keep earlier inputs and compare later plans without treating
 an updated financial situation as a different person. Recording tax residency does not itself
 calculate jurisdiction-specific taxes.
 
-Each advisor will keep their actual database outside the public repository. MCP access to the
-registry is planned after the storage API is implemented. Private advisory documents and internal
+Each advisor keeps their actual database outside the public repository. MCP access to the
+registry remains planned; the storage API is implemented. Private advisory documents and internal
 skills are not part of the public package.
 
 ## Languages
@@ -227,7 +241,7 @@ Retirement consumption **CE, gamma and equivalent-alpha helpers** exist as a sep
 they are not yet integrated into forecasts, MCP or reports.
 [Method and applicability →](docs/retirement-utility.md)
 
-Next steps include the client registry, broader MCP exports and multilingual presentation.
+Next steps include registry access through MCP, broader MCP exports and multilingual presentation.
 A web interface is a later direction. The standalone package contains no private client data,
 MBK documents, internal skills or dependency on the closed lfp application.
 

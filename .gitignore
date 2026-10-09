@@ -6,3 +6,13 @@ __pycache__/
 poetry.lock
 dist/
 tmp/
+
+.venv
+.env
+*.db
+*.sqlite
+*.sqlite3
+*-wal
+*-shm
+*-journal
+!src/okama_planner/storage/templates/empty.sqlite3

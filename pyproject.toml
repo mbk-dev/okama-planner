@@ -8,6 +8,7 @@ repository = "https://github.com/mbk-dev/okama-planner"
 readme = "README.md"
 packages = [{include = "okama_planner", from = "src"}]
 include = [
+    {path = "src/okama_planner/storage/templates/empty.sqlite3", format = ["wheel", "sdist"]},
     {path = "examples/**", format = "sdist"},
     {path = "docs/**", format = "sdist"},
     {path = "tests/**", format = "sdist"},
@@ -22,6 +23,8 @@ pandas = ">=2.0"
 scipy = ">=1.0"
 openpyxl = {version = ">=3.1,<4", optional = true}
 pillow = {version = ">=10", optional = true}
+sqlalchemy = ">=2.0,<3"
+alembic = ">=1.13,<2"
 
 [tool.poetry.extras]
 reports = ["openpyxl", "pillow"]
