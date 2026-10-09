@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "package": "okama-planner",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "inventory": {
     ".github/workflows/ci.yml": "2d316e85a5c3407c38be9853ce8449ecf13123d4a2f456461e46dc0beb4e1a70",
     ".gitignore": "3d80cd506cddd23dbf30a32eeae652a34755612e4c682e2414f66cf44d179ebf",
@@ -15,6 +15,7 @@
     "docs/multicurrency.md": "10e90d3d0d18e0a1eee798e4bdf7a744824216808d43afcdf6a072e9acdcf08e",
     "docs/portfolio-modes.md": "da87aa09f3578801397bcad9cf570e9db848326b1f97a822f84e4d100914556e",
     "docs/releases/v0.4.0.md": "2990f5950687dc0c25313b9a4f504c2c1225fabd61bd3679709371c1e43621c0",
+    "docs/releases/v0.4.1.md": "5a5e77d2e98857a73abd29e8e0fcf26bfb42a069ad3bc1f4bbe2196f734b0637",
     "docs/reports.md": "f3c2b8410ff8963d7f3edbede30c6cf5f46f512f31d0b7e4daf1707cd2bcccb8",
     "docs/retirement-utility.md": "360ef5491ad207983d1eaea39102bf4c40531d8408c073dc797eea9275d40313",
     "docs/storage.md": "96600edb61e818fe84d511369995494ea559645af2dc50cd0e5bab494f3a845c",
@@ -42,7 +43,7 @@
     "examples/reports.py": "96ed52556831ab55342ec6895c92697857098e13dd973be59c257dcb4b090647",
     "examples/request-schema.json": "e508866b5a0ef9b6ea1ebe6edf6f535b8eebade0c4bc0449046f76d196bced34",
     "examples/versions.json": "f89a103618dbf9157a325a0efdec8aa37bc8b447bfb8e76dc4ff0c8e1932508f",
-    "pyproject.toml": "3fe9ea367b8bbd6a122d4b5c2dee5d0e4f87f9db040f5d0d33c207a81de4fd39",
+    "pyproject.toml": "81450b500602f39554945342948f517e075a01837231946bc3b00fd136a174cc",
     "src/okama_planner/__init__.py": "54d11e9c8c724cbdbfd500d5be1514fafe9522c3c71be109dfc3903a77c5008b",
     "src/okama_planner/_chart_assets/ECHARTS-LICENSE.txt": "634293835b43a6dd2094fa39182a3d9a6b9ca43b7fdb9ac354e8037af2a3093a",
     "src/okama_planner/_chart_assets/ECHARTS-NOTICE.txt": "d491d358344f842685c1b1585970999db65fe30ecf7ef3867af8814f4016c016",
