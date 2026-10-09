@@ -234,3 +234,53 @@ def test_unsuccessful_browser_exit_stops_owned_children(tmp_path: Path) -> None:
                 os.kill(child_pid, signal.SIGKILL)
             except ProcessLookupError:
                 pass
+
+
+@pytest.mark.parametrize('name', ['baseline', 'family-single', 'family-per-goal'])
+def test_goal_markers_select_only_saved_labels_dates_and_numbers(tmp_path: Path, name: str) -> None:
+    from okama_planner.charts import export_charts
+
+    result = saved_result(name)
+    result['goals'][0]['private_note'] = 'DO NOT EMBED'
+    data = payload(export_charts(result, tmp_path)[0].read_text())
+    assert data['goals'] == [
+        {'number': index, 'label': goal['label'], 'month': goal['month']}
+        for index, goal in enumerate(result['goals'], 1)
+    ]
+    assert 'DO NOT EMBED' not in json.dumps(data)
+
+
+def test_goal_markers_keep_saved_number_when_dates_are_outside_horizon(tmp_path: Path) -> None:
+    from okama_planner.charts import export_charts
+
+    result = saved_result()
+    result['goals'][0]['month'] = '2020-01'
+    data = payload(export_charts(result, tmp_path)[0].read_text())
+    assert data['goals'] == [{'number': 2, 'label': result['goals'][1]['label'], 'month': '2029-01'}]
+    del result['goals']
+    assert payload(export_charts(result, tmp_path)[0].read_text())['goals'] == []
+
+
+@pytest.mark.parametrize('bad', [None, {}, [{'label': 'Goal', 'month': '2028-13'}],
+                                   [{'label': 123, 'month': '2028-01'}]])
+def test_invalid_goal_metadata_is_rejected_before_writing(tmp_path: Path, bad: object) -> None:
+    from okama_planner.charts import export_charts
+
+    result = saved_result()
+    result['goals'] = bad
+    with pytest.raises(ValueError):
+        export_charts(result, tmp_path / 'invalid')
+    assert not (tmp_path / 'invalid').exists()
+
+
+def test_license_notices_are_embedded_without_visible_ui_and_labels_are_safe(tmp_path: Path) -> None:
+    from okama_planner.charts import export_charts
+
+    result = saved_result()
+    result['goals'][0]['label'] = '</script><img src=x onerror=alert(1)>'
+    document = export_charts(result, tmp_path)[0].read_text()
+    assert '<details>' not in document
+    assert '<pre hidden id="license-notices">' in document
+    assert 'Apache License' in document
+    assert '</script><img' not in document
+    assert payload(document)['goals'][0]['label'] == result['goals'][0]['label']

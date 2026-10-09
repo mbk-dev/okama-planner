@@ -6,6 +6,7 @@
   const blue = '#2a78d6';
   const muted = '#898781';
   const charts = new Map();
+  const scales = new Map();
   const symbols = { USD: '$', EUR: '€', GBP: '£', RUB: '₽', CNY: '¥', HKD: 'HK$', ILS: '₪', INR: '₹' };
   const money = value => (symbols[input.currency] || input.currency + ' ') +
     Math.round(value).toLocaleString('en-US').replace(/,/g, '\u00a0');
@@ -17,6 +18,8 @@
 
   function option(key, width) {
     const rows = input.charts[key];
+    const logarithmic = scales.get(key) === true;
+    const value = (row, percentile) => logarithmic && row[percentile] <= 0 ? null : row[percentile];
     const dates = rows.map(row => row.month);
     const mobile = width < 700;
     const years = [...new Set(dates.map(month => month.slice(0, 4)))];
@@ -35,18 +38,43 @@
       lineStyle: { width: 0, opacity: 0 }, showSymbol: false, stack, stackStrategy: 'all',
       areaStyle: { color: gradient(opacity) }, silent: true, z, endLabel: endLabel(high)
     }];
+    // Additive ECharts stacks distort bands on a log axis. Project each interval's
+    // real endpoints instead, omitting intervals with a nonpositive boundary.
+    const logBand = (low, high, name, opacity, z) => ({
+      name: name + '-band', type: 'custom', silent: true, z,
+      dimensions: ['segment', 'lower', 'upper', 'nextLower', 'nextUpper'],
+      encode: { x: 'segment', y: ['lower', 'upper', 'nextLower', 'nextUpper'] },
+      data: rows.slice(0, -1).flatMap((row, index) =>
+        row[low] > 0 && rows[index + 1][low] > 0 ?
+          [[index, row[low], row[high], rows[index + 1][low], rows[index + 1][high]]] : []),
+      renderItem: (params, api) => {
+        const index = api.value(0);
+        const next = index + 1;
+        return { type: 'polygon', shape: { points: [
+          api.coord([index, rows[index][low]]), api.coord([index, rows[index][high]]),
+          api.coord([next, rows[next][high]]), api.coord([next, rows[next][low]])
+        ] }, style: { fill: gradient(opacity) } };
+      }
+    });
+    const logBoundary = p => ({
+      name: p, type: 'line', data: rows.map(row => value(row, p)),
+      lineStyle: { width: 0, opacity: 0 }, showSymbol: false, silent: true, endLabel: ['p90', 'p75'].includes(p) ? endLabel(p) : { show: false }
+    });
     const median = {
-      name: 'Median', type: 'line', data: rows.map(row => row.p50),
+      name: 'Median', type: 'line', data: rows.map(row => value(row, 'p50')),
       showSymbol: false, z: 10, lineStyle: { width: 2.5, color: blue }, itemStyle: { color: blue },
       endLabel: { show: !mobile, formatter: params => money(Number(params.value)), color: '#ffffff',
         backgroundColor: blue, padding: [3, 6], borderRadius: 5, fontFamily: font,
         fontSize: 11, fontWeight: 'bold', distance: 6 },
       markLine: { silent: true, symbol: 'none', lineStyle: { color: muted, type: 'dashed', width: 1 },
-        data: [{ xAxis: dates[0], label: { show: true, formatter: 'Forecast start', position: 'end',
-          align: 'left', color: muted, fontFamily: font, fontSize: mobile ? 10 : 11 } }] }
+        data: input.goals.map((goal, index) => ({ xAxis: goal.month,
+          label: { show: true, formatter: String(goal.number), position: 'insideEndTop', rotate: 0,
+            // Stagger coincident goals while keeping the saved numbering.
+            offset: [0, input.goals.slice(0, index).filter(other => other.month === goal.month).length * 16],
+            color: muted, fontFamily: font, fontSize: mobile ? 10 : 11 } })) }
     };
     const labels = ['p10', 'p25'].map(p => ({
-      name: p + '-label', type: 'scatter', data: [[dates.length - 1, rows.at(-1)[p]]],
+      name: p + '-label', type: 'scatter', data: [[dates.length - 1, value(rows.at(-1), p)]],
       symbolSize: 0, silent: true, label: { ...endLabel(p), position: 'right' }
     }));
     return {
@@ -65,11 +93,15 @@
             const year = value.slice(0, 4);
             return index === firstIndexes.get(year) && (years.length - 1 - years.indexOf(year)) % step === 0 ? year : '';
           } } },
-      yAxis: { type: 'value', position: 'right', scale: true, name: input.currency,
+      yAxis: { type: logarithmic ? 'log' : 'value', position: 'right', scale: true, name: input.currency,
+        min: logarithmic ? Math.min(...rows.flatMap(row =>
+          ['p10', 'p25', 'p50', 'p75', 'p90'].map(p => row[p]).filter(number => number > 0))) : undefined,
         axisLine: { show: false, onZero: false }, axisTick: { show: false },
         splitLine: { show: true, lineStyle: { color: '#eceef2' } },
         axisLabel: { color: muted, fontFamily: font, fontSize: mobile ? 10 : 11 } },
-      series: [...band('p10', 'p90', 'outer', 0.12, 1), ...band('p25', 'p75', 'inner', 0.25, 2), median, ...labels],
+      series: [...(logarithmic ? [logBand('p10', 'p90', 'outer', 0.12, 1),
+        logBand('p25', 'p75', 'inner', 0.25, 2), logBoundary('p90'), logBoundary('p75'), logBoundary('p25'), logBoundary('p10')] :
+        [...band('p10', 'p90', 'outer', 0.12, 1), ...band('p25', 'p75', 'inner', 0.25, 2)]), median, ...labels],
       tooltip: { trigger: 'axis', confine: true, backgroundColor: '#ffffff', borderColor: 'rgba(0,0,0,0.08)',
         borderWidth: 1, padding: [8, 12], textStyle: { color: '#111827', fontFamily: font, fontSize: 12 },
         extraCssText: 'border-radius:10px;box-shadow:0 6px 24px rgba(16,24,40,0.14);font-variant-numeric:tabular-nums;',
@@ -108,6 +140,31 @@
       }).observe(host);
     }
   }
+
+  document.querySelectorAll('[data-scale]').forEach(toggle => {
+    const key = toggle.dataset.scale;
+    const rows = input.charts[key];
+    const note = document.getElementById(key + '-scale-note');
+    const hasPositive = rows.some(row => row.p90 > 0);
+    toggle.disabled = !hasPositive;
+    if (!hasPositive) {
+      note.hidden = false;
+      note.textContent = 'Logarithmic scale is unavailable: this forecast has no positive values.';
+    }
+    toggle.addEventListener('change', () => {
+      scales.set(key, toggle.checked);
+      const chart = charts.get(key);
+      chart.setOption(option(key, document.getElementById(key).clientWidth), { notMerge: true });
+      note.hidden = !toggle.checked || !rows.some(row => row.p10 <= 0);
+      note.textContent = 'Zero and negative values are omitted on the logarithmic scale; affected bands have gaps.';
+    });
+    const annotations = document.getElementById(key + '-goals');
+    for (const goal of input.goals) {
+      const item = document.createElement('li');
+      item.textContent = `${goal.number} — ${goal.label} (${goal.month})`;
+      annotations.appendChild(item);
+    }
+  });
 
   document.querySelectorAll('button[data-chart]').forEach(button => {
     button.addEventListener('click', () => {

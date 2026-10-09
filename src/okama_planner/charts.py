@@ -59,7 +59,22 @@ def _chart_data(result: dict[str, Any]) -> dict[str, Any]:
         charts = {key: _chart_rows(result["charts"][key]) for key in ("portfolio", "capital")}
         if [r["month"] for r in charts["portfolio"]] != [r["month"] for r in charts["capital"]]:
             raise ValueError("Portfolio and capital must use the same months")
-        return {"currency": currency, "charts": charts}
+        goals = result.get("goals", [])
+        if not isinstance(goals, list):
+            raise ValueError("Forecast goals must be a list")
+        markers = []
+        months = {row["month"] for row in charts["portfolio"]}
+        for number, goal in enumerate(goals, 1):
+            month = goal["month"]
+            label = goal["label"]
+            if not isinstance(month, str) or not re.fullmatch(r"\d{4}-\d{2}", month):
+                raise ValueError("Goal dates must use YYYY-MM")
+            date.fromisoformat(f"{month}-01")
+            if not isinstance(label, str):
+                raise ValueError("Goal labels must be strings")
+            if month in months:
+                markers.append({"number": number, "label": label, "month": month})
+        return {"currency": currency, "charts": charts, "goals": markers}
     except (KeyError, TypeError, OverflowError) as error:
         raise ValueError("Saved forecast is missing valid chart data") from error
 

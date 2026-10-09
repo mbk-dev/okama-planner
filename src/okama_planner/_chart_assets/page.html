@@ -12,7 +12,14 @@ h1 { font-size: 24px; margin: 0 0 8px; }
 p { color: #4b5563; line-height: 1.5; }
 .card { background: #fff; border: 1px solid #eceef2; border-radius: 12px; margin: 20px 0; overflow: hidden; }
 .chart { width: 100%; height: clamp(320px, 70vh, 800px); }
-.actions { display: flex; gap: 8px; justify-content: flex-end; padding: 0 18px 14px; }
+.controls { padding: 8px 18px 16px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; }
+.downloads { display: flex; flex-wrap: wrap; gap: 8px; }
+.scale-toggle { display: flex; gap: 8px; align-items: center; cursor: pointer; }
+.goals { padding: 0; margin: 12px 0 0; list-style: none; color: #4b5563; overflow-wrap: anywhere; }
+.goals li { margin: 4px 0; }
+.scale-note { margin: 10px 0 0; font-size: 13px; }
+[hidden] { display: none !important; }
 button { background: #fff; border: 1px solid #c3c2b7; border-radius: 6px; color: #111827; font: inherit; padding: 6px 12px; cursor: pointer; }
 button:hover { background: #f4f5f7; } button:focus-visible { outline: 2px solid #2a78d6; outline-offset: 2px; }
 summary { cursor: pointer; color: #4b5563; } pre { white-space: pre-wrap; font-size: 11px; }
@@ -27,15 +34,25 @@ summary { cursor: pointer; color: #4b5563; } pre { white-space: pre-wrap; font-s
 Net capital includes assets outside the portfolio and subtracts debt. Values are not recalculated here.</p>
 <section class="card" aria-label="Portfolio forecast">
 <div id="portfolio" class="chart" role="img" aria-label="Portfolio median and percentile ranges"></div>
-<div class="actions"><button data-chart="portfolio" data-format="png">Save portfolio PNG</button><button data-chart="portfolio" data-format="svg">Save portfolio SVG</button></div>
+<div class="controls">
+<div class="actions"><label class="scale-toggle"><input type="checkbox" data-scale="portfolio" aria-describedby="portfolio-scale-note">Logarithmic scale</label>
+<div class="downloads"><button data-chart="portfolio" data-format="png">Save portfolio PNG</button><button data-chart="portfolio" data-format="svg">Save portfolio SVG</button></div></div>
+<p id="portfolio-scale-note" class="scale-note" hidden></p>
+<ul id="portfolio-goals" class="goals" aria-label="Goal annotations"></ul>
+</div>
 </section>
 <section class="card" aria-label="Net capital forecast">
 <div id="capital" class="chart" role="img" aria-label="Net capital median and percentile ranges"></div>
-<div class="actions"><button data-chart="capital" data-format="png">Save capital PNG</button><button data-chart="capital" data-format="svg">Save capital SVG</button></div>
+<div class="controls">
+<div class="actions"><label class="scale-toggle"><input type="checkbox" data-scale="capital" aria-describedby="capital-scale-note">Logarithmic scale</label>
+<div class="downloads"><button data-chart="capital" data-format="png">Save capital PNG</button><button data-chart="capital" data-format="svg">Save capital SVG</button></div></div>
+<p id="capital-scale-note" class="scale-note" hidden></p>
+<ul id="capital-goals" class="goals" aria-label="Goal annotations"></ul>
+</div>
 </section>
 <p>Resize the window to change chart proportions. Image exports preserve the current chart dimensions;
 PNG uses twice the pixel resolution, SVG remains vector. Negative net capital is retained.</p>
-<details><summary>Apache ECharts 6.1.0 — third-party license notices</summary><pre><!-- LICENSES --></pre></details>
+<pre hidden id="license-notices"><!-- LICENSES --></pre>
 </main>
 <pre id="render-output"></pre>
 <!-- DATA -->
