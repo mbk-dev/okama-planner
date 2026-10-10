@@ -1,0 +1,78 @@
+# Local browser form for human intake
+
+The form lets a person enter client identity directly into a local SQLite database,
+without sending names or contacts through an AI assistant. It is an optional standalone
+command, not an MCP tool. The current interface is Russian.
+
+## Start and stop
+
+Open an existing database:
+
+```bash
+poetry run python -m okama_planner.client_form --database /path/to/clients.sqlite3
+```
+
+Create a new empty database explicitly (its parent directory must exist):
+
+```bash
+poetry run python -m okama_planner.client_form --database /path/to/new.sqlite3 --initialize
+```
+
+Initialization refuses to overwrite an existing file. Without `--initialize`, a missing
+file is an error. No sample clients are inserted. `--port 8765` selects a fixed port;
+the default selects an unused port. The process prints a private capability URL.
+Open that exact URL in your local browser. Stop the process with Ctrl+C and close the tab.
+Restarting invalidates the old URL and all outstanding forms.
+
+Keep the URL private: anyone able to access this machine's loopback interface and possessing
+the URL can read and edit this database. Do not forward the port, reverse-proxy it, expose it
+on a network, or register the command as an AI tool. This is a local human intake surface,
+not a hosted multi-user application. A local process with database filesystem access remains
+outside this boundary; see [AI privacy](ai-privacy.md).
+
+## Client and financial input
+
+Navigation lists stable client codes, never names. Choose **Создать клиента** to create a
+record, or select a code to edit its complete identity record. The form includes all writable
+registry fields. The database assigns the ID, code and creation timestamp. The interface displays only
+the stable code.
+Saving an edited form replaces its writable fields; empty optional inputs clear those values.
+
+Enter one broker per line. An empty field with the known-information checkbox
+unchecked means unknown; checking it with an empty field means no broker.
+A populated field records the ordered broker list. Sex and the primary communication channel
+have explicit choices. A primary channel requires its corresponding contact. Birth year,
+Telegram ID and declaration delivery date use the existing registry validation.
+
+The **Финансовые планы** link opens an advanced JSON editor for a `ForecastRequest` or
+`MulticurrencyRequest`. It covers financial input including household members, income,
+expenses, assets, liabilities, goals and forecast settings. Copy a complete request into the
+editor; the offline synthetic inputs in `examples/` illustrate the schema. The same storage
+validation used by the Python API runs before saving.
+
+Saving always appends a financial version, with an optional version note. Version links load
+previous requests for the selected code; the editor opens the latest version by default.
+Saving a previous version also appends a new version. This editor does not calculate a
+forecast, export a report or edit results. Client identity and plan saves are separate actions.
+Annual tax residency is a related table rather than a registry field and remains available
+through the storage API.
+
+Errors are intentionally generic and do not echo validation inputs or database exceptions.
+On a validation error, the form retains your entries and issues a fresh single-use nonce
+so you can correct and resubmit them. Requests
+larger than 1 MiB are rejected. A form can be submitted only once, including an unsuccessful
+validation attempt (a replacement form is issued); refreshing the result after a successful save cannot duplicate a client
+or version. Opening more than 256 forms invalidates the oldest outstanding forms.
+
+## Local boundary
+
+The stdlib HTTP server binds only to `127.0.0.1`, requires the random capability path,
+checks the exact Host and same-origin Origin, and validates CSRF plus a single-use form nonce.
+It refuses cross-site browser requests and has no external assets or network data calls.
+HTML values are escaped; responses disable caching, scripts and framing, and prevent referrer
+leaks. Access logs and raw exception tracebacks are suppressed. The startup URL is printed
+only so the human can open the form.
+
+Tests use synthetic databases and real loopback HTTP requests. They cover intake, edit,
+validation, escaping, access boundaries, repeat submissions, append-only plan versions and
+client ownership of loaded versions.

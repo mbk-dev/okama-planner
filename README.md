@@ -164,6 +164,20 @@ with PlannerStore.initialize(path) as store:
 `initialize` refuses to overwrite a file; `PlannerStore.open(path)` reopens an existing
 database. [Storage API, versioned snapshots and migrations →](docs/storage.md)
 
+### Local browser intake
+
+Enter client identity directly through a human-only local browser form:
+
+```bash
+poetry run python -m okama_planner.client_form --database /path/to/clients.sqlite3
+```
+
+Open the private URL printed by the command; stop with Ctrl+C. The Russian interface
+creates and edits client records and saves financial input as append-only versions through
+an advanced JSON editor. It uses only the local database and does not connect to an AI.
+Use `--initialize` only to create a new empty database; existing files are never overwritten.
+[Form usage, validation and local access boundary →](docs/client-form.md)
+
 ### Complete client record
 
 The table below shows **all 16 columns of Planner's `client_registry`**, with three entirely
