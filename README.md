@@ -127,15 +127,16 @@ HTML financial-plan report or a hosted web application. [Chart options →](docs
 
 ## Use with an AI assistant
 
-Install Planner into the same environment as the existing **okama-mcp** server. Its current
-source branch exposes `planner_forecast` and `planner_compare_modes`, while preserving the
-existing portfolio tools. The adapter calls Planner rather than duplicating its calculations.
+The published **okama-mcp 2.0.0** installs Planner 0.4.x with report dependencies
+automatically. `planner_forecast` and `planner_compare_modes` call Planner's shared
+calculation API while preserving the existing portfolio tools.
 
-[Local installation, client setup and worked MCP examples →](https://github.com/mbk-dev/okama-mcp/blob/main/docs/planner.md)
+A configured local stdio installation adds six client-registry tools and
+`planner_export_report` for Excel reports. HTTP exposes calculation tools and never
+registers the local client/report tools. Standalone Planner chart exports and
+retirement consumption-utility helpers are not exposed by these MCP tools.
 
-Planner reports, chart rendering and consumption-utility helpers are not yet exposed through
-these MCP tools. The published MCP package and public HTTP server have not been updated for
-this integration; use the source installation described in the linked guide.
+[Installation, local setup and worked MCP examples →](https://github.com/mbk-dev/okama-mcp/blob/main/docs/planner.md)
 
 ## Client records
 
@@ -148,7 +149,7 @@ from collecting information and choosing how to communicate to revisiting their 
 **Status: implemented in the Python API.** `okama_planner.storage` provides client
 creation, reading and updates, financial versions, scenarios and saved forecast results.
 The shipped SQLite template contains schema and zero client records, plans or results.
-Access to this registry through okama-mcp is a separate planned integration.
+Local registry access is available through the configured stdio tools in okama-mcp 2.0.0.
 
 ```python
 from pathlib import Path
@@ -209,8 +210,8 @@ This structure lets an advisor keep earlier inputs and compare later plans witho
 an updated financial situation as a different person. Recording tax residency does not itself
 calculate jurisdiction-specific taxes.
 
-Each advisor keeps their actual database outside the public repository. MCP access to the
-registry remains planned; the storage API is implemented. Private advisory documents and internal
+Each advisor keeps their actual database outside the public repository. Configured local stdio tools in okama-mcp 2.0.0 access the
+registry through this storage API. Private advisory documents and internal
 skills are not part of the public package.
 
 ## Languages
@@ -246,7 +247,7 @@ Retirement consumption **CE, gamma and equivalent-alpha helpers** exist as a sep
 they are not yet integrated into forecasts, MCP or reports.
 [Method and applicability →](docs/retirement-utility.md)
 
-Next steps include registry access through MCP, broader MCP exports and multilingual presentation.
+Next steps include broader MCP exports and multilingual presentation.
 A web interface is a later direction. The standalone package contains no private client data,
 MBK documents, internal skills or dependency on the closed lfp application.
 
@@ -265,7 +266,6 @@ Tools for investing and financial planning.
 | [okama Data API](https://api.okama.io/) | Access historical market and economic data. |
 | [okama-macro](https://github.com/mbk-dev/okama-macro) | Work with inflation and central-bank rate series. |
 | [okama-mcp](https://mcp.okama.io/) | Use okama tools through an AI assistant. |
-| [okama Planner](https://github.com/mbk-dev/okama-planner) | Build financial plans and manage client planning history. |
 
 **[Join the okama community →](https://github.com/mbk-dev/okama/discussions)**
 
