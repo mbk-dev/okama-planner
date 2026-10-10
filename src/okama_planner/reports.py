@@ -23,7 +23,9 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from okama_planner.api import ForecastRequest
 from okama_planner.horizon import effective_horizon_years
-from okama_planner.localization import terminology, translate
+from okama_planner.localization import (
+    excel_number_format, format_date, presentation_boundary, terminology, translate,
+)
 
 MONEY = '#,##0.00;(#,##0.00);"-"'
 PERCENT = '0.0%;(0.0%);"-"'
@@ -693,6 +695,16 @@ def _localized_layout(sheet: Worksheet, language: str, resize: bool = True) -> N
             sheet.row_dimensions[row[0].row].height = min(120, max(old_height, 16 * lines))
 
 
+def _localized_mode(sheet: Worksheet, language: str) -> None:
+    """Translate the derived mode caption, never opaque user labels or machine snapshots."""
+    if sheet.title != "Summary" or sheet["A8"].value != translate("Portfolio mode", language):
+        return
+    mode = sheet["B8"].value
+    if language != "en" and mode in {"single", "per_goal"}:
+        caption = "Single portfolio" if mode == "single" else "Goal portfolios"
+        _text(sheet, 8, 2, translate(caption, language))
+
+
 def _localize(
     book: Workbook, language: str, unit: str, brand: ReportBrand, scenarios: Sequence[dict[str, Any]],
 ) -> None:
@@ -703,11 +715,21 @@ def _localize(
         _localized_layout(sheet, language)
         if original_name == "Comparison" and len(scenarios) == 1:
             _text(sheet, 5, 3, translate("No comparison", language))
+        _localized_mode(sheet, language)
         if original_name in {"Ledger", "Budget"}:
             basis = (" · " + translate("Planned requirements, not actual payments/balances", language)
                      if "Funding events" in names else "")
             _text(sheet, 4, 1, translate("Baseline: {label} · Nominal {unit}", language,
                                        label=str(scenarios[0]["label"]), unit=unit) + basis)
+        for row in sheet:
+            for cell in row:
+                if cell.data_type == "f" or isinstance(cell.value, (int, float)):
+                    cell.number_format = excel_number_format(cell.number_format, language)
+                # Source ledger calendars stay ISO because SUMIFS criteria use them.
+                if original_name == "Goals" and cell.row >= 6 and language != "en":
+                    date_column = 4 if "Currency groups" in names else 3
+                    if cell.column == date_column and isinstance(cell.value, str):
+                        _text(sheet, cell.row, cell.column, format_date(cell.value, language))
         sheet.oddFooter.right.text = translate("Nominal {unit} · {label}", language,
                                                unit=unit, label=str(scenarios[0]["label"]))
         sheet.title = names[original_name]
@@ -980,6 +1002,7 @@ def _export_legacy_report(
     return destination
 
 
+@presentation_boundary
 def export_report(
     scenarios: Sequence[dict[str, Any]], path: str | Path, *, brand: ReportBrand | None = None,
     language: str = "en", chart_images: dict[str, str | Path] | None = None,

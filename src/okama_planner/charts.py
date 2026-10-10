@@ -17,7 +17,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Literal
 
-from okama_planner.localization import terminology
+from okama_planner.localization import locale_code, presentation_boundary, terminology
 
 PERCENTILES = ("p10", "p25", "p50", "p75", "p90")
 ASSETS = files("okama_planner").joinpath("_chart_assets")
@@ -89,7 +89,7 @@ def _document(data: dict[str, Any]) -> str:
     for original, localized in sorted(labels.items(), key=lambda pair: -len(pair[0])):
         # Translate only the HTML template, before scripts/data/license notices are inserted.
         template = template.replace(original, localized)
-    data = {**data, "labels": labels}
+    data = {**data, "labels": labels, "locale": locale_code(language)}
     engine = ASSETS.joinpath("echarts.min.js").read_text(encoding="utf-8")
     script = ASSETS.joinpath("charts.js").read_text(encoding="utf-8")
     licenses = "\n".join(
@@ -262,6 +262,7 @@ def _export_currency_charts(
     return paths
 
 
+@presentation_boundary
 def export_charts(
     result: dict[str, Any], output_dir: str | Path, *,
     format: Literal["html", "png", "svg"] = "html", width: int = 1200, height: int = 720,

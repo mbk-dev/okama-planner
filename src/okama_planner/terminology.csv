@@ -217,3 +217,48 @@ multicurrency_amount,Amount,Сумма,金额,Betrag,Importe
 multicurrency_group_amounts_stay_in_native_currencies;_totals_are_converted_pathwise.,Group amounts stay in native currencies; totals are converted pathwise.,Суммы групп приведены в их валютах; общие итоги пересчитаны по каждой траектории.,各组金额采用各自币种；总额按每条路径换算。,Gruppenbeträge bleiben in ihrer Währung; Gesamtwerte werden je Pfad umgerechnet.,Los importes de cada grupo se mantienen en su moneda; los totales se convierten por trayectoria.
 multicurrency_fx_transfers_are_internal;_fees_reduce_capital._snapshots_retain_histories.,FX transfers are internal; fees reduce capital. Snapshots retain histories.,Валютные переводы — внутренние операции; комиссии уменьшают капитал. История сохранена в снимках плана.,外汇转账为内部操作；费用减少资本。计划快照保留历史数据。,Währungsumtausch ist intern; Gebühren mindern das Kapital. Planschnappschüsse speichern die Historien.,Las transferencias son internas; las comisiones reducen el capital. Las instantáneas guardan los históricos.
 multicurrency_loan_financing,Loan financing,Средства на погашение кредита,贷款偿还资金,Mittel zur Kredittilgung,Fondos para amortizar el préstamo
+localization_3,Currency,Валюта,货币,Währung,Divisa
+localization_14,Fee ({unit}),Комиссия ({unit}),费用（{unit}）,Gebühr ({unit}),Comisión ({unit})
+localization_15,Unmet mean ({unit}),Средняя непокрытая сумма ({unit}),平均未满足金额（{unit}）,Durchschnittlicher Fehlbetrag ({unit}),Importe medio no cubierto ({unit})
+localization_18,Record ID,Идентификатор записи,记录标识,Datensatz-ID,ID del registro
+localization_19,Client code,Код клиента,客户代码,Kundencode,Código de cliente
+localization_20,Full name,Полное имя,姓名,Vollständiger Name,Nombre completo
+localization_21,Sex,Пол,性别,Geschlecht,Sexo
+localization_22,Birth year,Год рождения,出生年份,Geburtsjahr,Año de nacimiento
+localization_23,Email,Электронная почта,电子邮箱,E-Mail,Correo electrónico
+localization_24,Phone,Телефон,电话,Telefon,Teléfono
+localization_25,Telegram,Telegram,Telegram,Telegram,Telegram
+localization_26,Telegram ID,Идентификатор Telegram,Telegram 标识,Telegram-ID,ID de Telegram
+localization_27,WhatsApp,WhatsApp,WhatsApp,WhatsApp,WhatsApp
+localization_28,MAX,MAX,MAX,MAX,MAX
+localization_29,Brokers,Брокеры,券商,Broker,Intermediarios
+localization_30,Primary contact channel,Основной канал связи,主要联系方式,Bevorzugter Kontaktkanal,Canal de contacto principal
+localization_31,IPS sent date,Дата отправки инвестиционной декларации,投资政策声明发送日期,Versanddatum der Anlagerichtlinie,Fecha de envío de la declaración de inversión
+localization_32,Note,Примечание,备注,Notiz,Nota
+localization_33,Created at,Дата создания,创建日期,Erstellt am,Fecha de creación
+localization_34,Updated at,Дата изменения,更新日期,Aktualisiert am,Fecha de modificación
+localization_35,Registry ID,Идентификатор реестра,登记标识,Register-ID,ID del registro de clientes
+localization_36,Year,Год,年份,Jahr,Año
+localization_37,Country,Страна,国家,Land,País
+localization_38,Female,Женский,女,Weiblich,Femenino
+localization_39,Male,Мужской,男,Männlich,Masculino
+localization_40,Field is required,Обязательное поле,必填字段,Pflichtfeld,Campo obligatorio
+localization_41,Unknown field,Неизвестное поле,未知字段,Unbekanntes Feld,Campo desconocido
+localization_42,Select one of the supported values,Выберите одно из допустимых значений,请选择一个允许的值,Wählen Sie einen zulässigen Wert,Seleccione uno de los valores admitidos
+localization_43,Value is below the allowed minimum,Значение меньше допустимого минимума,值低于允许的最小值,Wert unter dem zulässigen Minimum,El valor es inferior al mínimo permitido
+localization_44,Value exceeds the allowed maximum,Значение превышает допустимый максимум,值超过允许的最大值,Wert über dem zulässigen Maximum,El valor supera el máximo permitido
+localization_45,Value does not match the required format,Значение не соответствует требуемому формату,值不符合所需格式,Wert entspricht nicht dem erforderlichen Format,El valor no cumple el formato requerido
+localization_46,Invalid value,Недопустимое значение,无效值,Ungültiger Wert,Valor no válido
+localization_47,The operation could not be completed,Не удалось выполнить операцию,无法完成操作,Der Vorgang konnte nicht abgeschlossen werden,No se pudo completar la operación
+localization_48,A recorded name/contact must not be empty,Имя или контакт не могут быть пустыми,姓名或联系方式不能为空,Name oder Kontakt dürfen nicht leer sein,El nombre o contacto no puede estar vacío
+localization_49,Broker names must not be empty,Название брокера не может быть пустым,券商名称不能为空,Brokernamen dürfen nicht leer sein,Los nombres de intermediarios no pueden estar vacíos
+localization_50,Primary channel requires a recorded contact,Для основного канала связи нужен указанный контакт,主要联系方式需要已记录的联系信息,Für den bevorzugten Kanal muss ein Kontakt hinterlegt sein,El canal principal requiere un contacto registrado
+localization_51,Country must be an assigned ISO 3166-1 alpha-2 code,Укажите действующий двухбуквенный код страны ISO 3166-1,国家必须使用有效的 ISO 3166-1 两字母代码,Geben Sie einen gültigen ISO-3166-1-Ländercode mit zwei Buchstaben an,Indique un código de país ISO 3166-1 válido de dos letras
+localization_extra_0,Free cash flow,Свободный денежный поток,自由现金流,Freier Cashflow,Flujo de caja libre
+localization_extra_1,Mortgage payments,Платежи по ипотеке,按揭还款,Hypothekenzahlungen,Pagos hipotecarios
+localization_extra_2,Nominal amount,Номинальная сумма,名义金额,Nominalbetrag,Importe nominal
+localization_extra_3,Probability of success,Вероятность успеха,成功概率,Erfolgswahrscheinlichkeit,Probabilidad de éxito
+localization_extra_4,Strategy,Стратегия,策略,Strategie,Estrategia
+localization_extra_5,Variant,Вариант,变体,Variante,Variante
+localization_mode_0,Single portfolio,Единый портфель,共同投资组合,Gemeinsames Portfolio,Cartera única
+localization_mode_1,Goal portfolios,Портфели по целям,目标投资组合,Zielportfolios,Carteras por objetivo

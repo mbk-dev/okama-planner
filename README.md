@@ -216,24 +216,23 @@ skills are not part of the public package.
 
 ## Languages
 
-**Available today:** Excel reports and chart interface text in **English, Russian,
+**Available in this source checkout:** Excel reports and chart interface text in **English, Russian,
 German, Spanish and Simplified Chinese** (`en`, `ru`, `de`, `es`, `zh`). Select a language
 with `export_report(..., language="ru")` or `export_charts(..., language="ru")`.
 The shared [terminology table](src/okama_planner/terminology.csv) supplies translated captions.
-See the [five-language report example](examples/multilingual_reports.py).
-
-The broader localization roadmap covers:
-
-- Excel and future HTML/PDF report headings, sheet names, instructions and template text.
-- Chart titles, controls, annotations and number, currency and date formatting.
-- Client-registry field labels, descriptions, forms and user-facing views.
-- Validation messages, tool descriptions shown by MCP clients, guides and demonstration materials.
-- Future web interface labels and help text.
+See the [offline five-language example](examples/localized_plan.py),
+[user guides](docs/user-guide/en.md) and [coverage matrix and language contract](docs/localization.md).
+Localized presentation includes currency-group reports, registry field/enum displays,
+validation messages, chart controls and locale-specific dates and numbers. The companion
+okama-mcp implementation supplies language selection for Planner and local client tools.
+The additional locale formatting, registry presentation and validation helpers described
+here are source changes after v0.4.1; the published v0.4.1 package contains the earlier
+Excel/chart captions. The companion MCP additions likewise require its updated source.
 
 SQL column names, JSON keys and API identifiers will remain stable across languages.
 Client names and other user-entered text are not automatically translated. Localized wording
-does not imply support for a country's tax or pension rules. Additional languages and localization beyond the implemented
-Excel/chart captions are roadmap items until their implementation is published.
+does not imply support for a country's tax or pension rules. Future web interfaces,
+additional languages and full HTML/PDF financial reports remain roadmap items.
 
 ## Model boundaries & next steps
 

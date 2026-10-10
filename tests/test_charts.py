@@ -137,7 +137,7 @@ def test_direct_exports_render_two_real_images_at_requested_dimensions(tmp_path:
             text = " ".join(root.itertext())
             assert "2028" in text
             assert "p90" in text
-            expected_median = "$25\u00a0291" if file.stem == "portfolio" else "$47\u00a0556"
+            expected_median = "$25,291" if file.stem == "portfolio" else "$47,556"
             assert expected_median in text
     assert sorted(p.name for p in tmp_path.iterdir()) == [f"capital.{format}", f"portfolio.{format}"]
 

@@ -102,6 +102,7 @@ def _budget(
     request: MulticurrencyRequest,
     brand: ReportBrand,
     result: dict[str, Any],
+    language: str,
 ) -> None:
     plan = request.household
     retirement = year_index(plan.t0, plan.retirement_year)
@@ -134,7 +135,7 @@ def _budget(
         _append(
             cash,
             [
-                caption,
+                translate(caption, language),
                 *[
                     sum(
                         row[3]
@@ -145,7 +146,7 @@ def _budget(
                 ],
             ],
         )
-    _text(cash, 8, 1, "Free cash flow")
+    _text(cash, 8, 1, translate("Free cash flow", language))
     for col in range(2, len(years) + 2):
         from openpyxl.utils import get_column_letter
 
@@ -257,17 +258,21 @@ def _groups_and_goals(
             [
                 group.group_id,
                 native.currency,
-                native.portfolio_mode,
+                (translate("Single portfolio" if native.portfolio_mode == "single" else "Goal portfolios",
+                           language)
+                 if language != "en" else native.portfolio_mode),
                 saved["result"]["metrics"]["probability_of_success"],
                 saved["result"]["charts"]["portfolio"][-1]["p50"],
             ],
         )
         groups.cell(groups.max_row, 4).number_format = PERCENT
         for asset in native.plan.assets:
-            _append(inputs, [group.group_id, native.currency, "Asset", asset.label, asset.amount])
+            _append(inputs, [group.group_id, native.currency, translate("Asset", language),
+                             asset.label, asset.amount])
         for liability in native.plan.liabilities:
             _append(
-                inputs, [group.group_id, native.currency, "Liability", liability.label, liability.principal]
+                inputs, [group.group_id, native.currency, translate("Liability", language), liability.label,
+                         liability.principal]
             )
         for goal in native.plan.goals:
             _append(
@@ -275,10 +280,11 @@ def _groups_and_goals(
                 [
                     group.group_id,
                     native.currency,
-                    "Goal",
+                    translate("Goal", language),
                     goal.label,
                     goal.amount_pv,
-                    "Expense share" if goal.amount_basis == "expense_share" else "Present value",
+                    translate("Expense share" if goal.amount_basis == "expense_share" else "Present value",
+                              language),
                 ],
             )
             if goal.amount_basis == "expense_share":
@@ -432,14 +438,16 @@ def export_multicurrency_report(
     ]:
         _append(summary, [caption, value])
     summary["B6"].number_format = PERCENT
-    _budget(book, request, brand, result)
+    _budget(book, request, brand, result, language)
     _groups_and_goals(book, request, result, brand, language)
     _traces(book, request, result, brand)
     if len(scenarios) == 2:
         comparison = _sheet(book, "Comparison", brand, ["Indicator", "Baseline", "Variant", "Difference"])
         for metric in ("probability_of_success", "terminal_p50"):
             left, right = (s["result"]["metrics"][metric] for s in scenarios)
-            _append(comparison, [metric, left, right, right - left])
+            caption = ("Probability of success" if metric == "probability_of_success"
+                       else "Terminal portfolio p50")
+            _append(comparison, [caption, left, right, right - left])
     instructions = _sheet(book, "Instructions", brand, ["Topic", "Instruction", ""])
     _append(
         instructions, ["Units", "Group amounts stay in native currencies; totals are converted pathwise."]

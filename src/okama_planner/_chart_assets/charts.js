@@ -8,9 +8,16 @@
   const muted = '#898781';
   const charts = new Map();
   const scales = new Map();
-  const symbols = { USD: '$', EUR: '€', GBP: '£', RUB: '₽', CNY: '¥', HKD: 'HK$', ILS: '₪', INR: '₹' };
-  const money = value => (symbols[input.currency] || input.currency + ' ') +
-    Math.round(value).toLocaleString('en-US').replace(/,/g, '\u00a0');
+  const moneyFormat = new Intl.NumberFormat(input.locale || 'en-US', {
+    style: 'currency', currency: input.currency, currencyDisplay: 'narrowSymbol',
+    minimumFractionDigits: 0, maximumFractionDigits: 0
+  });
+  const money = value => moneyFormat.format(value);
+  const numberFormat = new Intl.NumberFormat(input.locale || 'en-US', { maximumFractionDigits: 2 });
+  const monthFormat = new Intl.DateTimeFormat(input.locale || 'en-US', {
+    year: 'numeric', month: 'short', timeZone: 'UTC'
+  });
+  const monthLabel = month => monthFormat.format(new Date(month + '-01T00:00:00Z'));
   const gradient = opacity => ({
     type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
     colorStops: [{ offset: 0, color: `rgba(42,120,214,${opacity})` },
@@ -90,7 +97,7 @@
         axisLabel: { color: muted, fontFamily: font, fontSize: mobile ? 10 : 11, hideOverlap: true, interval: 0,
           alignMinLabel: 'left', alignMaxLabel: 'right',
           formatter: (value, index) => {
-            if (short) return value;
+            if (short) return monthLabel(value);
             const year = value.slice(0, 4);
             return index === firstIndexes.get(year) && (years.length - 1 - years.indexOf(year)) % step === 0 ? year : '';
           } } },
@@ -100,7 +107,7 @@
         axisLine: { show: false, onZero: false }, axisTick: { show: false },
         splitLine: { show: true, lineStyle: { color: '#eceef2' } },
         axisLabel: { color: muted, fontFamily: font, fontSize: mobile ? 10 : 11,
-          showMinLabel: !logarithmic } },
+          showMinLabel: !logarithmic, formatter: value => numberFormat.format(value) } },
       series: [...(logarithmic ? [logBand('p10', 'p90', 'outer', 0.12, 1),
         logBand('p25', 'p75', 'inner', 0.25, 2), logBoundary('p90'), logBoundary('p75'), logBoundary('p25'), logBoundary('p10')] :
         [...band('p10', 'p90', 'outer', 0.12, 1), ...band('p25', 'p75', 'inner', 0.25, 2)]), median, ...labels],
@@ -112,7 +119,7 @@
           const index = dates.indexOf(params[0]?.axisValue);
           if (index < 0) return '';
           const row = rows[index];
-          return `<strong>${row.month}</strong><br>` + ['p90', 'p75', 'p50', 'p25', 'p10'].map(p =>
+          return `<strong>${monthLabel(row.month)}</strong><br>` + ['p90', 'p75', 'p50', 'p25', 'p10'].map(p =>
             p === 'p50' ? `<strong>${t('Median')}: ${money(row[p])}</strong>` : `${p}: ${money(row[p])}`).join('<br>');
         } }
     };
@@ -169,7 +176,7 @@
     const annotations = document.getElementById(key + '-goals');
     for (const goal of input.goals) {
       const item = document.createElement('li');
-      item.textContent = `${goal.number} — ${goal.label} (${goal.month})`;
+      item.textContent = `${goal.number} — ${goal.label} (${monthLabel(goal.month)})`;
       annotations.appendChild(item);
     }
   });
