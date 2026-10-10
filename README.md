@@ -270,3 +270,12 @@ Tools for investing and financial planning.
 
 Ask questions, share examples and discuss financial planning.
 <!-- okama-family:end -->
+
+### Identity privacy in the updated source
+
+AI-facing integrations use the restricted `okama_planner.ai` API. Names and contacts stay
+inside Planner; MCP receives codes, and financial versions are read/written by Planner.
+Personal identity intake uses a local human command, outside MCP. See
+[the privacy contract and local intake guide](docs/ai-privacy.md) for protected surfaces,
+signed anonymous exports and the filesystem isolation boundary. This contract change is
+available in the updated source and has not yet been published to PyPI.

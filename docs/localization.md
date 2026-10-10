@@ -88,3 +88,10 @@ five workbooks and linear/log HTML views. Optional images require Chrome/Chromiu
 uses a client registry or live market data. Follow the guide for your language:
 [English](user-guide/en.md), [Русский](user-guide/ru.md), [Deutsch](user-guide/de.md),
 [Español](user-guide/es.md), [简体中文](user-guide/zh.md).
+
+## Privacy boundary after localization
+
+The AI-facing registry contract now returns coded fields in every language. Localization
+never restores names or contacts. The earlier raw English client response shape is
+superseded by the [restricted AI API](ai-privacy.md); the trusted local human store keeps
+its full records. Client creation and personal identity patches are local human operations.
