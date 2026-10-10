@@ -20,11 +20,11 @@ poetry run python examples/localized_plan.py --output-dir tmp/localized-example
 
 ## 编制计划
 
-从[虚构请求](../../examples/baseline-request.json)开始，将完整请求传给 `okama_planner` 的 `forecast(request)`。`plan.t0` 是起始月份；还需提供规划期限、退休时间、资产、负债、月收入和月支出。每个目标应指定唯一的 `goal_id`、名称 `label`、类型 `kind`、当前金额 `amount_pv`、估值年份 `pv_year` 和目标日期。利率和概率用小数表示：`0.02` 代表 2%。收入和支出输入为正数；现金流明细将支出记为负数。
+从[虚构请求](../../examples/baseline-request.json)开始，将完整请求传给 `okama_planner` 的 `forecast(request)`。`plan.t0` 是格式为 `YYYY-MM` 的起始月份字符串，例如 `"2026-01"`；还需提供规划期限、退休时间、资产、负债、月收入和月支出。每个目标应指定唯一的 `goal_id` 和名称 `label`，以及类型 `kind`、当前金额 `amount_pv` 和估值年份 `pv_year`；有明确日期的目标还需指定 `target_year`，并可指定 `target_month`。利率和概率用小数表示：`0.02` 代表 2%。收入和支出输入为非负数；现金流明细将支出记为负数。
 
 `currency="USD"` 指定计算货币。`export_report` 或 `export_charts` 的 `language="zh"` 选择中文展示。语言不会兑换货币，也不会改变通胀、投资组合收益或法律假设。用户填写的名称保持原样；制作另一语言版本时请自行翻译这些名称。[本地化约定](../localization.md)说明了支持的消息、格式和 MCP 启动语言设置。
 
-单币种请求使用一种货币。多币种请求需明确指定 `reporting_currency`、原币种的 `currency_groups` 和汇率假设；翻译后的报告保留各组原币种及报告货币。请参阅[多币种规划](../multicurrency.md)和[投资组合模式](../portfolio-modes.md)。本地化不会补充输入中缺少的税费，也不会向预测请求添加不支持的 gamma/alpha 字段。
+单币种请求使用一种货币。`MulticurrencyRequest` 需指定基础货币 `currency`、`household` 中的共同预算、原币种的 `groups`（每组包含 `group_id` 和 `request`）以及汇率假设 `fx`。此外，还必须提供 `contribution_schedule`、`household_funding_order`、`conversion_fee_rate`、`seed` 和 `mc_number`。`currency_groups` 属于已保存的结果，而不是请求；翻译后的报告保留各组原币种及报告货币。请参阅[多币种规划](../multicurrency.md)和[投资组合模式](../portfolio-modes.md)。本地化不会补充输入中缺少的税费，也不会向预测请求添加不支持的 gamma/alpha 字段。
 
 ## 阅读与保存结果
 
