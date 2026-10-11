@@ -14,6 +14,7 @@ FIELDS = {
     'client_registry': 'id code full_name sex birth_year email phone telegram telegram_id whatsapp '
                        'max_messenger brokers primary_channel ips_sent_at note created_at',
     'client': 'id registry_id version note created_at',
+    'client_intake_note': 'content imported_at',
     'tax_residency': 'year country note',
     'person': 'name birth_year role',
     'asset': 'label amount currency asset_class growth_rate note',
@@ -56,6 +57,7 @@ LABELS = dict(zip(
      'Индексация доходов', 'Индексация целей', 'Ставка дисконтирования', 'Доходность буфера',
      'Версия okama', 'Показатель', 'Значение'], strict=True,
 ))
+LABELS.update({'content': 'Исходный текст', 'imported_at': 'Дата переноса'})
 ENUMS = {
     'email': 'Email', 'phone': 'Телефон', 'telegram': 'Telegram', 'whatsapp': 'WhatsApp', 'max': 'MAX',
     'female': 'Женский', 'male': 'Мужской', 'client': 'Клиент', 'spouse': 'Супруг(а)', 'child': 'Ребёнок',
@@ -172,6 +174,8 @@ class LegacyReader:
                 raise ValueError('Unknown client')
             parts.append('<nav>' + link('К списку клиентов') + '</nav>')
             parts.append(table('Личные сведения и контакты', [identity]))
+            parts.append(table('Исходные заметки', self.rows(
+                db, 'client_intake_note', 'WHERE registry_id = ? ORDER BY id', (identity['id'],))))
             parts.append(table('Налоговое резидентство', self.rows(
                 db, 'tax_residency', 'WHERE registry_id = ? ORDER BY year', (identity['id'],))))
             versions = self.rows(db, 'client', 'WHERE registry_id = ? ORDER BY version', (identity['id'],))

@@ -86,12 +86,15 @@ Dates appear as DD.MM.YYYY; missing contacts or dates display a dash. The index 
 no financial details. Selecting a linked code opens the detailed view, and
 **К списку клиентов** returns to the table.
 
-The detailed view shows identity, contacts, tax residency, financial input versions, family, assets,
+The detailed view shows identity, contacts, original imported Markdown notes when present,
+tax residency, financial input versions, family, assets,
 liabilities, budget, goals, portfolios with holdings, scenarios and a stored run summary
 with metrics. The latest input version and run are selected by default; navigation can select
 an earlier version or run owned by that client and version. Missing optional tables display
 an empty section. Monthly ledgers and raw input snapshots are not loaded. Values are escaped,
-enums use Russian captions, rates and expense-share goals show percentages.
+enums use Russian captions, rates and expense-share goals show percentages. Imported notes
+are displayed as escaped plain text for the selected registry entry; their source fingerprints
+are not displayed, and their content is not exposed through AI APIs.
 
 **Форма Planner** returns to the writable form's starting page. The two databases have
 independent code namespaces: equal codes can identify different people. Navigation does not

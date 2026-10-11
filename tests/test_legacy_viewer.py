@@ -226,3 +226,21 @@ def test_client_index_with_minimal_schema_and_no_clients(legacy: Path) -> None:
         db.execute('DELETE FROM client_registry')
     page = LegacyReader(legacy).page('/local/', '', '', '')
     assert 'Нет записей.' in page and 'Форма Planner' in page
+
+
+def test_imported_notes_are_local_escaped_and_scoped_to_client(
+    legacy_browser: tuple[client_form.FormServer, Path],
+) -> None:
+    server, path = legacy_browser
+    with sqlite3.connect(path) as db:
+        db.executescript("""
+        CREATE TABLE client_intake_note(id INTEGER, registry_id INTEGER, content TEXT, imported_at TEXT);
+        INSERT INTO client_intake_note VALUES(1,1,'<script>synthetic</script> Goal: example','2026-10-11');
+        INSERT INTO client_intake_note VALUES(2,2,'Other private note','2026-10-11');
+        """)
+    route = server.entry_path + '?view=legacy'
+    _, _, index = send(server, route)
+    assert 'Goal: example' not in index
+    _, _, card = send(server, route + '&code=c-0001')
+    assert '&lt;script&gt;synthetic&lt;/script&gt; Goal: example' in card
+    assert '<script>synthetic</script>' not in card and 'Other private note' not in card
