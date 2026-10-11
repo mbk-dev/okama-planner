@@ -76,7 +76,7 @@ def test_readonly_browser_navigation_and_source_integrity(
     status, _, index = send(server, route)
     assert status == 200
     assert 'c-0001' in index and 'c-0002' in index
-    assert 'test@example.invalid' not in index
+    assert 'test@example.invalid' in index
     status, _, page = send(server, route + '&code=c-0001')
     assert status == 200
     assert '&lt;script&gt;Synthetic&lt;/script&gt;' in page
@@ -174,3 +174,55 @@ def test_free_text_is_not_translated_as_an_enum(key: str, value: str) -> None:
     from okama_planner.legacy_viewer import display
 
     assert display(key, value, {}) == value
+
+
+def test_client_index_contacts_dates_and_detail_roundtrip(
+    legacy_browser: tuple[client_form.FormServer, Path],
+) -> None:
+    server, path = legacy_browser
+    with sqlite3.connect(path) as db:
+        db.executescript("""
+        ALTER TABLE client_registry ADD COLUMN phone TEXT;
+        ALTER TABLE client_registry ADD COLUMN primary_channel TEXT;
+        ALTER TABLE client_registry ADD COLUMN ips_sent_at TEXT;
+        UPDATE client_registry SET phone='+1 555 0100', primary_channel='telegram',
+            ips_sent_at='2026-09-20' WHERE id=1;
+        ALTER TABLE plan_run ADD COLUMN created_at TEXT;
+        UPDATE plan_run SET created_at='2026-09-10 12:00:00' WHERE id=1001;
+        UPDATE plan_run SET created_at='2026-10-10 12:00:00' WHERE id=2001;
+        INSERT INTO scenario VALUES(102,10,'Old version',1);
+        INSERT INTO plan_run VALUES(1002,102,'ok','2026-01',20,'2026-09-15 12:00:00');
+        INSERT INTO plan_run VALUES(1003,101,'failed','2026-01',20,'2026-10-09 12:00:00');
+        """)
+    before = hashlib.sha256(path.read_bytes()).digest()
+    route = server.entry_path + '?view=legacy'
+    status, _, index = send(server, route)
+    assert status == 200
+    assert '<table' in index
+    assert '&lt;script&gt;Synthetic&lt;/script&gt;' in index
+    assert '<script>Synthetic</script>' not in index
+    assert '+1 555 0100' in index and 'Telegram' in index and 'test@example.invalid' in index
+    assert '15.09.2026' in index and '20.09.2026' in index
+    assert '10.10.2026' not in index and '09.10.2026' not in index
+    assert 'Synthetic goal' not in index and 'Версии исходных данных' not in index
+    assert f'href="{route}&amp;code=c-0001"' in index
+    second_row = index.split('<tbody>')[1].split('<tr>')[2].split('</tr>')[0]
+    assert second_row.count('—') == 4
+    _, _, details = send(server, route + '&code=c-0001')
+    assert 'Synthetic goal' in details
+    assert f'href="{route}">К списку клиентов</a>' in details
+    assert 'Other synthetic' not in details
+    assert hashlib.sha256(path.read_bytes()).digest() == before
+
+
+def test_client_index_with_minimal_schema_and_no_clients(legacy: Path) -> None:
+    from okama_planner.legacy_viewer import LegacyReader
+
+    with sqlite3.connect(legacy) as db:
+        db.execute('DROP TABLE scenario')
+    page = LegacyReader(legacy).page('/local/', '', '', '')
+    assert 'test@example.invalid' in page and '<table' in page and '—' in page
+    with sqlite3.connect(legacy) as db:
+        db.execute('DELETE FROM client_registry')
+    page = LegacyReader(legacy).page('/local/', '', '', '')
+    assert 'Нет записей.' in page and 'Форма Planner' in page

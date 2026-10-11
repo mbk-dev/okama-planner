@@ -4,6 +4,7 @@ import html
 import json
 import sqlite3
 from contextlib import closing
+from datetime import date
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode
@@ -56,6 +57,7 @@ LABELS = dict(zip(
      'Версия okama', 'Показатель', 'Значение'], strict=True,
 ))
 ENUMS = {
+    'email': 'Email', 'phone': 'Телефон', 'telegram': 'Telegram', 'whatsapp': 'WhatsApp', 'max': 'MAX',
     'female': 'Женский', 'male': 'Мужской', 'client': 'Клиент', 'spouse': 'Супруг(а)', 'child': 'Ребёнок',
     'portfolio': 'Инвестиционный портфель', 'reserve': 'Резерв', 'non_working': 'Неработающий актив',
     'third_party': 'Сторонний актив', 'savings': 'Накопления на покупки', 'income': 'Доход',
@@ -118,6 +120,37 @@ class LegacyReader:
         return [table(f'Состав портфеля: {row.get("label", "")}', self.rows(
             db, 'portfolio_holding', 'WHERE portfolio_id = ?', (row['id'],))) for row in portfolios]
 
+    def client_index(self, db: sqlite3.Connection, registry: list[dict[str, Any]],
+                     entry_path: str) -> str:
+        dates = {}
+        required = {'scenario': {'id', 'client_id'},
+                    'plan_run': {'scenario_id', 'status', 'created_at'}}
+        if all(keys <= self.columns(db, name) for name, keys in required.items()):
+            dates = dict(db.execute(
+                'SELECT c.registry_id, MAX(r.created_at) FROM client c '
+                'JOIN scenario s ON s.client_id = c.id '
+                'JOIN plan_run r ON r.scenario_id = s.id '
+                "WHERE r.status = 'ok' GROUP BY c.registry_id"))
+        headers = ('Код', 'Имя и фамилия', 'Телефон', 'Канал связи', 'Email', 'Дата ЛФП', 'Дата IPS')
+        parts = ['<section><h2>Клиенты</h2>',
+                 '<p>Дата ЛФП — последний успешный расчёт по всем версиям клиента; '
+                 'дата IPS — отправка инвестиционной декларации. '
+                 'Имя и фамилия показаны так, как записаны в реестре.</p>']
+        if not registry:
+            return ''.join(parts) + '<p>Нет записей.</p></section>'
+        parts.append('<div class="table-scroll"><table><thead><tr>' + ''.join(
+            f'<th scope="col">{caption}</th>' for caption in headers) + '</tr></thead><tbody>')
+        for row in registry:
+            url = entry_path + '?' + urlencode({'view': 'legacy', 'code': row['code']})
+            parts.append('<tr><td><a href="' + html.escape(url, quote=True) + '">' +
+                         html.escape(row['code']) + '</a></td>')
+            values = [display(key, row.get(key) or None, row)
+                      for key in ('full_name', 'phone', 'primary_channel', 'email')]
+            values.extend((calendar_date(dates.get(row['id'])), calendar_date(row.get('ips_sent_at'))))
+            parts.extend(f'<td>{html.escape(value)}</td>' for value in values)
+            parts.append('</tr>')
+        return ''.join(parts) + '</tbody></table></div></section>'
+
     def page(self, entry_path: str, code: str, version: str, run: str) -> str:
         def link(caption: str, **query: Any) -> str:
             url = entry_path + '?' + urlencode({'view': 'legacy', **query})
@@ -130,15 +163,14 @@ class LegacyReader:
                  f'<nav><a href="{entry_path}">Форма Planner</a></nav>']
         with closing(self.connect()) as db:
             registry = self.rows(db, 'client_registry', 'ORDER BY code')
-            parts.append('<nav>' + ' '.join(
-                link(row['code'], code=row['code']) for row in registry) + '</nav>')
             if not code:
                 if version or run:
                     raise ValueError('Client required')
-                return ''.join(parts) + '<p>Выберите код клиента.</p>'
+                return ''.join(parts) + self.client_index(db, registry, entry_path)
             identity = next((row for row in registry if row['code'] == code), None)
             if identity is None:
                 raise ValueError('Unknown client')
+            parts.append('<nav>' + link('К списку клиентов') + '</nav>')
             parts.append(table('Личные сведения и контакты', [identity]))
             parts.append(table('Налоговое резидентство', self.rows(
                 db, 'tax_residency', 'WHERE registry_id = ? ORDER BY year', (identity['id'],))))
@@ -172,6 +204,15 @@ class LegacyReader:
                 parts.append(table('Показатели расчёта', self.rows(
                     db, 'run_metric', 'WHERE plan_run_id = ?', (selected['id'],))))
         return ''.join(parts)
+
+
+def calendar_date(value: Any) -> str:
+    if not value:
+        return '—'
+    try:
+        return date.fromisoformat(str(value)[:10]).strftime('%d.%m.%Y')
+    except ValueError:
+        return '—'
 
 
 def choose(rows: list[dict[str, Any]], key: str, selection: str) -> dict[str, Any] | None:

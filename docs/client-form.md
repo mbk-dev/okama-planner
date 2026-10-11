@@ -77,8 +77,16 @@ The startup check rejects missing files, directories, unsupported databases and 
 schema as a legacy source. The legacy connection uses SQLite URI `mode=ro` and
 `PRAGMA query_only=ON`; it does not initialize, migrate, copy or update the source.
 
-**Просмотр базы LFP (только чтение)** opens the existing registry by code. Selecting a code
-shows identity, contacts, tax residency, financial input versions, family, assets,
+**Просмотр базы LFP (только чтение)** opens a compact client table: code, full name as
+stored, phone, primary communication channel, email, LFP date and IPS date. The legacy
+registry stores a single `full_name`, so the name is not guessed or split into components.
+The LFP date is the latest successful calculation timestamp across all input versions and
+scenarios for that client, not a workbook delivery date; the IPS date is `ips_sent_at`.
+Dates appear as DD.MM.YYYY; missing contacts or dates display a dash. The index contains
+no financial details. Selecting a linked code opens the detailed view, and
+**К списку клиентов** returns to the table.
+
+The detailed view shows identity, contacts, tax residency, financial input versions, family, assets,
 liabilities, budget, goals, portfolios with holdings, scenarios and a stored run summary
 with metrics. The latest input version and run are selected by default; navigation can select
 an earlier version or run owned by that client and version. Missing optional tables display
