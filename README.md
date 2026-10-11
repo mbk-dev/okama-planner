@@ -176,6 +176,9 @@ Open the private URL printed by the command; stop with Ctrl+C. The Russian inter
 creates and edits client records and saves financial input as append-only versions through
 an advanced JSON editor. It uses only the local database and does not connect to an AI.
 Use `--initialize` only to create a new empty database; existing files are never overwritten.
+Add `--legacy-database /path/to/lfp.sqlite3` to browse an existing LFP database read-only
+and switch between the two interfaces. Planner edits stay in its separate database;
+this option does not migrate data.
 [Form usage, validation and local access boundary →](docs/client-form.md)
 
 ### Complete client record

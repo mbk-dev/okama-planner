@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlencode, urlsplit
 
+from okama_planner.legacy_viewer import LegacyReader
 from okama_planner.storage import PlannerStore
 from okama_planner.storage.validation import ClientDetails
 
@@ -38,6 +39,9 @@ font:inherit;border:1px solid #97a9bd;border-radius:6px}textarea{resize:vertical
 input[type=checkbox]{width:auto}button{background:#185eaa;color:white;border:0;border-radius:8px;
 padding:12px 24px;font:inherit;cursor:pointer}.notice{background:#e7f5ec;padding:14px;border-radius:8px}
 .error{background:#fff0ec;padding:14px;border-radius:8px}small{color:#425b74}
+.table-scroll{overflow-x:auto}table{border-collapse:collapse;width:100%}
+th,td{padding:10px;border-bottom:1px solid #dae2ec;text-align:left;vertical-align:top}
+td{white-space:pre-wrap;overflow-wrap:anywhere}section{margin:28px 0}
 @media(max-width:650px){main{margin:0;padding:20px;border-radius:0}.grid{grid-template-columns:1fr}}
 """
 MAX_BODY = 1_048_576
@@ -56,8 +60,9 @@ def single_values(parsed: dict[str, list[str]]) -> dict[str, str]:
 class FormServer(HTTPServer):
     """A synchronous server keeps nonce consumption and mutations serialized."""
 
-    def __init__(self, database: Path, port: int) -> None:
+    def __init__(self, database: Path, port: int, legacy: LegacyReader | None = None) -> None:
         self.database = database
+        self.legacy = legacy
         self.entry_path = f'/{secrets.token_urlsafe(32)}/'
         self.style_nonce = secrets.token_urlsafe(24)
         self.csrf = secrets.token_urlsafe(32)
@@ -190,6 +195,9 @@ class FormHandler(BaseHTTPRequestHandler):
                  f'<nav><a href="{self.server.entry_path}">Создать клиента</a> ']
         for row in store.list_clients():
             parts.append(f'<a href="{self.server.entry_path}?code={row["code"]}">{row["code"]}</a> ')
+        if self.server.legacy is not None:
+            parts.append(f'<a href="{self.server.entry_path}?view=legacy">'
+                         'Просмотр базы LFP (только чтение)</a>')
         parts.append('</nav>')
         if notice:
             level = 'error' if submitted is not None else 'notice'
@@ -216,14 +224,26 @@ class FormHandler(BaseHTTPRequestHandler):
             self.reply(403, 'Доступ запрещён.')
             return
         try:
-            query = parse_qs(urlsplit(self.path).query, strict_parsing=True)
-            code = query.get('code', [''])[0]
-            view = query.get('view', ['client'])[0]
+            query = single_values(parse_qs(urlsplit(self.path).query, strict_parsing=True))
+            code = query.get('code', '')
+            view = query.get('view', 'client')
+            if view == 'legacy':
+                if self.server.legacy is None:
+                    raise ValueError('Legacy not enabled')
+                content = self.server.legacy.page(self.server.entry_path, code,
+                                                  query.get('version', ''), query.get('run', ''))
+                page = ('<!doctype html><html lang="ru"><head><meta charset="utf-8">'
+                        '<meta name="viewport" content="width=device-width,initial-scale=1">'
+                        '<title>Просмотр базы LFP</title>'
+                        f'<style nonce="{self.server.style_nonce}">{STYLE}</style></head>'
+                        f'<body><main>{content}</main></body></html>')
+                self.reply(200, page)
+                return
             if view not in ('client', 'plan'):
                 raise ValueError('Unknown view')
             with PlannerStore.open(self.server.database) as store:
-                page = self.page(store, code, view, query.get('version', [''])[0],
-                                 notice='Сохранено.' if query.get('saved') == ['1'] else '')
+                page = self.page(store, code, view, query.get('version', ''),
+                                 notice='Сохранено.' if query.get('saved') == '1' else '')
             self.reply(200, page)
         except Exception:
             self.reply(400, 'Не удалось открыть запись. Проверьте код и версию в локальной базе.')
@@ -232,6 +252,12 @@ class FormHandler(BaseHTTPRequestHandler):
         if not self.allowed(post=True):
             self.reply(403, 'Доступ запрещён.')
             return
+        if urlsplit(self.path).query:
+            self.reply(405, 'Сохранение по этому адресу недоступно.')
+            return
+        self.submit()
+
+    def submit(self) -> None:
         try:
             length = int(self.headers.get('Content-Length', '0'))
             if self.headers.get('Transfer-Encoding') or length <= 0:
@@ -306,17 +332,20 @@ class FormHandler(BaseHTTPRequestHandler):
             return {'code': code}
 
 
-def create_server(database: Path, port: int = 0) -> FormServer:
+def create_server(database: Path, port: int = 0, legacy_database: Path | None = None) -> FormServer:
     """Open an existing database and bind only to 127.0.0.1."""
     with PlannerStore.open(database):
         pass
-    return FormServer(database, port)
+    legacy = LegacyReader(legacy_database) if legacy_database is not None else None
+    return FormServer(database, port, legacy)
 
 
 def main(argv: list[str] | None = None) -> int:
     """Run local human intake; never start a browser or reveal database content."""
     parser = argparse.ArgumentParser(description='Human-only local client browser form (Russian UI)')
     parser.add_argument('--database', type=Path, required=True)
+    parser.add_argument('--legacy-database', type=Path,
+                        help='Optional existing LFP database; read-only, never migrated')
     parser.add_argument('--port', type=int, default=0, help='Loopback port; default chooses an unused port')
     parser.add_argument('--initialize', action='store_true',
                         help='Create a new empty database; never overwrite')
@@ -326,7 +355,7 @@ def main(argv: list[str] | None = None) -> int:
         if arguments.initialize:
             with PlannerStore.initialize(arguments.database):
                 pass
-        server = create_server(arguments.database, arguments.port)
+        server = create_server(arguments.database, arguments.port, arguments.legacy_database)
         print(f'Open locally: http://127.0.0.1:{server.server_port}{server.entry_path}', flush=True)
         print('Stop with Ctrl+C. Keep this capability URL private.', flush=True)
         server.serve_forever()

@@ -64,6 +64,33 @@ larger than 1 MiB are rejected. A form can be submitted only once, including an 
 validation attempt (a replacement form is issued); refreshing the result after a successful save cannot duplicate a client
 or version. Opening more than 256 forms invalidates the oldest outstanding forms.
 
+## Read-only legacy LFP browser
+
+Attach an existing LFP database explicitly while keeping the writable Planner database separate:
+
+```bash
+poetry run python -m okama_planner.client_form --database /path/to/planner.sqlite3 --legacy-database /path/to/lfp.sqlite3
+```
+
+No legacy path is assumed. Without this flag the legacy link and view are unavailable.
+The startup check rejects missing files, directories, unsupported databases and Planner's own
+schema as a legacy source. The legacy connection uses SQLite URI `mode=ro` and
+`PRAGMA query_only=ON`; it does not initialize, migrate, copy or update the source.
+
+**Просмотр базы LFP (только чтение)** opens the existing registry by code. Selecting a code
+shows identity, contacts, tax residency, financial input versions, family, assets,
+liabilities, budget, goals, portfolios with holdings, scenarios and a stored run summary
+with metrics. The latest input version and run are selected by default; navigation can select
+an earlier version or run owned by that client and version. Missing optional tables display
+an empty section. Monthly ledgers and raw input snapshots are not loaded. Values are escaped,
+enums use Russian captions, rates and expense-share goals show percentages.
+
+**Форма Planner** returns to the writable form's starting page. The two databases have
+independent code namespaces: equal codes can identify different people. Navigation does not
+transfer a client or migrate data. The legacy page contains no save form, and POST requests
+to a view URL are rejected. The existing Host, Origin, capability path and response protections
+apply to both views. Errors and logs never expose source paths, query values or raw database errors.
+
 ## Local boundary
 
 The stdlib HTTP server binds only to `127.0.0.1`, requires the random capability path,
