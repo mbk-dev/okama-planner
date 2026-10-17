@@ -17,7 +17,7 @@ include = [
 
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0"
-okama = ">=3.0.0"
+okama = ">=4.0.0"
 pydantic = ">=2.0"
 pandas = ">=2.0"
 scipy = ">=1.0"
