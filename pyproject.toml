@@ -11,7 +11,11 @@ exclude = ["ui/**/node_modules", "ui/**/node_modules/**"]
 include = [
     {path = "src/okama_planner/storage/templates/empty.sqlite3", format = ["wheel", "sdist"]},
     {path = "examples/**", format = "sdist"},
-    {path = "ui/**", format = "sdist"},
+    {path = "ui/meeting-journal/src/**", format = "sdist"},
+    {path = "ui/meeting-journal/scripts/**", format = "sdist"},
+    {path = "ui/meeting-journal/package*.json", format = "sdist"},
+    {path = "ui/meeting-journal/vite.config.mjs", format = "sdist"},
+    {path = "ui/meeting-journal/README.md", format = "sdist"},
     {path = "src/okama_planner/_journal_assets/**", format = ["wheel", "sdist"]},
     {path = "docs/**", format = "sdist"},
     {path = "tests/**", format = "sdist"},

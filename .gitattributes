@@ -1,0 +1,2 @@
+# Preserve upstream generated JavaScript, including meaningful Markdown whitespace.
+src/okama_planner/_journal_assets/journal.js -whitespace linguist-generated=true
