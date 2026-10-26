@@ -134,6 +134,7 @@
     "src/okama_planner/utility.py": "52943d45b5cee35aa18a406db7a8bc82f5b48dc90a582d03a48babc01150860b",
     "tests/browser/check_chart_options.cjs": "ec5b1532fbc394536966ecdd8707fd8fdbff3bd9b7baae543619ed8fe82fc914",
     "tests/browser/check_charts.cjs": "03cc95e8f7f92461fc5664e593de4ef5bcc00cea9823233f3ce2457e346668f0",
+    "tests/conftest.py": "c204aea410b1e61300ef40f8110a65ed8480068399f50fde3675b981539f2af7",
     "tests/fixtures/advisor-schema.sql": "eeeea9fb9d523439e22884981998fc2f1e10a55d35a7c6f2b34dc48bf86c3403",
     "tests/planner_tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "tests/planner_tests/forecast/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
