@@ -18,7 +18,7 @@ from okama_planner.storage import PlannerStore
 from okama_planner.storage.validation import ClientDetails
 
 LABELS = {
-    'full_name': 'Полное имя', 'sex': 'Пол', 'birth_year': 'Год рождения',
+    'crm_id': 'CRM ID', 'full_name': 'Полное имя', 'sex': 'Пол', 'birth_year': 'Год рождения',
     'email': 'Email', 'phone': 'Телефон', 'telegram': 'Telegram', 'telegram_id': 'Telegram ID',
     'whatsapp': 'WhatsApp', 'max_messenger': 'MAX', 'brokers': 'Брокеры (по одному на строку)',
     'primary_channel': 'Основной канал связи', 'ips_sent_at': 'Дата отправки декларации', 'note': 'Заметка',
@@ -83,15 +83,18 @@ class FormHandler(BaseHTTPRequestHandler):
     def log_message(self, format: str, *args: Any) -> None:
         """Suppress capability URLs and private submitted values in access logs."""
 
-    def reply(self, status: int, body: str = '', location: str | None = None) -> None:
+    def reply(self, status: int, body: str = '', location: str | None = None,
+              content_type: str = 'text/html; charset=utf-8') -> None:
         encoded = body.encode('utf-8')
         self.send_response(status)
-        self.send_header('Content-Type', 'text/html; charset=utf-8')
+        self.send_header('Content-Type', content_type)
         self.send_header('Content-Length', str(len(encoded)))
         self.send_header('Cache-Control', 'no-store')
         self.send_header('Content-Security-Policy',
                          f"default-src 'none'; style-src 'nonce-{self.server.style_nonce}'; "
-                         "form-action 'self'; frame-ancestors 'none'; base-uri 'none'")
+                         "script-src 'self'; connect-src 'self'; style-src-elem 'self' "
+                         f"'nonce-{self.server.style_nonce}'; form-action 'self'; "
+                         "frame-ancestors 'none'; base-uri 'none'")
         self.send_header('Referrer-Policy', 'same-origin')
         self.send_header('X-Content-Type-Options', 'nosniff')
         self.send_header('Connection', 'close')
@@ -126,7 +129,7 @@ class FormHandler(BaseHTTPRequestHandler):
     def identity_fields(self, row: dict[str, Any]) -> str:
         parts = []
         for title, keys in (
-            ('Личные сведения', ('full_name', 'sex', 'birth_year', 'ips_sent_at')),
+            ('Личные сведения', ('full_name', 'crm_id', 'sex', 'birth_year', 'ips_sent_at')),
             ('Контакты', ('email', 'phone', 'telegram', 'telegram_id', 'whatsapp',
                           'max_messenger', 'primary_channel')),
             ('Брокеры и заметки', ('brokers', 'note')),
@@ -207,7 +210,15 @@ class FormHandler(BaseHTTPRequestHandler):
             parts.append(f'<h2>{escaped(code)}</h2><nav>'
                          f'<a href="{self.server.entry_path}?code={code}">Анкета</a> '
                          f'<a href="{self.server.entry_path}?code={code}&amp;view=plan">'
-                         'Финансовые планы</a></nav>')
+                         'Финансовые планы</a> '
+                         f'<a href="{self.server.entry_path}?code={code}&amp;view=meetings">'
+                         'Дневник встреч</a> '
+                         f'<a href="{self.server.entry_path}?code={code}&amp;view=legacy">'
+                         'История расчётов</a></nav>')
+        if not code and self.server.legacy is not None:
+            with self.server.legacy.connect() as db:
+                registry = self.server.legacy.rows(db, 'client_registry', 'ORDER BY code')
+                parts.append(self.server.legacy.client_index(db, registry, self.server.entry_path))
         if view == 'plan':
             parts.append(self.plan_fields(store, code, version, submitted))
         else:
@@ -225,6 +236,9 @@ class FormHandler(BaseHTTPRequestHandler):
             return
         try:
             query = single_values(parse_qs(urlsplit(self.path).query, strict_parsing=True))
+            from okama_planner import journal_web
+            if journal_web.get(self, query):
+                return
             code = query.get('code', '')
             view = query.get('view', 'client')
             if view == 'legacy':
@@ -254,6 +268,10 @@ class FormHandler(BaseHTTPRequestHandler):
             return
         if urlsplit(self.path).query:
             self.reply(405, 'Сохранение по этому адресу недоступно.')
+            return
+        if self.headers.get_content_type() == 'application/json':
+            from okama_planner import journal_web
+            journal_web.post(self)
             return
         self.submit()
 
@@ -336,7 +354,7 @@ def create_server(database: Path, port: int = 0, legacy_database: Path | None = 
     """Open an existing database and bind only to 127.0.0.1."""
     with PlannerStore.open(database):
         pass
-    legacy = LegacyReader(legacy_database) if legacy_database is not None else None
+    legacy = LegacyReader(legacy_database) if legacy_database else LegacyReader(database, canonical=True)
     return FormServer(database, port, legacy)
 
 

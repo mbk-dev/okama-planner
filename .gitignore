@@ -14,5 +14,13 @@ tmp/
 *.sqlite3
 *-wal
 *-shm
-*-journal
+*.db-journal
+*.sqlite-journal
+*.sqlite3-journal
 !src/okama_planner/storage/templates/empty.sqlite3
+
+/data/
+node_modules/
+*.db.*
+*.sqlite.*
+*.sqlite3.*

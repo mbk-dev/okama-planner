@@ -16,6 +16,7 @@ def test_initialize_empty_schema(tmp_path: Path) -> None:
             "id",
             "code",
             "full_name",
+            "crm_id",
             "sex",
             "birth_year",
             "email",
@@ -34,7 +35,7 @@ def test_initialize_empty_schema(tmp_path: Path) -> None:
         assert {
             "client",
             "tax_residency",
-            "plan_snapshot",
+            "planner_plan_snapshot",
             "person",
             "asset",
             "liability",
@@ -103,7 +104,7 @@ def test_upgrade_preserves_previous_schema_data(tmp_path: Path) -> None:
                 "c-0001",
                 "Synthetic One",
             )
-            assert connection.exec_driver_sql("SELECT version_num FROM alembic_version").scalar() == "0002"
+            assert connection.exec_driver_sql("SELECT version_num FROM alembic_version").scalar() == "0003"
 
 
 def test_declared_current_revision_requires_complete_schema(tmp_path: Path) -> None:

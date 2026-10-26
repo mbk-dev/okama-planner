@@ -93,3 +93,12 @@ The regression tests use only fictional identities and temporary databases. They
 registry success and failure, old stored plans, safe writes, cross-client version ownership,
 financial equivalence, code collisions, signed Excel export, unsigned/tampered artifacts,
 local human intake and actual MCP argument/runtime error paths.
+
+## Explicit personal access in 0.5.0
+
+The original `PlannerAI` facade remains anonymous. MCP 3.1 uses
+`PlannerClientAccess`, which defaults to anonymous reads and rejects all persistent
+writes. An explicit local startup `allow_personal_data=True` enables full client
+records and CRUD through Planner. This setting is never accepted from an LLM tool
+call. Errors and forecast/report proofs retain the existing protected contract.
+See [one database and access policy](unified-database.md).

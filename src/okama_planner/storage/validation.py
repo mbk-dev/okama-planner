@@ -32,6 +32,7 @@ CHANNEL_FIELDS = {
 class ClientDetails(BaseModel):
     model_config = ConfigDict(extra="forbid")
     full_name: str = Field(min_length=1)
+    crm_id: str | None = None
     sex: Literal["female", "male"] | None = None
     birth_year: StrictInt | None = Field(default=None, ge=1, le=9999)
     email: str | None = None
@@ -45,7 +46,7 @@ class ClientDetails(BaseModel):
     ips_sent_at: date | None = None
     note: str | None = None
 
-    @field_validator("full_name", "email", "phone", "telegram", "whatsapp", "max_messenger")
+    @field_validator("full_name", "crm_id", "email", "phone", "telegram", "whatsapp", "max_messenger")
     @classmethod
     def nonempty(cls, value: str | None) -> str | None:
         if value is not None and not value.strip():

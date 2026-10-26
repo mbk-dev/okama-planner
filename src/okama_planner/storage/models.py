@@ -17,6 +17,7 @@ class ClientRegistry(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     code: Mapped[str]
     full_name: Mapped[str]
+    crm_id: Mapped[str | None]
     sex: Mapped[str | None]
     birth_year: Mapped[int | None]
     email: Mapped[str | None]
@@ -43,7 +44,7 @@ class TaxResidency(Base):
 
 
 class Client(Base):
-    __tablename__ = "client"
+    __tablename__ = "planner_client"
     __table_args__ = (UniqueConstraint("registry_id", "version"),)
     id: Mapped[int] = mapped_column(primary_key=True)
     registry_id: Mapped[int] = mapped_column(ForeignKey("client_registry.id"))
@@ -54,8 +55,8 @@ class Client(Base):
 
 
 class PlanSnapshot(Base):
-    __tablename__ = "plan_snapshot"
-    client_id: Mapped[int] = mapped_column(ForeignKey("client.id"), primary_key=True)
+    __tablename__ = "planner_plan_snapshot"
+    client_id: Mapped[int] = mapped_column(ForeignKey("planner_client.id"), primary_key=True)
     request: Mapped[dict[str, Any]] = mapped_column(JSON)
 
 
@@ -63,54 +64,54 @@ class PlanSnapshot(Base):
 # IDs inside payloads (e.g. goal_id) remain request identifiers, not database IDs.
 class Component:
     id: Mapped[int] = mapped_column(primary_key=True)
-    client_id: Mapped[int] = mapped_column(ForeignKey("client.id"))
+    client_id: Mapped[int] = mapped_column(ForeignKey("planner_client.id"))
     position: Mapped[int]
     payload: Mapped[dict[str, Any]] = mapped_column(JSON)
 
 
 class Person(Component, Base):
-    __tablename__ = "person"
+    __tablename__ = "planner_person"
     __table_args__ = (UniqueConstraint("client_id", "position"),)
 
 
 class Asset(Component, Base):
-    __tablename__ = "asset"
+    __tablename__ = "planner_asset"
     __table_args__ = (UniqueConstraint("client_id", "position"),)
 
 
 class Liability(Component, Base):
-    __tablename__ = "liability"
+    __tablename__ = "planner_liability"
     __table_args__ = (UniqueConstraint("client_id", "position"),)
 
 
 class BudgetItem(Component, Base):
-    __tablename__ = "budget_item"
+    __tablename__ = "planner_budget_item"
     __table_args__ = (UniqueConstraint("client_id", "position"),)
 
 
 class Goal(Component, Base):
-    __tablename__ = "goal"
+    __tablename__ = "planner_goal"
     __table_args__ = (UniqueConstraint("client_id", "position"),)
 
 
 class Portfolio(Component, Base):
-    __tablename__ = "portfolio"
+    __tablename__ = "planner_portfolio"
     __table_args__ = (UniqueConstraint("client_id", "position"),)
 
 
 class Scenario(Base):
-    __tablename__ = "scenario"
+    __tablename__ = "planner_scenario"
     id: Mapped[int] = mapped_column(primary_key=True)
-    client_id: Mapped[int] = mapped_column(ForeignKey("client.id"))
+    client_id: Mapped[int] = mapped_column(ForeignKey("planner_client.id"))
     label: Mapped[str]
     request: Mapped[dict[str, Any]] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime)
 
 
 class PlanRun(Base):
-    __tablename__ = "plan_run"
+    __tablename__ = "planner_plan_run"
     id: Mapped[int] = mapped_column(primary_key=True)
-    scenario_id: Mapped[int] = mapped_column(ForeignKey("scenario.id"))
+    scenario_id: Mapped[int] = mapped_column(ForeignKey("planner_scenario.id"))
     request: Mapped[dict[str, Any]] = mapped_column(JSON)
     result: Mapped[dict[str, Any]] = mapped_column(JSON)
     source_digest: Mapped[str]

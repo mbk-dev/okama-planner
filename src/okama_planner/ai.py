@@ -183,3 +183,10 @@ class PlannerAI:
     @_boundary
     def client_forecast(self, code: str, version: int) -> dict[str, Any]:
         return forecast(self.client_load_plan(code, version))
+
+
+def __getattr__(name: str) -> Any:
+    if name == 'PlannerClientAccess':
+        from okama_planner.client_access import PlannerClientAccess
+        return PlannerClientAccess
+    raise AttributeError(name)

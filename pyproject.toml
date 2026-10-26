@@ -1,15 +1,18 @@
 [tool.poetry]
 name = "okama-planner"
-version = "0.4.1"
+version = "0.5.0"
 description = "Personal and family financial planning powered by okama"
 authors = ["Sergey Kikevich"]
 license = "MIT"
 repository = "https://github.com/mbk-dev/okama-planner"
 readme = "README.md"
 packages = [{include = "okama_planner", from = "src"}]
+exclude = ["ui/**/node_modules", "ui/**/node_modules/**"]
 include = [
     {path = "src/okama_planner/storage/templates/empty.sqlite3", format = ["wheel", "sdist"]},
     {path = "examples/**", format = "sdist"},
+    {path = "ui/**", format = "sdist"},
+    {path = "src/okama_planner/_journal_assets/**", format = ["wheel", "sdist"]},
     {path = "docs/**", format = "sdist"},
     {path = "tests/**", format = "sdist"},
     {path = "extraction-manifest.json", format = "sdist"},
@@ -42,6 +45,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.pytest.ini_options]
 pythonpath = ["src", "tests"]
 testpaths = ["tests"]
+addopts = "--basetemp=tmp/pytest"
 
 [tool.ruff]
 line-length = 110

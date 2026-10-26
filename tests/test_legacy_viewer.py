@@ -100,7 +100,7 @@ def test_readonly_browser_navigation_and_source_integrity(
     assert capsys.readouterr().err == ''
 
 
-def test_legacy_requires_explicit_flag(tmp_path: Path) -> None:
+def test_canonical_history_needs_no_second_database(tmp_path: Path) -> None:
     planner = tmp_path / 'planner.sqlite3'
     with PlannerStore.initialize(planner):
         pass
@@ -108,8 +108,8 @@ def test_legacy_requires_explicit_flag(tmp_path: Path) -> None:
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
-        assert 'view=legacy' not in send(server)[2]
-        assert send(server, server.entry_path + '?view=legacy')[0] == 400
+        assert 'view=legacy' in send(server)[2]
+        assert send(server, server.entry_path + '?view=legacy')[0] == 200
     finally:
         server.shutdown()
         thread.join()

@@ -76,11 +76,13 @@ def test_joint_request_and_components(tmp_path: Path) -> None:
         assert store.load_plan(pid).model_dump(mode="json") == expected
         assert store.list_plans(client["code"])[0]["source_digest"] == digest
         with store.engine.connect() as connection:
-            assert connection.exec_driver_sql("SELECT count(*) FROM goal").scalar() == len(
+            assert connection.exec_driver_sql("SELECT count(*) FROM planner_goal").scalar() == len(
                 data["plan"]["goals"]
             )
             rows = (
-                connection.exec_driver_sql("SELECT payload FROM portfolio ORDER BY position").scalars().all()
+                connection.exec_driver_sql("SELECT payload FROM planner_portfolio ORDER BY position")
+                .scalars()
+                .all()
             )
             assert len(rows) == len(data["allocation"]["segments"]) + 1
         scenario = store.save_scenario(pid, "Joint", data)
@@ -108,7 +110,7 @@ def test_invalid_request_and_result_leave_no_partial_rows(tmp_path: Path) -> Non
         with pytest.raises(ValueError):
             store.save_result(sid, bad_result)
         with store.engine.connect() as connection:
-            assert connection.exec_driver_sql("SELECT count(*) FROM plan_run").scalar() == 0
+            assert connection.exec_driver_sql("SELECT count(*) FROM planner_plan_run").scalar() == 0
 
 
 def test_concurrent_versions(tmp_path: Path) -> None:
@@ -135,14 +137,21 @@ def test_database_failure_rolls_back_entire_version(tmp_path: Path) -> None:
         code = store.create_client({"full_name": "Synthetic One"})["code"]
         with store.engine.begin() as connection:
             connection.exec_driver_sql(
-                "CREATE TRIGGER fail_asset BEFORE INSERT ON asset "
+                "CREATE TRIGGER fail_asset BEFORE INSERT ON planner_asset "
                 "BEGIN SELECT RAISE(ABORT, 'test failure'); END"
             )
         with pytest.raises(IntegrityError, match="test failure"):
             store.save_plan(code, request())
         assert store.list_plans(code) == []
         with store.engine.connect() as connection:
-            for table in ("client", "plan_snapshot", "person", "asset", "goal", "portfolio"):
+            for table in (
+                "planner_client",
+                "planner_plan_snapshot",
+                "planner_person",
+                "planner_asset",
+                "planner_goal",
+                "planner_portfolio",
+            ):
                 assert connection.exec_driver_sql(f"SELECT count(*) FROM {table}").scalar() == 0
         with store.engine.begin() as connection:
             connection.exec_driver_sql("DROP TRIGGER fail_asset")

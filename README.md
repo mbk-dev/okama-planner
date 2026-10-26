@@ -127,11 +127,11 @@ HTML financial-plan report or a hosted web application. [Chart options →](docs
 
 ## Use with an AI assistant
 
-The published **okama-mcp 2.0.0** installs Planner 0.4.x with report dependencies
+**okama-mcp 3.1.0** installs Planner 0.5.x with report dependencies
 automatically. `planner_forecast` and `planner_compare_modes` call Planner's shared
-calculation API while preserving the existing portfolio tools.
+privacy API while preserving the existing portfolio tools.
 
-A configured local stdio installation adds six client-registry tools and
+A configured local stdio installation adds anonymous read-only client tools and
 `planner_export_report` for Excel reports. HTTP exposes calculation tools and never
 registers the local client/report tools. Standalone Planner chart exports and
 retirement consumption-utility helpers are not exposed by these MCP tools.
@@ -233,7 +233,7 @@ skills are not part of the public package.
 
 ## Languages
 
-**Available in this source checkout:** Excel reports and chart interface text in **English, Russian,
+**Available since Planner 0.5.0:** Excel reports and chart interface text in **English, Russian,
 German, Spanish and Simplified Chinese** (`en`, `ru`, `de`, `es`, `zh`). Select a language
 with `export_report(..., language="ru")` or `export_charts(..., language="ru")`.
 The shared [terminology table](src/okama_planner/terminology.csv) supplies translated captions.
@@ -242,9 +242,8 @@ See the [offline five-language example](examples/localized_plan.py),
 Localized presentation includes currency-group reports, registry field/enum displays,
 validation messages, chart controls and locale-specific dates and numbers. The companion
 okama-mcp implementation supplies language selection for Planner and local client tools.
-The additional locale formatting, registry presentation and validation helpers described
-here are source changes after v0.4.1; the published v0.4.1 package contains the earlier
-Excel/chart captions. The companion MCP additions likewise require its updated source.
+The locale formatting, registry presentation and validation helpers require Planner
+0.5.0 or later. Use MCP 3.1.0 or later for the corresponding assistant workflows.
 
 SQL column names, JSON keys and API identifiers will remain stable across languages.
 Client names and other user-entered text are not automatically translated. Localized wording
@@ -288,11 +287,17 @@ Tools for investing and financial planning.
 Ask questions, share examples and discuss financial planning.
 <!-- okama-family:end -->
 
-### Identity privacy in the updated source
+### Identity privacy since Planner 0.5.0
 
 AI-facing integrations use the restricted `okama_planner.ai` API. Names and contacts stay
-inside Planner; MCP receives codes, and financial versions are read/written by Planner.
+inside Planner by default; MCP receives codes, and financial versions are read/written by Planner.
 Personal identity intake uses a local human command, outside MCP. See
 [the privacy contract and local intake guide](docs/ai-privacy.md) for protected surfaces,
-signed anonymous exports and the filesystem isolation boundary. This contract change is
-available in the updated source and has not yet been published to PyPI.
+signed anonymous exports and the filesystem isolation boundary. Planner 0.4.1 does not
+provide this interface and is incompatible with these MCP workflows.
+
+## One client database and meetings
+
+Planner 0.5.0 preserves CRM, client meetings and complete advisory history in one
+local SQLite database. The human interface includes a persistent visual/Markdown
+journal. See [migration, schema ownership and access policy](docs/unified-database.md).

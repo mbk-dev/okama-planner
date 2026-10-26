@@ -1,0 +1,36 @@
+import {execFileSync} from 'node:child_process';
+import {writeFileSync} from 'node:fs';
+const page=process.argv[2],output=process.argv[3];
+if(!page||!output)throw Error('Supply the owned synthetic Orca page and output JSON path');
+const orca=process.env.ORCA_CLI_COMMAND||'orca-ide';
+const command=(args)=>{const r=JSON.parse(execFileSync(orca,[...args,'--page',page,'--json'],{encoding:'utf8'}));if(!r.ok)throw Error(JSON.stringify(r.error));return r.result};
+const run=x=>{const r=command(['eval','--expression',x]);try{return JSON.parse(r.result)}catch{return r.result}};
+const click=text=>run(`(()=>{const e=[...document.querySelectorAll('button')].find(x=>x.textContent.trim()===${JSON.stringify(text)});if(!e||e.disabled)throw Error('Missing enabled button');e.click();return true})()`);
+const fill=(selector,value)=>run(`(()=>{const e=document.querySelector(${JSON.stringify(selector)});Object.getOwnPropertyDescriptor(${selector.includes('textarea')?'HTMLTextAreaElement':'HTMLInputElement'}.prototype,'value').set.call(e,${JSON.stringify(value)});e.dispatchEvent(new Event('input',{bubbles:true}));return true})()`);
+const results=[];
+const check=(name,expr)=>{const pass=run(expr);results.push({name,pass});if(pass!==true)throw Error(name)};
+const saved=()=>command(['wait','--selector','footer .primary:disabled']);
+try{
+ command(['reload']);command(['wait','--selector','.tiptap']);
+ fill('[aria-label="Цель встречи"]','Обсуждение целей');click('Сохранить');saved();
+ click('Markdown');const note='## Проверка\n\n**Важное** и *курсив*.\n\n- Пункт\n\n> Цитата\n\n[Ссылка](https://example.com)';
+ fill('textarea',note);click('Визуально');
+ check('Markdown renders actual rich text',`!!document.querySelector('.tiptap h2')&&!!document.querySelector('.tiptap strong')&&!!document.querySelector('.tiptap blockquote')`);
+ click('Markdown');check('Round trip keeps exact Markdown',`document.querySelector('textarea').value===${JSON.stringify(note)}`);
+ click('Новая встреча');check('Unsaved draft guarded',`!!document.querySelector('[aria-labelledby="unsaved-title"]')`);
+ click('Остаться');click('Сохранить');saved();
+ command(['reload']);command(['wait','--selector','.tiptap']);click('Markdown');
+ check('Saved note survives reload',`document.querySelector('textarea').value===${JSON.stringify(note)}`);
+ click('Новая встреча');fill('[aria-label="Цель встречи"]','Проверочная встреча');
+ fill('[aria-label="Дата встречи"]','31.02.2026');click('Сохранить');command(['wait','--text','Запись не сохранена']);
+ check('Invalid date keeps draft',`document.querySelector('[aria-label="Цель встречи"]').value==='Проверочная встреча'`);
+ fill('[aria-label="Дата встречи"]','26.10.2026');fill('textarea','Сохранённая встреча');click('Сохранить');saved();
+ check('New meeting receives a persistent ID',`document.querySelectorAll('.meeting').length===2`);
+ fill('textarea','Правка из диалога');click('Отмена');click('Сохранить и перейти');saved();
+ check('Save from guard retains the assigned ID',`document.querySelector('textarea').value==='Правка из диалога'&&document.querySelectorAll('.meeting').length===2`);
+ command(['reload']);command(['wait','--selector','.tiptap']);click('Markdown');
+ check('No duplicate after reload',`document.querySelectorAll('.meeting').length===2&&document.querySelector('textarea').value==='Правка из диалога'`);
+ check('No table editor or external assets',`!document.querySelector('table')&&performance.getEntriesByType('resource').every(x=>x.name.startsWith(location.origin))`);
+ const messages=command(['console','--limit','30']).messages;results.push({name:'Console',messages});
+ if(messages.some(x=>x.level==='error'))throw Error('Browser console errors');
+}finally{writeFileSync(output,JSON.stringify(results,null,2));console.log(JSON.stringify(results,null,2))}

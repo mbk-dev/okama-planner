@@ -22,11 +22,26 @@ def owned_request() -> dict:
         native = group["request"]
         native["plan"]["persons"] = raw["household"]["persons"]
         native["portfolio_mode"] = "per_goal" if index == 2 else "single"
-        native["plan"]["goals"] = [{"goal_id": index, "label": "Purchase", "kind": "lump",
-                                    "amount_pv": 10, "pv_year": 2026, "target_year": 2026}]
-        native["plan"]["liabilities"] = [{"label": "Loan", "principal": 10, "annual_rate": 0,
-                                          "monthly_payment": 1, "term_months": 10,
-                                          "start_month": "2026-01"}]
+        native["plan"]["goals"] = [
+            {
+                "goal_id": index,
+                "label": "Purchase",
+                "kind": "lump",
+                "amount_pv": 10,
+                "pv_year": 2026,
+                "target_year": 2026,
+            }
+        ]
+        native["plan"]["liabilities"] = [
+            {
+                "label": "Loan",
+                "principal": 10,
+                "annual_rate": 0,
+                "monthly_payment": 1,
+                "term_months": 10,
+                "start_month": "2026-01",
+            }
+        ]
         native["allocation"] = allocation(100, (index,))
         for segment in native["allocation"]["segments"]:
             segment["currency"] = native["currency"]
@@ -53,17 +68,22 @@ def test_multicurrency_plan_scenario_and_result_round_trip(tmp_path: Path) -> No
         with pytest.raises(ValueError, match="hash"):
             store.save_result(sid, bad)
         with store.engine.connect() as connection:
+
             def payloads(table: str) -> list[dict]:
-                return [json.loads(v) for v in connection.exec_driver_sql(
-                    f"SELECT payload FROM {table} ORDER BY position"
-                ).scalars()]
+                return [
+                    json.loads(v)
+                    for v in connection.exec_driver_sql(
+                        f"SELECT payload FROM planner_{table} ORDER BY position"
+                    ).scalars()
+                ]
 
             assert payloads("person") == expected["household"]["persons"]
             assert payloads("budget_item") == expected["household"]["budget_items"]
             for table, key in (("asset", "assets"), ("liability", "liabilities"), ("goal", "goals")):
                 assert payloads(table) == [
                     {**item, "group_id": group["group_id"], "currency": group["request"]["currency"]}
-                    for group in expected["groups"] for item in group["request"]["plan"][key]
+                    for group in expected["groups"]
+                    for item in group["request"]["plan"][key]
                 ]
             portfolios = payloads("portfolio")
             assert len(portfolios) == 2
@@ -73,10 +93,12 @@ def test_multicurrency_plan_scenario_and_result_round_trip(tmp_path: Path) -> No
                 assert row["portfolio_mode"] == group["request"]["portfolio_mode"]
                 assert row["allocation"] == group["request"]["allocation"]
                 assert row["stages"] == [
-                    {"role": stage,
-                     "holdings": group["request"]["plan"][f"{stage}_holdings"],
-                     "rebalancing": group["request"]["plan"][f"{stage}_rebalancing"],
-                     "last_date_pin": group["request"]["plan"][f"{stage}_last_date_pin"]}
+                    {
+                        "role": stage,
+                        "holdings": group["request"]["plan"][f"{stage}_holdings"],
+                        "rebalancing": group["request"]["plan"][f"{stage}_rebalancing"],
+                        "last_date_pin": group["request"]["plan"][f"{stage}_last_date_pin"],
+                    }
                     for stage in ("accumulation", "withdrawal")
                 ]
 
@@ -99,12 +121,22 @@ def test_multicurrency_failure_leaves_no_partial_components(tmp_path: Path) -> N
             store.save_plan(code, bad)
         assert store.list_plans(code) == []
         with store.engine.begin() as connection:
-            connection.exec_driver_sql("CREATE TRIGGER fail_goal BEFORE INSERT ON goal "
-                                       "BEGIN SELECT RAISE(ABORT, 'test failure'); END")
+            connection.exec_driver_sql(
+                "CREATE TRIGGER fail_goal BEFORE INSERT ON planner_goal "
+                "BEGIN SELECT RAISE(ABORT, 'test failure'); END"
+            )
         with pytest.raises(IntegrityError, match="test failure"):
             store.save_plan(code, owned_request())
         assert store.list_plans(code) == []
         with store.engine.connect() as connection:
-            for table in ("client", "plan_snapshot", "person", "budget_item", "asset", "liability",
-                          "goal", "portfolio"):
+            for table in (
+                "planner_client",
+                "planner_plan_snapshot",
+                "planner_person",
+                "planner_budget_item",
+                "planner_asset",
+                "planner_liability",
+                "planner_goal",
+                "planner_portfolio",
+            ):
                 assert connection.exec_driver_sql(f"SELECT count(*) FROM {table}").scalar() == 0

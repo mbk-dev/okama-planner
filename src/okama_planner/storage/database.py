@@ -18,10 +18,12 @@ from sqlalchemy.orm import Session
 
 from .registry import RegistryMethods
 from .plans import PlanMethods
+from .meetings import MeetingMethods
 from .models import Base
+from . import advisor_models  # noqa: F401 - register typed advisory history in the shared metadata
 
-HEAD = "0002"
-REVISIONS = {"0001", HEAD}
+HEAD = "0003"
+REVISIONS = {"0001", "0002", HEAD}
 # Alembic command/env module proxies are shared within one Python process.
 _MIGRATION_LOCK = RLock()
 
@@ -93,7 +95,7 @@ def upgrade_database(path: Path | str) -> None:
         engine.dispose()
 
 
-class PlannerStore(RegistryMethods, PlanMethods):
+class PlannerStore(RegistryMethods, PlanMethods, MeetingMethods):
     """Local client/planning repository; operations commit or roll back together."""
 
     def __init__(self, engine: Engine) -> None:

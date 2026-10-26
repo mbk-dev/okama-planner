@@ -114,3 +114,11 @@ only so the human can open the form.
 Tests use synthetic databases and real loopback HTTP requests. They cover intake, edit,
 validation, escaping, access boundaries, repeat submissions, append-only plan versions and
 client ownership of loaded versions.
+
+## Unified Planner database (0.5.0)
+
+Normal operation uses one Planner-owned file. CRM identifiers and the persistent
+meeting journal are available from the client card; historical advisory records
+are read from the same file. `--legacy-database` is a compatibility viewer for
+archived files, not the normal working setup. Use the verified importer and
+[one database guide](unified-database.md) before retiring an old working file.

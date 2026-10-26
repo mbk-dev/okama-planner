@@ -161,3 +161,9 @@ returns data rather than a translated client form; registry UI localization is
 tracked separately.
 
 Multi-currency snapshots preserve native group ownership and one household budget; see [Multi-currency plans](multicurrency.md).
+
+## Schema 0003 and unified history
+
+See [one database](unified-database.md). Native planning tables now use the `planner_`
+prefix; typed advisory history keeps its original table names. CRM and meetings belong
+to the common client registry. Use the Planner-owned access policy for MCP adapters.
