@@ -166,6 +166,11 @@ database. [Storage API, versioned snapshots and migrations →](docs/storage.md)
 
 ### Local browser intake
 
+![Local Planner interface: a client card with the meeting journal, and the client registry with three fictional clients](docs/images/client-database-interface.png)
+
+*Synthetic records only: the three fictional clients from the table below, opened through the
+capability URL that the command prints.*
+
 Enter client identity directly through a human-only local browser form:
 
 ```bash

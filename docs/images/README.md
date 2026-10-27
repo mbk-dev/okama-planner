@@ -1,4 +1,28 @@
+# Release images
+
+## Local client database interface
+
+`client-database-interface.png` is the 0.5.0 release hero: the client card with the meeting
+journal, and the registry table with three fictional clients. It is a headless Chrome capture
+of `python -m okama_planner.client_form` running against a temporary SQLite file created for
+the capture. The records are Alex Morgan, Priya Rao and Jordan Lee — the same fictional
+clients that appear in the README table; addresses use the reserved `.invalid` domain.
+
+The entries never need to leave the capture directory, and each capture run builds its own
+database. No real client database, folder or screenshot is used, and the shipped
+`empty.sqlite3` template stays empty. Regenerate the image with:
+
+```bash
+poetry run python docs/images/capture-client-database.py
+```
+
+Chrome or Chromium and Pillow are required. The script seeds the database, starts the local
+form, captures the journal and registry views at 2× device scale, composes them into
+2500 × 1420 pixels and stops the server.
+
 # README hero
+
+## Financial plan
 
 `financial-plan-three-goals.png` is the updated synthetic USD example prepared in lfp,
 exported by Planner's ECharts renderer. The published input, result and dated assumptions
