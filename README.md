@@ -10,7 +10,7 @@
 
 </div>
 
-![Synthetic financial plan with three goals, a logarithmic USD axis, median and Monte Carlo percentile bands](docs/images/financial-plan-three-goals.png)
+[![Synthetic financial plan with three goals, a logarithmic USD axis, median and Monte Carlo percentile bands](docs/images/financial-plan-three-goals.png)](docs/images/financial-plan-three-goals.png)
 
 *Three goals, one household: **1 Car** (October 2029), **2 Home purchase** (October 2031),
 **3 Early retirement** (October 2040). Forecast in USD through 2070, on a logarithmic scale;
@@ -166,7 +166,7 @@ database. [Storage API, versioned snapshots and migrations →](docs/storage.md)
 
 ### Local browser intake
 
-![Local Planner interface: a client card with the meeting journal, and the client registry with three fictional clients](docs/images/client-database-interface.png)
+[![Local Planner interface: a client card with the meeting journal, and the client registry with three fictional clients](docs/images/client-database-interface.png)](docs/images/client-database-interface.png)
 
 *Synthetic records only: the three fictional clients from the table below, opened through the
 capability URL that the command prints.*
