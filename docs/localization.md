@@ -36,6 +36,16 @@ ID. Excel/LibreOffice may apply the viewer's configured decimal/group separators
 viewer settings, not a change in plan values. Goal dates are localized. Source ledger dates
 and technical snapshots remain ISO so year-based SUMIFS and provenance remain reproducible.
 
+## Local browser interfaces
+
+The intake form, the meeting journal and the legacy viewer are part of the same language
+contract. Every supported language covers all of them: a new caption is added to
+`src/okama_planner/ui_texts.csv` in `en`, `ru`, `de`, `es` and `zh` in the same change, and
+`tests/test_ui_languages.py` fails when a language is missing or when Russian text reaches a
+non-Russian interface. The interface language is selected with `--language` when the form
+starts and defaults to English. The server sends the caption table to the browser bundle, so
+the React journal has no translations of its own.
+
 ## Translation catalog and completeness
 
 `src/okama_planner/terminology.csv` is the packaged source of captions with columns

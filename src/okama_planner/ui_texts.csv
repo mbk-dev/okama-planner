@@ -1,0 +1,261 @@
+key,en,ru,zh,de,es
+enum.accumulation,Accumulation,Накопление,积累,Ansparphase,Acumulación
+enum.amount,Monetary amount,Денежная сумма,货币金额,Geldbetrag,Importe monetario
+enum.child,Child,Ребёнок,子女,Kind,Hijo/a
+enum.client,Client,Клиент,客户,Kunde,Cliente
+enum.email,Email,Электронная почта,电子邮箱,E-Mail,Correo electrónico
+enum.expense,Expense,Расход,支出,Ausgabe,Gasto
+enum.failed,Failed,Ошибка,失败,Fehler,Error
+enum.female,Female,Женский,女,Weiblich,Femenino
+enum.income,Income,Доходы,收入,Einnahmen,Ingresos
+enum.lognorm,Lognormal,Логнормальное,对数正态,Lognormalverteilt,Lognormal
+enum.lump,One-off purchase,Разовая покупка,一次性购买,Einmaliger Kauf,Compra única
+enum.male,Male,Мужской,男,Männlich,Masculino
+enum.max,MAX,MAX,MAX,MAX,MAX
+enum.month,Monthly,За месяц,每月,Monatlich,Mensual
+enum.non_working,Non-working asset,Неработающий актив,非生产性资产,Nicht werbender Vermögenswert,Activo no productivo
+enum.none,No limit,Без ограничения,无限制,Ohne Begrenzung,Sin límite
+enum.norm,Normal,Нормальное,正态,Normalverteilt,Normal
+enum.ok,Successful,Успешно,成功,Erfolgreich,Correcto
+enum.pending,Pending calculation,Ожидает расчёта,待计算,Berechnung ausstehend,Pendiente de cálculo
+enum.phone,Phone,Телефон,电话,Telefon,Teléfono
+enum.portfolio,Investment portfolio,Инвестиции,投资组合,Investitionen,Inversiones
+enum.reserve,Reserve,Резерв,储备,Reserve,Reserva
+enum.reserve_topup,Reserve top-up,Пополнение резерва,补充储备,Reservenauffüllung,Reposición de reserva
+enum.retirement_income,Retirement income,Пенсионный доход,退休收入,Renteneinkommen,Ingreso de jubilación
+enum.savings,Savings for purchases,Накопления на покупки,购物储蓄,Ansparen für Anschaffungen,Ahorro para compras
+enum.share,Share of household expenses,Доля семейных расходов,家庭支出份额,Anteil der Haushaltsausgaben,Parte de los gastos del hogar
+enum.spouse,Spouse,Супруг(а),配偶,Ehepartner(in),Cónyuge
+enum.t,Student's t,Стьюдента,学生 t,Student-t,t de Student
+enum.telegram,Telegram,Telegram,Telegram,Telegram,Telegram
+enum.third_party,Third-party asset,Сторонний актив,第三方资产,Dritter Vermögenswert,Activo de terceros
+enum.until_month,Until the specified month,До указанного месяца,至指定月份,Bis zum angegebenen Monat,Hasta el mes indicado
+enum.until_retirement,Until retirement,До пенсии,至退休,Bis zur Rente,Hasta la jubilación
+enum.whatsapp,WhatsApp,WhatsApp,WhatsApp,WhatsApp,WhatsApp
+enum.withdrawal,Withdrawal,Изъятия,提取,Entnahme,Retiradas
+enum.yearly,Yearly,Ежегодно,每年,Jährlich,Anual
+field.abs_deviation,Absolute deviation,Абсолютное отклонение,绝对偏差,Absolute Abweichung,Desviación absoluta
+field.amount,Amount,Сумма,金额,Betrag,Importe
+field.amount_basis,Target amount basis,Основа размера цели,目标金额依据,Grundlage des Zielbetrags,Base del importe objetivo
+field.amount_pv,Target amount,Размер цели,目标金额,Zielbetrag,Importe objetivo
+field.annual_rate,Annual rate,Годовая ставка,年利率,Jahreszins,Tipo anual
+field.asset_class,Asset class,Класс актива,资产类别,Anlageklasse,Clase de activo
+field.becomes_asset,Becomes an asset,Становится активом,转为资产,Wird zum Vermögenswert,Se convierte en activo
+field.birth_year,Birth year,Год рождения,出生年份,Geburtsjahr,Año de nacimiento
+field.brokers,Brokers,Брокеры,券商,Broker,Intermediarios
+field.buffer_lookahead_months,"Buffer, months","Буфер, месяцев",缓冲（月）,"Puffer, Monate","Colchón, meses"
+field.buffer_rate,Buffer return,Доходность буфера,缓冲收益率,Pufferrendite,Rentabilidad del colchón
+field.can_defer,Can be deferred,Можно отложить,可推迟,Verschiebbar,Se puede aplazar
+field.can_resize,Can be resized,Можно уменьшить,可调整,Anpassbar,Se puede reducir
+field.code,Client code,Код клиента,客户代码,Kundencode,Código de cliente
+field.content,Source text,Исходный текст,原始文本,Quelltext,Texto de origen
+field.country,Country,Страна,国家,Land,País
+field.created_at,Created at,Дата создания,创建日期,Erstellt am,Fecha de creación
+field.crm_id,CRM ID,CRM ID,CRM ID,CRM-ID,ID de CRM
+field.currency,Currency,Валюта,货币,Währung,Moneda
+field.discount_rate,Discount rate,Ставка дисконтирования,贴现率,Diskontsatz,Tasa de descuento
+field.distribution,Distribution,Распределение,分布,Verteilung,Distribución
+field.email,Email,Электронная почта,电子邮箱,E-Mail,Correo electrónico
+field.end_month,End month,Конечный месяц,结束月份,Endmonat,Mes final
+field.end_rule,End rule,Правило окончания,结束规则,Endregel,Regla de fin
+field.expense_indexation_rate,Expense indexation,Индексация расходов,支出指数化,Ausgabenindexierung,Indexación de gastos
+field.full_name,Full name,Полное имя,姓名,Vollständiger Name,Nombre completo
+field.goal_indexation_rate,Goal indexation,Индексация целей,目标指数化,Zielindexierung,Indexación de objetivos
+field.growth_rate,Return rate,Доходность,收益率,Rendite,Rentabilidad
+field.horizon_years,"Horizon, years","Горизонт, лет",期限（年）,"Horizont, Jahre","Horizonte, años"
+field.imported_at,Import date,Дата переноса,导入日期,Importdatum,Fecha de importación
+field.income,Income,Доходы,收入,Einnahmen,Ingresos
+field.income_indexation_rate,Income indexation,Индексация доходов,收入指数化,Einkommensindexierung,Indexación de ingresos
+field.indexation_rate,Indexation,Индексация,指数化,Indexierung,Indexación
+field.inflation_rate,Inflation,Инфляция,通货膨胀,Inflation,Inflación
+field.ips_sent_at,IPS sent date,Дата отправки инвестиционной декларации,投资政策声明发送日期,Versanddatum der Anlagerichtlinie,Fecha de envío de la declaración de inversión
+field.is_base,Base scenario,Базовый сценарий,基准情景,Basisszenario,Escenario base
+field.kind,Kind,Тип,类型,Art,Tipo
+field.label,Label,Название,名称,Bezeichnung,Nombre
+field.last_date_pin,History date,Дата истории,历史截止日期,Historienstand,Fecha de la historia
+field.match_moments,Preserve sample moments,Сохранение моментов выборки,保留样本矩,Stichprobenmomente erhalten,Conservar los momentos de la muestra
+field.max_messenger,MAX,MAX,MAX,MAX,MAX
+field.mc_number,Paths,Число траекторий,路径数,Pfade,Trayectorias
+field.metric,Metric,Показатель,指标,Kennzahl,Métrica
+field.monthly,Monthly,За месяц,每月,Monatlich,Mensual
+field.monthly_amount,Monthly amount,Сумма в месяц,每月金额,Monatsbetrag,Importe mensual
+field.monthly_payment,Monthly payment,Ежемесячный платёж,每月还款,Monatliche Rate,Pago mensual
+field.name,Name,Имя,姓名,Name,Nombre
+field.note,Note,Примечание,备注,Notiz,Nota
+field.okama_version,okama version,Версия okama,okama 版本,okama-Version,Versión de okama
+field.phone,Phone,Телефон,电话,Telefon,Teléfono
+field.portfolio,Investment portfolio,Инвестиции,投资组合,Investitionen,Inversiones
+field.primary_channel,Primary contact channel,Основной канал связи,主要联系方式,Bevorzugter Kontaktkanal,Canal de contacto principal
+field.principal,Principal,Остаток долга,未偿本金,Restschuld,Principal pendiente
+field.priority,Priority,Приоритет,优先级,Priorität,Prioridad
+field.pv_year,Current-price year,Год текущих цен,现价年份,Jahr der aktuellen Preise,Año de precios actuales
+field.rebalancing_period,Rebalancing,Ребалансировка,再平衡,Rebalancing,Reequilibrio
+field.rel_deviation,Relative deviation,Относительное отклонение,相对偏差,Relative Abweichung,Desviación relativa
+field.replaces_asset,Replaced asset,Заменяемый актив,被替代资产,Ersetzter Vermögenswert,Activo sustituido
+field.reserve_label,Reserve label,Название резерва,储备名称,Reservesname,Nombre de la reserva
+field.retirement_year,Retirement year,Год пенсии,退休年份,Rentenjahr,Año de jubilación
+field.role,Role,Роль,角色,Rolle,Rol
+field.savings_horizon_years,"Savings horizon, years","Горизонт накоплений, лет",储蓄期（年）,"Sparhorizont, Jahre","Horizonte de ahorro, años"
+field.seed,Seed,Seed,Seed,Seed,Seed
+field.sex,Sex,Пол,性别,Geschlecht,Sexo
+field.start_month,Start month,Начальный месяц,起始月份,Startmonat,Mes inicial
+field.status,Status,Статус,状态,Status,Estado
+field.symbol,Symbol,Тикер,代码,Symbol,Símbolo
+field.t0,Calculation start,Начало расчёта,计算起点,Berechnungsbeginn,Inicio del cálculo
+field.target_month,Target month,Целевой месяц,目标月份,Zielmonat,Mes objetivo
+field.target_year,Target year,Целевой год,目标年份,Zieljahr,Año objetivo
+field.telegram,Telegram,Telegram,Telegram,Telegram,Telegram
+field.telegram_id,Telegram ID,Идентификатор Telegram,Telegram 标识,Telegram-ID,ID de Telegram
+field.term_months,"Term, months","Срок, месяцев",期限（月）,"Laufzeit, Monate","Plazo, meses"
+field.value,Value,Значение,数值,Wert,Valor
+field.version,Version,Версия,版本,Version,Versión
+field.weight,Weight,Доля,权重,Gewicht,Peso
+field.whatsapp,WhatsApp,WhatsApp,WhatsApp,WhatsApp,WhatsApp
+field.withdrawal_years,"Withdrawal period, years","Период изъятий, лет",提取期（年）,"Entnahmephase, Jahre","Período de retiradas, años"
+field.year,Year,Год,年份,Jahr,Año
+legacy.assets,Assets,Активы,资产,Vermögenswerte,Activos
+legacy.back,Back to the client list,К списку клиентов,返回客户列表,Zurück zur Kundenliste,Volver a la lista de clientes
+legacy.calculations,Calculations,Расчёты,计算,Berechnungen,Cálculos
+legacy.channel,Contact channel,Канал связи,联系方式渠道,Kontaktkanal,Canal de contacto
+legacy.clients_explainer,LFP date — the latest successful calculation across all client versions; IPS date — when the investment policy statement was sent. Names are shown as recorded in the registry.,"Дата ЛФП — последний успешный расчёт по всем версиям клиента; дата IPS — отправка инвестиционной декларации. Имя и фамилия показаны так, как записаны в реестре.",LFP 日期 — 客户所有版本中最近一次成功计算；IPS 日期 — 投资声明发送日期。姓名按登记原样显示。,LFP-Datum — die letzte erfolgreiche Berechnung über alle Kundenversionen; IPS-Datum — Versand der Anlageerklärung. Namen werden wie im Register erfasst angezeigt.,Fecha LFP: último cálculo correcto de todas las versiones del cliente; fecha IPS: envío de la declaración de inversión. Los nombres se muestran tal como están registrados.
+legacy.clients_heading,Clients,Клиенты,客户,Kunden,Clientes
+legacy.code,Code,Код,代码,Code,Código
+legacy.family,Family,Семья,家庭,Familie,Familia
+legacy.history,Financial plan history,История финансовых планов,财务计划历史,Verlauf der Finanzpläne,Historial de planes financieros
+legacy.holdings,Portfolio holdings: {label},Состав портфеля: {label},投资组合构成：{label},Portfoliozusammensetzung: {label},Composición de la cartera: {label}
+legacy.intro,The source database is not modified. Planner profiles and plans are stored in a separate database. Codes in these databases can coincide and refer to different people. Switching between the interfaces does not move data.,Исходная база не изменяется. Анкеты и планы Planner сохраняются в отдельной базе. Коды в этих базах могут совпадать и относиться к разным людям. Переход между интерфейсами не переносит данные.,源数据库不会被修改。Planner 的客户档案和计划保存在单独的数据库中。两个数据库中的代码可能相同但指向不同的人。切换界面不会移动数据。,Die Quelldatenbank wird nicht verändert. Planner-Profile und -Pläne liegen in einer separaten Datenbank. Codes können übereinstimmen und verschiedene Personen bezeichnen. Der Wechsel zwischen den Oberflächen verschiebt keine Daten.,La base de origen no se modifica. Las fichas y planes de Planner se guardan en otra base. Los códigos pueden coincidir y referirse a personas distintas. Cambiar de interfaz no mueve datos.
+legacy.intro_canonical,Saved source data and results are in the unified Planner database.,Сохранённые исходные данные и результаты находятся в единой базе Planner.,保存的源数据和结果位于统一的 Planner 数据库中。,Gespeicherte Quelldaten und Ergebnisse liegen in der einheitlichen Planner-Datenbank.,Los datos de origen y los resultados guardados están en la base unificada de Planner.
+legacy.ips_date,IPS date,Дата IPS,IPS 日期,IPS-Datum,Fecha IPS
+legacy.lfp_date,LFP date,Дата ЛФП,LFP 日期,LFP-Datum,Fecha LFP
+legacy.liabilities,Liabilities,Обязательства,负债,Verbindlichkeiten,Pasivos
+legacy.metric_average_return,Average return: {stage},Средняя доходность: {stage},平均收益率：{stage},Durchschnittsrendite: {stage},Rentabilidad media: {stage}
+legacy.metric_probability,Probability of plan success,Вероятность выполнения плана,计划成功概率,Wahrscheinlichkeit des Planerfolgs,Probabilidad de éxito del plan
+legacy.metric_risk,Risk: {stage},Риск: {stage},风险：{stage},Risiko: {stage},Riesgo: {stage}
+legacy.metric_survival,"Median capital survival, years","Медианный срок сохранения капитала, лет",资本中位存续年限,"Medianer Kapitalerhalt, Jahre","Supervivencia mediana del capital, años"
+legacy.metric_terminal,Terminal capital: percentile {p},Конечный капитал: перцентиль {p},期末资本：第 {p} 百分位,Endkapital: Perzentil {p},Capital final: percentil {p}
+legacy.no,No,Нет,否,Nein,No
+legacy.no_records,No records.,Нет записей.,没有记录。,Keine Einträge.,No hay registros.
+legacy.no_versions,No source data versions.,Версии исходных данных отсутствуют.,没有源数据版本。,Keine Versionen der Quelldaten.,No hay versiones de los datos de origen.
+legacy.personal,Personal details and contacts,Личные сведения и контакты,个人信息与联系方式,Persönliche Angaben und Kontakte,Datos personales y contactos
+legacy.planner_clients,Planner clients,Клиенты Planner,Planner 客户,Planner-Kunden,Clientes de Planner
+legacy.planner_form,Planner form,Форма Planner,Planner 表单,Planner-Formular,Formulario de Planner
+legacy.portfolios,Portfolios,Портфели,投资组合,Portfolios,Carteras
+legacy.readonly,Existing LFP database — read only,Существующая база ЛФП — только для чтения,现有 LFP 数据库 — 只读,Bestehende LFP-Datenbank — schreibgeschützt,Base LFP existente — solo lectura
+legacy.run,Run {run},Расчёт {run},计算 {run},Berechnung {run},Cálculo {run}
+legacy.run_metrics,Run metrics,Показатели расчёта,计算指标,Berechnungskennzahlen,Métricas del cálculo
+legacy.run_summary,Run summary,Сводка расчёта,计算概要,Berechnungsübersicht,Resumen del cálculo
+legacy.scenarios,Scenarios,Сценарии,情景,Szenarien,Escenarios
+legacy.selected_version,Selected version,Выбранная версия,所选版本,Ausgewählte Version,Versión seleccionada
+legacy.source_notes,Source notes,Исходные заметки,原始备注,Ursprüngliche Notizen,Notas de origen
+legacy.source_versions,Source data versions,Версии исходных данных,源数据版本,Versionen der Quelldaten,Versiones de los datos de origen
+legacy.tax_residence,Tax residence,Налоговое резидентство,税务居民身份,Steuerlicher Wohnsitz,Residencia fiscal
+legacy.yes,Yes,Да,是,Ja,Sí
+ui_access_denied,Access denied.,Доступ запрещён.,访问被拒绝。,Zugriff verweigert.,Acceso denegado.
+ui_add_link,Add link,Добавить ссылку,添加链接,Link hinzufügen,Añadir enlace
+ui_address,Address,Адрес,地址,Adresse,Dirección
+ui_advanced_json,"Advanced JSON editor: income, expenses, assets, liabilities, goals and forecast settings. Saving appends a new version; no calculation runs.","Расширенный редактор JSON: доходы, расходы, активы, обязательства, цели и настройки прогноза. Сохранение создаёт новую версию; расчёт не запускается.",高级 JSON 编辑器：收入、支出、资产、负债、目标和预测设置。保存会新增一个版本，但不会运行计算。,"Erweiterter JSON-Editor: Einnahmen, Ausgaben, Vermögenswerte, Verbindlichkeiten, Ziele und Prognoseeinstellungen. Speichern fügt eine neue Version hinzu; es wird nicht gerechnet.","Editor JSON avanzado: ingresos, gastos, activos, pasivos, objetivos y ajustes de previsión. Guardar añade una versión nueva; no se ejecuta ningún cálculo."
+ui_all_saved,All changes saved,Все изменения сохранены,所有更改已保存,Alle Änderungen gespeichert,Todos los cambios guardados
+ui_apply,Apply,Применить,应用,Anwenden,Aplicar
+ui_bold,Bold (Ctrl+B),Жирный (Ctrl+B),粗体 (Ctrl+B),Fett (Strg+B),Negrita (Ctrl+B)
+ui_brokers_and_notes,Brokers and notes,Брокеры и заметки,经纪商与备注,Broker und Notizen,Brókeres y notas
+ui_brokers_hint,An empty list with the checkbox ticked means the client has no brokers.,"Пустой список при отмеченном флажке означает, что брокеров нет.",勾选复选框且列表为空表示客户没有经纪商。,Eine leere Liste mit gesetztem Häkchen bedeutet: Der Kunde hat keine Broker.,Una lista vacía con la casilla marcada significa que el cliente no tiene brókeres.
+ui_brokers_known,Broker details are known,Сведения о брокерах известны,经纪商信息已知,Broker-Angaben sind bekannt,Se conocen los brókeres
+ui_brokers_one_per_line,Brokers (one per line),Брокеры (по одному на строку),经纪商（每行一个）,Broker (einer pro Zeile),Brókeres (uno por línea)
+ui_browse_lfp,Browse LFP database (read-only),Просмотр базы LFP (только чтение),浏览 LFP 数据库（只读）,LFP-Datenbank ansehen (schreibgeschützt),Ver base LFP (solo lectura)
+ui_budget,Budget,Бюджет,预算,Budget,Presupuesto
+ui_bullet_list,Bulleted list,Маркированный список,项目符号列表,Aufzählung,Lista con viñetas
+ui_calculation_history,Calculation history,История расчётов,计算历史,Berechnungsverlauf,Historial de cálculos
+ui_cancel,Cancel,Отмена,取消,Abbrechen,Cancelar
+ui_changes_saved,Changes saved,Изменения сохранены,更改已保存,Änderungen gespeichert,Cambios guardados
+ui_client_card,Client card,Карточка клиента,客户卡片,Kundenkarte,Ficha del cliente
+ui_client_meetings,Client meetings,Встречи клиента,客户的会面,Besprechungen des Kunden,Reuniones del cliente
+ui_clients_and_plans,Clients and financial plans,Клиенты и финансовые планы,客户与财务计划,Kunden und Finanzpläne,Clientes y planes financieros
+ui_collapse,Collapse,Свернуть,收起,Einklappen,Contraer
+ui_collapse_aria,Collapse or expand the menu,Свернуть или раскрыть меню,收起或展开菜单,Menü ein- oder ausklappen,Contraer o expandir el menú
+ui_contacts,Contacts,Контакты,联系方式,Kontakte,Contactos
+ui_create_client,Create client,Создать клиента,新建客户,Kunde anlegen,Crear cliente
+ui_date,Date,Дата,日期,Datum,Fecha
+ui_date_placeholder,DD.MM.YYYY,ДД.ММ.ГГГГ,日.月.年,TT.MM.JJJJ,DD.MM.AAAA
+ui_do_not_save,Do not save,Не сохранять,不保存,Nicht speichern,No guardar
+ui_download_markdown,Download Markdown,Скачать Markdown,下载 Markdown,Markdown herunterladen,Descargar Markdown
+ui_editor_hint,"Headings, emphasis, lists, quotes and links","Заголовки, выделение, списки, цитаты и ссылки",标题、强调、列表、引用和链接,"Überschriften, Hervorhebungen, Listen, Zitate und Links","Títulos, énfasis, listas, citas y enlaces"
+ui_editor_mode,Editor mode,Режим редактора,编辑器模式,Editor-Modus,Modo del editor
+ui_expand_editor,Expand editor,Развернуть редактор,展开编辑器,Editor erweitern,Ampliar el editor
+ui_financial_plans,Financial plans,Финансовые планы,财务计划,Finanzpläne,Planes financieros
+ui_form_expired,This form has already been used or has expired. Open it again.,Форма уже использована или устарела. Откройте её заново.,该表单已使用或已过期。请重新打开。,Dieses Formular wurde bereits verwendet oder ist abgelaufen. Öffnen Sie es erneut.,Este formulario ya se usó o caducó. Ábralo de nuevo.
+ui_form_intro,Data stays in the local database. For human use; no AI connection.,Данные остаются в локальной базе. Для работы человека; без подключения к ИИ.,数据保留在本地数据库中，供人工使用，不连接人工智能。,Daten bleiben in der lokalen Datenbank. Für die menschliche Arbeit; keine KI-Verbindung.,"Los datos permanecen en la base local. Para uso humano, sin conexión a la IA."
+ui_format,Format,Формат,形式,Format,Formato
+ui_format_in_person,In person,Очно,当面,Vor Ort,Presencial
+ui_format_online,Online,Онлайн,线上,Online,En línea
+ui_format_phone,Phone,Телефон,电话,Telefon,Teléfono
+ui_formatting,Formatting,Форматирование,格式,Formatierung,Formato
+ui_goal_placeholder,"For example, reviewing goals","Например, обсуждение целей",例如：讨论目标,Zum Beispiel Zielfestlegung,"Por ejemplo, revisar objetivos"
+ui_goal_required,Enter the meeting goal.,Укажите цель встречи.,请填写会面目标。,Geben Sie das Ziel der Besprechung an.,Indique el objetivo de la reunión.
+ui_goals,Goals,Цели,目标,Ziele,Objetivos
+ui_heading1,Heading 1,Заголовок 1,标题 1,Überschrift 1,Título 1
+ui_heading2,Heading 2,Заголовок 2,标题 2,Überschrift 2,Título 2
+ui_heading3,Heading 3,Заголовок 3,标题 3,Überschrift 3,Título 3
+ui_invalid_request,Invalid request.,Некорректный запрос.,请求无效。,Ungültige Anfrage.,Solicitud no válida.
+ui_invalid_request_format,Invalid request format.,Некорректный формат запроса.,请求格式无效。,Ungültiges Anfrageformat.,Formato de solicitud no válido.
+ui_italic,Italic (Ctrl+I),Курсив (Ctrl+I),斜体 (Ctrl+I),Kursiv (Strg+I),Cursiva (Ctrl+I)
+ui_journal_conflict,The meeting was changed in another window. Copy your draft and reload the page.,Встреча уже изменена в другом окне. Скопируйте черновик и обновите страницу.,会面已在另一窗口更改。请复制草稿并刷新页面。,Die Besprechung wurde in einem anderen Fenster geändert. Kopieren Sie den Entwurf und laden Sie die Seite neu.,La reunión se cambió en otra ventana. Copie el borrador y recargue la página.
+ui_journal_expired,The form has expired. Open the journal again.,Форма устарела. Откройте дневник заново.,表单已过期。请重新打开日志。,Das Formular ist abgelaufen. Öffnen Sie das Journal erneut.,El formulario caducó. Abra el diario de nuevo.
+ui_journal_notice,Data is stored in the local Planner database. Meeting content is not sent to an AI while personal access is off.,Данные сохраняются в локальной базе Planner. Содержание встреч не передаётся ИИ при выключенном персональном доступе.,数据保存在 Planner 本地数据库中。关闭个人访问时，会面内容不会发送给人工智能。,Daten werden in der lokalen Planner-Datenbank gespeichert. Bei ausgeschaltetem persönlichem Zugriff wird der Inhalt nicht an eine KI übertragen.,Los datos se guardan en la base local de Planner. El contenido no se envía a la IA mientras el acceso personal esté desactivado.
+ui_journal_save_failed,"The record was not saved. Check the goal, date, time and meeting format.","Запись не сохранена. Проверьте цель, дату, время и формат встречи.",记录未保存。请检查目标、日期、时间和会面形式。,"Der Datensatz wurde nicht gespeichert. Prüfen Sie Ziel, Datum, Uhrzeit und Format.","El registro no se guardó. Compruebe el objetivo, la fecha, la hora y el formato."
+ui_lfp_view,LFP database view,Просмотр базы LFP,LFP 数据库视图,LFP-Datenbankansicht,Vista de la base LFP
+ui_link,Link,Ссылка,链接,Link,Enlace
+ui_local_client_form,Local client form,Локальная форма клиента,本地客户表单,Lokale Kundenmaske,Formulario local de cliente
+ui_local_database,Local Planner database,Локальная база Planner,Planner 本地数据库,Lokale Planner-Datenbank,Base local de Planner
+ui_markdown_source,Markdown source,Исходный текст Markdown,Markdown 源文本,Markdown-Quelltext,Texto Markdown
+ui_meeting_content,Meeting content,Содержание встречи,会面内容,Inhalt der Besprechung,Contenido de la reunión
+ui_meeting_goal,Meeting goal,Цель встречи,会面目标,Ziel der Besprechung,Objetivo de la reunión
+ui_meeting_journal,Meeting journal,Дневник встреч,会面日志,Besprechungsjournal,Diario de reuniones
+ui_meeting_journal_title,Meeting journal — Planner,Дневник встреч — Planner,会面日志 — Planner,Besprechungsjournal — Planner,Diario de reuniones — Planner
+ui_nav_analytics,Analytics,Аналитика,分析,Analysen,Analítica
+ui_nav_calendar,Calendar,Календарь,日历,Kalender,Calendario
+ui_nav_clients,Clients,Клиенты,客户,Kunden,Clientes
+ui_nav_knowledge,Knowledge base,База знаний,知识库,Wissensbasis,Base de conocimiento
+ui_nav_settings,Settings,Настройки,设置,Einstellungen,Ajustes
+ui_new_meeting,New meeting,Новая встреча,新建会面,Neue Besprechung,Nueva reunión
+ui_new_meeting_unsaved,New meeting · not saved,Новая встреча · не сохранена,新会面 · 未保存,Neue Besprechung · nicht gespeichert,Nueva reunión · sin guardar
+ui_no_connection,No connection to the local database. Changes were not saved.,Нет связи с локальной базой. Изменения не сохранены.,无法连接本地数据库。更改未保存。,Keine Verbindung zur lokalen Datenbank. Änderungen wurden nicht gespeichert.,Sin conexión con la base local. Los cambios no se guardaron.
+ui_not_specified,Not specified,Не указан,未指定,Nicht angegeben,No indicado
+ui_numbered_list,Numbered list,Нумерованный список,编号列表,Nummerierte Liste,Lista numerada
+ui_open_failed,Could not open the record. Check the code and version in the local database.,Не удалось открыть запись. Проверьте код и версию в локальной базе.,无法打开记录。请检查本地数据库中的代码和版本。,Der Datensatz konnte nicht geöffnet werden. Prüfen Sie Code und Version in der lokalen Datenbank.,No se pudo abrir el registro. Compruebe el código y la versión en la base local.
+ui_open_journal_failed,Could not open the client journal.,Не удалось открыть дневник клиента.,无法打开客户日志。,Das Kundenjournal konnte nicht geöffnet werden.,No se pudo abrir el diario del cliente.
+ui_open_locally,Open locally:,Откройте локально:,本地打开：,Lokal öffnen:,Abra localmente:
+ui_opening_journal,Opening the journal…,Открываем дневник…,正在打开日志…,Journal wird geöffnet…,Abriendo el diario…
+ui_optional,optional,необязательно,可选,optional,opcional
+ui_paragraph_style,Paragraph style,Стиль абзаца,段落样式,Absatzstil,Estilo de párrafo
+ui_personal_details,Personal details,Личные сведения,个人信息,Persönliche Angaben,Datos personales
+ui_plan_label,Plan (ForecastRequest / MulticurrencyRequest),План (ForecastRequest / MulticurrencyRequest),计划（ForecastRequest / MulticurrencyRequest）,Plan (ForecastRequest / MulticurrencyRequest),Plan (ForecastRequest / MulticurrencyRequest)
+ui_preview,Preview,Предпросмотр,预览,Vorschau,Vista previa
+ui_profile,Profile,Анкета,档案,Profil,Ficha
+ui_quote,Quote,Цитата,引用,Zitat,Cita
+ui_record_not_saved,The record was not saved.,Запись не сохранена.,记录未保存。,Der Datensatz wurde nicht gespeichert.,El registro no se guardó.
+ui_redo,Redo,Повторить действие,重做,Wiederholen,Rehacer
+ui_request_malformed,The request is too large or malformed.,Запрос слишком большой или некорректный.,请求过大或格式不正确。,Die Anfrage ist zu groß oder fehlerhaft.,La solicitud es demasiado grande o no válida.
+ui_request_too_large,The request is too large.,Запрос слишком большой.,请求过大。,Die Anfrage ist zu groß.,La solicitud es demasiado grande.
+ui_retry,Retry,Повторить,重试,Wiederholen,Reintentar
+ui_save,Save,Сохранить,保存,Speichern,Guardar
+ui_save_and_continue,Save and continue,Сохранить и перейти,保存并继续,Speichern und weiter,Guardar y continuar
+ui_save_changes_q,Save changes?,Сохранить изменения?,保存更改？,Änderungen speichern?,¿Guardar los cambios?
+ui_save_failed,"The record was not saved. Check the fields, the plan format and the primary contact.","Запись не сохранена. Проверьте поля, формат плана и основной контакт.",记录未保存。请检查字段、计划格式和主要联系方式。,"Der Datensatz wurde nicht gespeichert. Prüfen Sie Felder, Planformat und Hauptkontakt.","El registro no se guardó. Compruebe los campos, el formato del plan y el contacto principal."
+ui_save_shortcut,Ctrl+S — save,Ctrl+S — сохранить,Ctrl+S — 保存,Strg+S — speichern,Ctrl+S — guardar
+ui_saved_notice,Saved.,Сохранено.,已保存。,Gespeichert.,Guardado.
+ui_saving_unavailable,Saving is not available at this address.,Сохранение по этому адресу недоступно.,无法在此地址保存。,Speichern ist unter dieser Adresse nicht möglich.,No se puede guardar en esta dirección.
+ui_section_unavailable,Section outside this interface,Раздел вне этого макета,此界面之外的部分,Bereich außerhalb dieser Oberfläche,Sección fuera de esta interfaz
+ui_show_meeting_list,Show meeting list,Показать список встреч,显示会面列表,Besprechungsliste anzeigen,Mostrar la lista de reuniones
+ui_start_failed,Local form could not start. Check the database and port locally.,Локальная форма не запустилась. Проверьте базу и порт локально.,Die lokale Maske konnte nicht starten. Prüfen Sie Datenbank und Port lokal.,Die lokale Maske konnte nicht starten. Prüfen Sie Datenbank und Port lokal.,El formulario local no pudo iniciarse. Compruebe la base y el puerto localmente.
+ui_stay,Stay,Остаться,留在本页,Bleiben,Quedarse
+ui_stop_hint,Stop with Ctrl+C. Keep this capability URL private.,Остановите по Ctrl+C. Держите эту ссылку доступа в тайне.,Beenden mit Strg+C. Halten Sie diese Zugriffs-URL geheim.,Stoppen Sie mit Strg+C. Halten Sie diese Zugriffs-URL geheim.,Detenga con Ctrl+C. Mantenga esta URL de acceso en privado.
+ui_text_style,Text,Текст,正文,Text,Texto
+ui_time,Time,Время,时间,Uhrzeit,Hora
+ui_time_placeholder,HH:MM,ЧЧ:ММ,时:分,HH:MM,HH:MM
+ui_undo,Undo,Отменить действие,撤销,Rückgängig,Deshacer
+ui_unsaved_body,The meeting has unsaved changes.,В записи встречи есть несохранённые изменения.,该会面有未保存的更改。,Die Besprechung enthält nicht gespeicherte Änderungen.,La reunión tiene cambios sin guardar.
+ui_unsaved_changes,Unsaved changes,Есть несохранённые изменения,有未保存的更改,Nicht gespeicherte Änderungen,Cambios sin guardar
+ui_version,Version {version},Версия {version},版本 {version},Version {version},Versión {version}
+ui_version_note,Version note,Заметка к версии,版本备注,Versionsnotiz,Nota de la versión
+ui_visual,Visual,Визуально,可视化,Visuell,Visual
+ui_write_content,Write the meeting content…,Запишите содержание встречи…,填写会面内容…,Inhalt der Besprechung erfassen…,Escriba el contenido de la reunión…

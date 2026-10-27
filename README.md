@@ -177,9 +177,10 @@ Enter client identity directly through a human-only local browser form:
 poetry run python -m okama_planner.client_form --database /path/to/clients.sqlite3
 ```
 
-Open the private URL printed by the command; stop with Ctrl+C. The Russian interface
-creates and edits client records and saves financial input as append-only versions through
-an advanced JSON editor. It uses only the local database and does not connect to an AI.
+Open the private URL printed by the command; stop with Ctrl+C. The interface is translated
+into every supported language — English by default, selected with `--language ru|de|es|zh` —
+and creates and edits client records, saving financial input as append-only versions through
+an advanced JSON editor. The meeting journal and the legacy viewer follow the same language. It uses only the local database and does not connect to an AI.
 Use `--initialize` only to create a new empty database; existing files are never overwritten.
 Add `--legacy-database /path/to/lfp.sqlite3` to browse an existing LFP database read-only
 and switch between the two interfaces. Planner edits stay in its separate database;
@@ -239,7 +240,9 @@ skills are not part of the public package.
 ## Languages
 
 **Available since Planner 0.5.0:** Excel reports and chart interface text in **English, Russian,
-German, Spanish and Simplified Chinese** (`en`, `ru`, `de`, `es`, `zh`). Select a language
+German, Spanish and Simplified Chinese** (`en`, `ru`, `de`, `es`, `zh`). **Since 0.5.1 every
+local browser interface ships in the same five languages**, English by default: select one with
+`--language ru|de|es|zh` when starting the client form. Reports and charts take a language
 with `export_report(..., language="ru")` or `export_charts(..., language="ru")`.
 The shared [terminology table](src/okama_planner/terminology.csv) supplies translated captions.
 See the [offline five-language example](examples/localized_plan.py),

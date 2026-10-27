@@ -2,7 +2,7 @@
 
 The form lets a person enter client identity directly into a local SQLite database,
 without sending names or contacts through an AI assistant. It is an optional standalone
-command, not an MCP tool. The current interface is Russian.
+command, not an MCP tool. The interface is available in every supported language (English, Russian, German, Spanish, Simplified Chinese); English is the default.
 
 ## Start and stop
 
@@ -10,7 +10,14 @@ Open an existing database:
 
 ```bash
 poetry run python -m okama_planner.client_form --database /path/to/clients.sqlite3
+poetry run python -m okama_planner.client_form --database /path/to/clients.sqlite3 --language ru
 ```
+
+The interface language is chosen on the command line and defaults to English. Every supported
+language (`en`, `ru`, `de`, `es`, `zh`) covers the whole local surface — the intake form, the
+meeting journal and the legacy viewer — and dates follow the selected locale. Catalogue keys
+live in `src/okama_planner/ui_texts.csv`; the browser bundle receives its captions from the
+server and never carries its own translations.
 
 Create a new empty database explicitly (its parent directory must exist):
 
@@ -92,7 +99,7 @@ liabilities, budget, goals, portfolios with holdings, scenarios and a stored run
 with metrics. The latest input version and run are selected by default; navigation can select
 an earlier version or run owned by that client and version. Missing optional tables display
 an empty section. Monthly ledgers and raw input snapshots are not loaded. Values are escaped,
-enums use Russian captions, rates and expense-share goals show percentages. Imported notes
+enums use the interface language, rates and expense-share goals show percentages. Imported notes
 are displayed as escaped plain text for the selected registry entry; their source fingerprints
 are not displayed, and their content is not exposed through AI APIs.
 

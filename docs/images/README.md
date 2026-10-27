@@ -4,8 +4,9 @@
 
 `client-database-interface.png` is the 0.5.0 release hero: the client card with the meeting
 journal, and the registry table with three fictional clients. It is a headless Chrome capture
-of `python -m okama_planner.client_form` running against a temporary SQLite file created for
-the capture. The records are Alex Morgan, Priya Rao and Jordan Lee — the same fictional
+of `python -m okama_planner.client_form --language en` running against a temporary SQLite
+file created for the capture. The interface ships in all five supported languages; the hero
+uses English. The records are Alex Morgan, Priya Rao and Jordan Lee — the same fictional
 clients that appear in the README table; addresses use the reserved `.invalid` domain.
 
 The entries never need to leave the capture directory, and each capture run builds its own

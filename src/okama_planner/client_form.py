@@ -13,21 +13,23 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlencode, urlsplit
 
+from okama_planner.localization import LANGUAGES
 from okama_planner.legacy_viewer import LegacyReader
 from okama_planner.storage import PlannerStore
 from okama_planner.storage.validation import ClientDetails
+from okama_planner.ui_texts import DEFAULT_LANGUAGE, UiText
 
-LABELS = {
-    'crm_id': 'CRM ID', 'full_name': 'Полное имя', 'sex': 'Пол', 'birth_year': 'Год рождения',
-    'email': 'Email', 'phone': 'Телефон', 'telegram': 'Telegram', 'telegram_id': 'Telegram ID',
-    'whatsapp': 'WhatsApp', 'max_messenger': 'MAX', 'brokers': 'Брокеры (по одному на строку)',
-    'primary_channel': 'Основной канал связи', 'ips_sent_at': 'Дата отправки декларации', 'note': 'Заметка',
-}
 OPTIONS = {
-    'sex': [('', 'Не указан'), ('female', 'Женский'), ('male', 'Мужской')],
-    'primary_channel': [('', 'Не указан'), ('email', 'Email'), ('phone', 'Телефон'),
-                        ('telegram', 'Telegram'), ('whatsapp', 'WhatsApp'), ('max', 'MAX')],
+    'sex': [('', 'ui_not_specified'), ('female', 'enum.female'), ('male', 'enum.male')],
+    'primary_channel': [('', 'ui_not_specified'), ('email', 'enum.email'), ('phone', 'enum.phone'),
+                        ('telegram', 'enum.telegram'), ('whatsapp', 'enum.whatsapp'), ('max', 'enum.max')],
 }
+SECTIONS = (
+    ('ui_personal_details', ('full_name', 'crm_id', 'sex', 'birth_year', 'ips_sent_at')),
+    ('ui_contacts', ('email', 'phone', 'telegram', 'telegram_id', 'whatsapp', 'max_messenger',
+                     'primary_channel')),
+    ('ui_brokers_and_notes', ('brokers', 'note')),
+)
 STYLE = """
 body{font:16px system-ui,sans-serif;color:#172b42;background:#f3f6fa;margin:0}
 main{max-width:960px;margin:32px auto;padding:28px;background:white;border-radius:16px}
@@ -60,9 +62,11 @@ def single_values(parsed: dict[str, list[str]]) -> dict[str, str]:
 class FormServer(HTTPServer):
     """A synchronous server keeps nonce consumption and mutations serialized."""
 
-    def __init__(self, database: Path, port: int, legacy: LegacyReader | None = None) -> None:
+    def __init__(self, database: Path, port: int, legacy: LegacyReader | None = None,
+                 language: str = DEFAULT_LANGUAGE) -> None:
         self.database = database
         self.legacy = legacy
+        self.ui = UiText(language)
         self.entry_path = f'/{secrets.token_urlsafe(32)}/'
         self.style_nonce = secrets.token_urlsafe(24)
         self.csrf = secrets.token_urlsafe(32)
@@ -128,21 +132,17 @@ class FormHandler(BaseHTTPRequestHandler):
 
     def identity_fields(self, row: dict[str, Any]) -> str:
         parts = []
-        for title, keys in (
-            ('Личные сведения', ('full_name', 'crm_id', 'sex', 'birth_year', 'ips_sent_at')),
-            ('Контакты', ('email', 'phone', 'telegram', 'telegram_id', 'whatsapp',
-                          'max_messenger', 'primary_channel')),
-            ('Брокеры и заметки', ('brokers', 'note')),
-        ):
-            parts.append(f'<fieldset><legend>{title}</legend><div class="grid">')
+        ui = self.server.ui
+        for title, keys in SECTIONS:
+            parts.append(f'<fieldset><legend>{ui.text(title)}</legend><div class="grid">')
             for key in keys:
                 value = row.get(key) or ''
-                parts.append(f'<label>{LABELS[key]}')
+                parts.append(f'<label>{ui.text(f"field.{key}")}')
                 if key in OPTIONS:
                     parts.append(f'<select name="{key}">')
                     for option, caption in OPTIONS[key]:
                         selected = ' selected' if value == option else ''
-                        parts.append(f'<option value="{option}"{selected}>{caption}</option>')
+                        parts.append(f'<option value="{option}"{selected}>{ui.text(caption)}</option>')
                     parts.append('</select>')
                 elif key in ('brokers', 'note'):
                     if key == 'brokers' and isinstance(value, list):
@@ -151,10 +151,9 @@ class FormHandler(BaseHTTPRequestHandler):
                     if key == 'brokers':
                         known = row.get('brokers_known', row.get('brokers') is not None)
                         checked = ' checked' if known else ''
-                        parts.append('<small>Пустой список при отмеченном флажке '
-                                     'означает, что брокеров нет.</small>'
+                        parts.append(f'<small>{ui.text("ui_brokers_hint")}</small>'
                                      f'<br><input type="checkbox" name="brokers_known" value="yes"{checked}>'
-                                     ' Сведения о брокерах известны')
+                                     f' {ui.text("ui_brokers_known")}')
                 else:
                     kind = 'date' if key == 'ips_sent_at' else 'text'
                     required = ' required' if key == 'full_name' else ''
@@ -172,35 +171,37 @@ class FormHandler(BaseHTTPRequestHandler):
             (item for item in plans if str(item['version']) == version), None)
         if version and chosen is None:
             raise ValueError('Unknown version')
-        parts = ['<p>Расширенный редактор JSON: доходы, расходы, активы, обязательства, цели '
-                 'и настройки прогноза. Сохранение создаёт новую версию; расчёт не запускается.</p>']
+        ui = self.server.ui
+        parts = [f'<p>{ui.text("ui_advanced_json")}</p>']
         for item in plans:
             query = urlencode({'code': code, 'view': 'plan', 'version': item['version']})
             parts.append(f'<p><a href="{self.server.entry_path}?{escaped(query)}">'
-                         f'Версия {item["version"]}</a> {escaped(item["note"] or "")}</p>')
+                         f'{ui.text("ui_version", version=item["version"])}'
+                         f'</a> {escaped(item["note"] or "")}</p>')
         data = '{}' if chosen is None else json.dumps(
             store.load_plan(chosen['id']).model_dump(mode='json'), ensure_ascii=False, indent=2)
         values = submitted or {}
-        parts.extend([self.form('save-plan', code), '<label>План (ForecastRequest / MulticurrencyRequest)'
+        parts.extend([self.form('save-plan', code), f'<label>{ui.text("ui_plan_label")}'
                       f'<textarea name="request" rows="24">{escaped(values.get("request", data))}</textarea>'
-                      '</label>', '<p><label>Заметка к версии '
+                      f'</label>', f'<p><label>{ui.text("ui_version_note")} '
                       f'<input name="plan_note" value="{escaped(values.get("plan_note", ""))}"></label></p>'])
         return ''.join(parts)
 
     def page(self, store: PlannerStore, code: str, view: str, version: str = '',
              submitted: dict[str, str] | None = None, notice: str = '') -> str:
-        parts = ['<!doctype html><html lang="ru"><head><meta charset="utf-8">',
+        ui = self.server.ui
+        parts = [f'<!doctype html><html lang="{ui.language}"><head><meta charset="utf-8">',
                  '<meta name="viewport" content="width=device-width,initial-scale=1">',
-                 '<title>Локальная форма клиента</title>',
+                 f'<title>{ui.text("ui_local_client_form")}</title>',
                  f'<style nonce="{self.server.style_nonce}">{STYLE}</style></head><body><main>',
-                 '<h1>Клиенты и финансовые планы</h1>',
-                 '<p>Данные остаются в локальной базе. Для работы человека; без подключения к ИИ.</p>',
-                 f'<nav><a href="{self.server.entry_path}">Создать клиента</a> ']
+                 f'<h1>{ui.text("ui_clients_and_plans")}</h1>',
+                 f'<p>{ui.text("ui_form_intro")}</p>',
+                 f'<nav><a href="{self.server.entry_path}">{ui.text("ui_create_client")}</a> ']
         for row in store.list_clients():
             parts.append(f'<a href="{self.server.entry_path}?code={row["code"]}">{row["code"]}</a> ')
         if self.server.legacy is not None:
             parts.append(f'<a href="{self.server.entry_path}?view=legacy">'
-                         'Просмотр базы LFP (только чтение)</a>')
+                         f'{ui.text("ui_browse_lfp")}</a>')
         parts.append('</nav>')
         if notice:
             level = 'error' if submitted is not None else 'notice'
@@ -208,13 +209,13 @@ class FormHandler(BaseHTTPRequestHandler):
         row = store.get_client(code) if code else {}
         if code:
             parts.append(f'<h2>{escaped(code)}</h2><nav>'
-                         f'<a href="{self.server.entry_path}?code={code}">Анкета</a> '
+                         f'<a href="{self.server.entry_path}?code={code}">{ui.text("ui_profile")}</a> '
                          f'<a href="{self.server.entry_path}?code={code}&amp;view=plan">'
-                         'Финансовые планы</a> '
+                         f'{ui.text("ui_financial_plans")}</a> '
                          f'<a href="{self.server.entry_path}?code={code}&amp;view=meetings">'
-                         'Дневник встреч</a> '
+                         f'{ui.text("ui_meeting_journal")}</a> '
                          f'<a href="{self.server.entry_path}?code={code}&amp;view=legacy">'
-                         'История расчётов</a></nav>')
+                         f'{ui.text("ui_calculation_history")}</a></nav>')
         if not code and self.server.legacy is not None:
             with self.server.legacy.connect() as db:
                 registry = self.server.legacy.rows(db, 'client_registry', 'ORDER BY code')
@@ -227,12 +228,13 @@ class FormHandler(BaseHTTPRequestHandler):
                 row.update(submitted)
                 row['brokers_known'] = submitted.get('brokers_known') == 'yes'
             parts.append(self.identity_fields(row))
-        parts.append('<p><button type="submit">Сохранить</button></p></form></main></body></html>')
+        parts.append(f'<p><button type="submit">{ui.text("ui_save")}</button></p>'
+                     '</form></main></body></html>')
         return ''.join(parts)
 
     def do_GET(self) -> None:
         if not self.allowed():
-            self.reply(403, 'Доступ запрещён.')
+            self.reply(403, self.server.ui.text('ui_access_denied'))
             return
         try:
             query = single_values(parse_qs(urlsplit(self.path).query, strict_parsing=True))
@@ -246,9 +248,10 @@ class FormHandler(BaseHTTPRequestHandler):
                     raise ValueError('Legacy not enabled')
                 content = self.server.legacy.page(self.server.entry_path, code,
                                                   query.get('version', ''), query.get('run', ''))
-                page = ('<!doctype html><html lang="ru"><head><meta charset="utf-8">'
+                ui = self.server.ui
+                page = (f'<!doctype html><html lang="{ui.language}"><head><meta charset="utf-8">'
                         '<meta name="viewport" content="width=device-width,initial-scale=1">'
-                        '<title>Просмотр базы LFP</title>'
+                        f'<title>{ui.text("ui_lfp_view")}</title>'
                         f'<style nonce="{self.server.style_nonce}">{STYLE}</style></head>'
                         f'<body><main>{content}</main></body></html>')
                 self.reply(200, page)
@@ -257,17 +260,18 @@ class FormHandler(BaseHTTPRequestHandler):
                 raise ValueError('Unknown view')
             with PlannerStore.open(self.server.database) as store:
                 page = self.page(store, code, view, query.get('version', ''),
-                                 notice='Сохранено.' if query.get('saved') == '1' else '')
+                                 notice=self.server.ui.text('ui_saved_notice')
+                                 if query.get('saved') == '1' else '')
             self.reply(200, page)
         except Exception:
-            self.reply(400, 'Не удалось открыть запись. Проверьте код и версию в локальной базе.')
+            self.reply(400, self.server.ui.text('ui_open_failed'))
 
     def do_POST(self) -> None:
         if not self.allowed(post=True):
-            self.reply(403, 'Доступ запрещён.')
+            self.reply(403, self.server.ui.text('ui_access_denied'))
             return
         if urlsplit(self.path).query:
-            self.reply(405, 'Сохранение по этому адресу недоступно.')
+            self.reply(405, self.server.ui.text('ui_saving_unavailable'))
             return
         if self.headers.get_content_type() == 'application/json':
             from okama_planner import journal_web
@@ -279,13 +283,13 @@ class FormHandler(BaseHTTPRequestHandler):
         try:
             length = int(self.headers.get('Content-Length', '0'))
             if self.headers.get('Transfer-Encoding') or length <= 0:
-                self.reply(400, 'Некорректный запрос.')
+                self.reply(400, self.server.ui.text('ui_invalid_request'))
                 return
             if length > MAX_BODY:
-                self.reply(413, 'Запрос слишком большой.')
+                self.reply(413, self.server.ui.text('ui_request_too_large'))
                 return
             if self.headers.get_content_type() != 'application/x-www-form-urlencoded':
-                self.reply(400, 'Некорректный формат запроса.')
+                self.reply(400, self.server.ui.text('ui_invalid_request_format'))
                 return
             raw = self.rfile.read(length)
             if len(raw) != length:
@@ -294,16 +298,16 @@ class FormHandler(BaseHTTPRequestHandler):
             data = single_values(parsed)
             if not secrets.compare_digest(data.pop('csrf', '').encode('utf-8'),
                                           self.server.csrf.encode('utf-8')):
-                self.reply(403, 'Доступ запрещён.')
+                self.reply(403, self.server.ui.text('ui_access_denied'))
                 return
             nonce = data.pop('nonce', '')
             operation, code = data.pop('operation', ''), data.pop('code', '')
             expected = self.server.nonces.get(nonce)
             if expected is None:
-                self.reply(409, 'Форма уже использована или устарела. Откройте её заново.')
+                self.reply(409, self.server.ui.text('ui_form_expired'))
                 return
             if expected != (operation, code):
-                self.reply(403, 'Доступ запрещён.')
+                self.reply(403, self.server.ui.text('ui_access_denied'))
                 return
             del self.server.nonces[nonce]
             query = self.save(operation, code, data)
@@ -314,7 +318,7 @@ class FormHandler(BaseHTTPRequestHandler):
                                   locals().get('data', {}))
 
     def validation_error(self, code: str, operation: str, data: dict[str, str]) -> None:
-        message = 'Запись не сохранена. Проверьте поля, формат плана и основной контакт.'
+        message = self.server.ui.text('ui_save_failed')
         try:
             with PlannerStore.open(self.server.database) as store:
                 page = self.page(store, code, 'plan' if operation == 'save-plan' else 'client',
@@ -350,18 +354,25 @@ class FormHandler(BaseHTTPRequestHandler):
             return {'code': code}
 
 
-def create_server(database: Path, port: int = 0, legacy_database: Path | None = None) -> FormServer:
+def create_server(database: Path, port: int = 0, legacy_database: Path | None = None,
+                  language: str = DEFAULT_LANGUAGE) -> FormServer:
     """Open an existing database and bind only to 127.0.0.1."""
     with PlannerStore.open(database):
         pass
-    legacy = LegacyReader(legacy_database) if legacy_database else LegacyReader(database, canonical=True)
-    return FormServer(database, port, legacy)
+    legacy = (
+        LegacyReader(legacy_database, language=language)
+        if legacy_database
+        else LegacyReader(database, canonical=True, language=language)
+    )
+    return FormServer(database, port, legacy, language)
 
 
 def main(argv: list[str] | None = None) -> int:
     """Run local human intake; never start a browser or reveal database content."""
-    parser = argparse.ArgumentParser(description='Human-only local client browser form (Russian UI)')
+    parser = argparse.ArgumentParser(description='Human-only local client browser form')
     parser.add_argument('--database', type=Path, required=True)
+    parser.add_argument('--language', choices=LANGUAGES, default=DEFAULT_LANGUAGE,
+                        help='Interface language; defaults to English')
     parser.add_argument('--legacy-database', type=Path,
                         help='Optional existing LFP database; read-only, never migrated')
     parser.add_argument('--port', type=int, default=0, help='Loopback port; default chooses an unused port')
@@ -373,15 +384,18 @@ def main(argv: list[str] | None = None) -> int:
         if arguments.initialize:
             with PlannerStore.initialize(arguments.database):
                 pass
-        server = create_server(arguments.database, arguments.port, arguments.legacy_database)
-        print(f'Open locally: http://127.0.0.1:{server.server_port}{server.entry_path}', flush=True)
-        print('Stop with Ctrl+C. Keep this capability URL private.', flush=True)
+        server = create_server(arguments.database, arguments.port, arguments.legacy_database,
+                               arguments.language)
+        ui = server.ui
+        print(f'{ui.text("ui_open_locally")} http://127.0.0.1:{server.server_port}{server.entry_path}',
+              flush=True)
+        print(ui.text('ui_stop_hint'), flush=True)
         server.serve_forever()
         return 0
     except KeyboardInterrupt:
         return 0
     except Exception:
-        print('Local form could not start. Check the database and port locally.', file=sys.stderr)
+        print(UiText(arguments.language).text('ui_start_failed'), file=sys.stderr)
         return 2
     finally:
         if server is not None:

@@ -11,6 +11,7 @@ import pytest
 
 from okama_planner import client_form
 from okama_planner.storage import PlannerStore
+from okama_planner.ui_texts import UiText
 from test_client_form import fields, send
 
 
@@ -88,7 +89,7 @@ def test_readonly_browser_navigation_and_source_integrity(
     assert 'HIDDEN.MOEX' not in page and 'Other scenario' not in page
     assert 'method="post"' not in page
     assert f'href="{server.entry_path}"' in page
-    assert 'только для чтения' in page
+    assert 'read only' in page
     assert send(server, route + '&code=c-0001&version=1')[0] == 200
     assert send(server, route + '&code=c-0001&run=1001')[0] == 200
     for query in ('&version=20', '&version=3', '&run=2001', '&run=0', '&code=c-0001&code=c-0002'):
@@ -155,7 +156,7 @@ def test_connection_is_readonly_and_optional_tables_can_be_absent(legacy: Path) 
                      'portfolio_holding', 'scenario', 'plan_run', 'run_metric', 'tax_residency'):
             setup.execute(f'DROP TABLE {name}')
     page = reader.page('/capability/', 'c-0001', '', '')
-    assert 'Нет записей.' in page and 'Second version' in page
+    assert 'No records.' in page and 'Second version' in page
 
 
 def test_goal_expense_share_is_percent_not_money(legacy: Path) -> None:
@@ -165,7 +166,7 @@ def test_goal_expense_share_is_percent_not_money(legacy: Path) -> None:
         setup.execute('ALTER TABLE goal ADD COLUMN amount_basis TEXT')
         setup.execute("UPDATE goal SET amount_pv=0.8, amount_basis='expense_share'")
     page = LegacyReader(legacy).page('/capability/', 'c-0001', '', '')
-    assert '80.00 %' in page and 'Доля семейных расходов' in page
+    assert '80.00 %' in page and 'Share of household expenses' in page
 
 
 @pytest.mark.parametrize('key,value', [('telegram', 'income'), ('note', 'ok'),
@@ -173,7 +174,7 @@ def test_goal_expense_share_is_percent_not_money(legacy: Path) -> None:
 def test_free_text_is_not_translated_as_an_enum(key: str, value: str) -> None:
     from okama_planner.legacy_viewer import display
 
-    assert display(key, value, {}) == value
+    assert display(key, value, {}, UiText("en")) == value
 
 
 def test_client_index_contacts_dates_and_detail_roundtrip(
@@ -202,15 +203,15 @@ def test_client_index_contacts_dates_and_detail_roundtrip(
     assert '&lt;script&gt;Synthetic&lt;/script&gt;' in index
     assert '<script>Synthetic</script>' not in index
     assert '+1 555 0100' in index and 'Telegram' in index and 'test@example.invalid' in index
-    assert '15.09.2026' in index and '20.09.2026' in index
-    assert '10.10.2026' not in index and '09.10.2026' not in index
-    assert 'Synthetic goal' not in index and 'Версии исходных данных' not in index
+    assert '09/15/2026' in index and '09/20/2026' in index
+    assert '10/10/2026' not in index and '10/09/2026' not in index
+    assert 'Synthetic goal' not in index and 'Source data versions' not in index
     assert f'href="{route}&amp;code=c-0001"' in index
     second_row = index.split('<tbody>')[1].split('<tr>')[2].split('</tr>')[0]
     assert second_row.count('—') == 4
     _, _, details = send(server, route + '&code=c-0001')
     assert 'Synthetic goal' in details
-    assert f'href="{route}">К списку клиентов</a>' in details
+    assert f'href="{route}">Back to the client list</a>' in details
     assert 'Other synthetic' not in details
     assert hashlib.sha256(path.read_bytes()).digest() == before
 
@@ -225,7 +226,7 @@ def test_client_index_with_minimal_schema_and_no_clients(legacy: Path) -> None:
     with sqlite3.connect(legacy) as db:
         db.execute('DELETE FROM client_registry')
     page = LegacyReader(legacy).page('/local/', '', '', '')
-    assert 'Нет записей.' in page and 'Форма Planner' in page
+    assert 'No records.' in page and 'Planner form' in page
 
 
 def test_imported_notes_are_local_escaped_and_scoped_to_client(

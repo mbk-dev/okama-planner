@@ -4,10 +4,12 @@ import html
 import json
 import sqlite3
 from contextlib import closing
-from datetime import date
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode
+
+from okama_planner.localization import format_date
+from okama_planner.ui_texts import DEFAULT_LANGUAGE, UiText
 
 # Explicit field allowlists keep snapshots and the monthly ledger out of the browser.
 FIELDS = {
@@ -31,137 +33,29 @@ FIELDS = {
     "discount_rate buffer_rate okama_version",
     "run_metric": "key value",
 }
-LABELS = dict(
-    zip(
-        "code full_name sex birth_year email phone telegram telegram_id whatsapp max_messenger brokers "
-        "primary_channel ips_sent_at note created_at version year country name role label amount currency "
-        "asset_class growth_rate principal annual_rate monthly_payment term_months start_month kind "
-        "monthly_amount indexation_rate end_rule end_month amount_pv amount_basis pv_year target_year "
-        "target_month priority becomes_asset can_defer can_resize replaces_asset reserve_label last_date_pin "
-        "rebalancing_period abs_deviation rel_deviation symbol weight is_base status t0 horizon_years "
-        "withdrawal_years retirement_year seed mc_number distribution match_moments buffer_lookahead_months "
-        "savings_horizon_years inflation_rate expense_indexation_rate income_indexation_rate "
-        "goal_indexation_rate "
-        "discount_rate buffer_rate okama_version key value".split(),
-        [
-            "Код",
-            "Полное имя",
-            "Пол",
-            "Год рождения",
-            "Email",
-            "Телефон",
-            "Telegram",
-            "Telegram ID",
-            "WhatsApp",
-            "MAX",
-            "Брокеры",
-            "Основной канал связи",
-            "Дата отправки декларации",
-            "Заметка",
-            "Дата создания",
-            "Версия",
-            "Год",
-            "Страна",
-            "Имя",
-            "Роль",
-            "Название",
-            "Сумма",
-            "Валюта",
-            "Класс актива",
-            "Доходность",
-            "Остаток долга",
-            "Годовая ставка",
-            "Ежемесячный платёж",
-            "Срок, месяцев",
-            "Начальный месяц",
-            "Тип",
-            "Сумма в месяц",
-            "Индексация",
-            "Правило окончания",
-            "Конечный месяц",
-            "Размер цели",
-            "Основа размера цели",
-            "Год текущих цен",
-            "Целевой год",
-            "Целевой месяц",
-            "Приоритет",
-            "Становится активом",
-            "Можно отложить",
-            "Можно уменьшить",
-            "Заменяемый актив",
-            "Название резерва",
-            "Дата истории",
-            "Ребалансировка",
-            "Абсолютное отклонение",
-            "Относительное отклонение",
-            "Тикер",
-            "Доля",
-            "Базовый сценарий",
-            "Статус",
-            "Начало расчёта",
-            "Горизонт, лет",
-            "Период изъятий, лет",
-            "Год пенсии",
-            "Seed",
-            "Число траекторий",
-            "Распределение",
-            "Сохранение моментов выборки",
-            "Буфер, месяцев",
-            "Горизонт накоплений, лет",
-            "Инфляция",
-            "Индексация расходов",
-            "Индексация доходов",
-            "Индексация целей",
-            "Ставка дисконтирования",
-            "Доходность буфера",
-            "Версия okama",
-            "Показатель",
-            "Значение",
-        ],
-        strict=True,
-    )
-)
-LABELS.update({"content": "Исходный текст", "imported_at": "Дата переноса"})
-ENUMS = {
-    "email": "Email",
-    "phone": "Телефон",
-    "telegram": "Telegram",
-    "whatsapp": "WhatsApp",
-    "max": "MAX",
-    "female": "Женский",
-    "male": "Мужской",
-    "client": "Клиент",
-    "spouse": "Супруг(а)",
-    "child": "Ребёнок",
-    "portfolio": "Инвестиционный портфель",
-    "reserve": "Резерв",
-    "non_working": "Неработающий актив",
-    "third_party": "Сторонний актив",
-    "savings": "Накопления на покупки",
-    "income": "Доход",
-    "expense": "Расход",
-    "none": "Без ограничения",
-    "until_retirement": "До пенсии",
-    "until_month": "До указанного месяца",
-    "lump": "Разовая покупка",
-    "retirement_income": "Пенсионный доход",
-    "reserve_topup": "Пополнение резерва",
-    "amount": "Денежная сумма",
-    "expense_share": "Доля семейных расходов",
-    "accumulation": "Накопление",
-    "withdrawal": "Изъятия",
-    "pending": "Ожидает расчёта",
-    "ok": "Успешно",
-    "failed": "Ошибка",
-    "norm": "Нормальное",
-    "lognorm": "Логнормальное",
-    "t": "Стьюдента",
-    "month": "Ежемесячно",
-    "year": "Ежегодно",
-    "probability_of_success": "Вероятность выполнения плана",
-    "median_survival_years": "Медианный срок сохранения капитала, лет",
-    **{f"terminal_p{p}": f"Конечный капитал: перцентиль {p}" for p in (10, 25, 50, 75, 90)},
+FIELD_KEYS = {
+    column: ("field.metric" if column == "key" else f"field.{column}")
+    for column in "code full_name sex birth_year email phone telegram telegram_id whatsapp max_messenger "
+    "brokers primary_channel ips_sent_at note created_at version year country name role label amount "
+    "currency asset_class growth_rate principal annual_rate monthly_payment term_months start_month kind "
+    "monthly_amount indexation_rate end_rule end_month amount_pv amount_basis pv_year target_year "
+    "target_month priority becomes_asset can_defer can_resize replaces_asset reserve_label last_date_pin "
+    "rebalancing_period abs_deviation rel_deviation symbol weight is_base status t0 horizon_years "
+    "withdrawal_years retirement_year seed mc_number distribution match_moments buffer_lookahead_months "
+    "savings_horizon_years inflation_rate expense_indexation_rate income_indexation_rate "
+    "goal_indexation_rate discount_rate buffer_rate okama_version value content imported_at".split()
 }
+ENUM_KEYS = {
+    value: ("enum.yearly" if value == "year" else f"enum.{value}")
+    for value in "email phone telegram whatsapp max female male client spouse child portfolio reserve "
+    "non_working third_party savings income expense none until_retirement until_month lump "
+    "retirement_income reserve_topup amount accumulation withdrawal pending ok failed norm lognorm "
+    "t month year".split()
+}
+ENUM_KEYS["expense_share"] = "enum.share"
+METRICS = {"probability_of_success": "legacy.metric_probability",
+           "median_survival_years": "legacy.metric_survival"}
+UNKNOWN_LABEL = "field.metric"
 INTERNAL = {"id", "registry_id", "scenario_id"}
 ENUM_FIELDS = {
     "sex",
@@ -182,8 +76,9 @@ BOOLS = {"is_base", "becomes_asset", "can_defer", "can_resize", "match_moments"}
 class LegacyReader:
     """Connections are short lived, read-only and never passed to Planner storage."""
 
-    def __init__(self, path: Path, *, canonical: bool = False) -> None:
+    def __init__(self, path: Path, *, canonical: bool = False, language: str = DEFAULT_LANGUAGE) -> None:
         self.canonical = canonical
+        self.ui = UiText(language)
         self.path = path.resolve(strict=True)
         if not self.path.is_file():
             raise ValueError("Legacy database unavailable")
@@ -227,8 +122,9 @@ class LegacyReader:
     def holdings(self, db: sqlite3.Connection, portfolios: list[dict[str, Any]]) -> list[str]:
         return [
             table(
-                f"Состав портфеля: {row.get('label', '')}",
+                self.ui.text("legacy.holdings", label=row.get("label", "")),
                 self.rows(db, "portfolio_holding", "WHERE portfolio_id = ?", (row["id"],)),
+                self.ui,
             )
             for row in portfolios
         ]
@@ -245,15 +141,18 @@ class LegacyReader:
                     "WHERE r.status = 'ok' GROUP BY c.registry_id"
                 )
             )
-        headers = ("Код", "Имя и фамилия", "Телефон", "Канал связи", "Email", "Дата ЛФП", "Дата IPS")
+        ui = self.ui
+        headers = tuple(
+            ui.text(key)
+            for key in ("legacy.code", "field.full_name", "field.phone", "legacy.channel",
+                        "field.email", "legacy.lfp_date", "legacy.ips_date")
+        )
         parts = [
-            "<section><h2>Клиенты</h2>",
-            "<p>Дата ЛФП — последний успешный расчёт по всем версиям клиента; "
-            "дата IPS — отправка инвестиционной декларации. "
-            "Имя и фамилия показаны так, как записаны в реестре.</p>",
+            f"<section><h2>{ui.text('legacy.clients_heading')}</h2>",
+            f"<p>{ui.text('legacy.clients_explainer')}</p>",
         ]
         if not registry:
-            return "".join(parts) + "<p>Нет записей.</p></section>"
+            return "".join(parts) + f"<p>{ui.text('legacy.no_records')}</p></section>"
         parts.append(
             '<div class="table-scroll"><table><thead><tr>'
             + "".join(f'<th scope="col">{caption}</th>' for caption in headers)
@@ -269,22 +168,26 @@ class LegacyReader:
                 + "</a></td>"
             )
             values = [
-                display(key, row.get(key) or None, row)
+                display(key, row.get(key) or None, row, ui)
                 for key in ("full_name", "phone", "primary_channel", "email")
             ]
-            values.extend((calendar_date(dates.get(row["id"])), calendar_date(row.get("ips_sent_at"))))
+            values.extend(
+                (calendar_date(dates.get(row["id"]), ui), calendar_date(row.get("ips_sent_at"), ui))
+            )
             parts.extend(f"<td>{html.escape(value)}</td>" for value in values)
             parts.append("</tr>")
         return "".join(parts) + "</tbody></table></div></section>"
 
     def canonical_navigation(self, parts: list[str], entry_path: str, code: str) -> None:
         if self.canonical:
-            parts[1] = "<p>Сохранённые исходные данные и результаты находятся в единой базе Planner.</p>"
+            ui = self.ui
+            parts[1] = f"<p>{ui.text('legacy.intro_canonical')}</p>"
             parts[2] = (
-                f'<nav><a href="{entry_path}">Клиенты Planner</a>'
+                f'<nav><a href="{entry_path}">{ui.text("legacy.planner_clients")}</a>'
                 + (
-                    f' <a href="{entry_path}?code={code}">Анкета</a>'
-                    f' <a href="{entry_path}?view=meetings&amp;code={code}">Дневник встреч</a>'
+                    f' <a href="{entry_path}?code={code}">{ui.text("ui_profile")}</a>'
+                    f' <a href="{entry_path}?view=meetings&amp;code={code}">'
+                    f'{ui.text("ui_meeting_journal")}</a>'
                     if code
                     else ""
                 )
@@ -296,14 +199,11 @@ class LegacyReader:
             url = entry_path + "?" + urlencode({"view": "legacy", **query})
             return f'<a href="{html.escape(url, quote=True)}">{html.escape(caption)}</a>'
 
+        ui = self.ui
         parts = [
-            "<h1>История финансовых планов</h1>"
-            if self.canonical
-            else "<h1>Существующая база ЛФП — только для чтения</h1>",
-            "<p>Исходная база не изменяется. Анкеты и планы Planner сохраняются в отдельной базе. "
-            "Коды в этих базах могут совпадать и относиться к разным людям. "
-            "Переход между интерфейсами не переносит данные.</p>",
-            f'<nav><a href="{entry_path}">Форма Planner</a></nav>',
+            f'<h1>{ui.text("legacy.history") if self.canonical else ui.text("legacy.readonly")}</h1>',
+            f"<p>{ui.text('legacy.intro')}</p>",
+            f'<nav><a href="{entry_path}">{ui.text("legacy.planner_form")}</a></nav>',
         ]
         self.canonical_navigation(parts, entry_path, code)
         with closing(self.connect()) as db:
@@ -315,27 +215,30 @@ class LegacyReader:
             identity = next((row for row in registry if row["code"] == code), None)
             if identity is None:
                 raise ValueError("Unknown client")
-            parts.append("<nav>" + link("К списку клиентов") + "</nav>")
-            parts.append(table("Личные сведения и контакты", [identity]))
+            parts.append("<nav>" + link(ui.text("legacy.back")) + "</nav>")
+            parts.append(table(ui.text("legacy.personal"), [identity], ui))
             parts.append(
                 table(
-                    "Исходные заметки",
+                    ui.text("legacy.source_notes"),
                     self.rows(
                         db, "client_intake_note", "WHERE registry_id = ? ORDER BY id", (identity["id"],)
                     ),
+                    ui,
                 )
             )
             parts.append(
                 table(
-                    "Налоговое резидентство",
+                    ui.text("legacy.tax_residence"),
                     self.rows(db, "tax_residency", "WHERE registry_id = ? ORDER BY year", (identity["id"],)),
+                    ui,
                 )
             )
             versions = self.rows(db, "client", "WHERE registry_id = ? ORDER BY version", (identity["id"],))
             parts.append(
-                "<h2>Версии исходных данных</h2><nav>"
+                f'<h2>{ui.text("legacy.source_versions")}</h2><nav>'
                 + " ".join(
-                    link(f"Версия {row['version']}", code=code, version=row["version"]) for row in versions
+                    link(ui.text("ui_version", version=row["version"]), code=code, version=row["version"])
+                    for row in versions
                 )
                 + "</nav>"
             )
@@ -343,19 +246,19 @@ class LegacyReader:
             if chosen is None:
                 if run:
                     raise ValueError("Unknown run")
-                return "".join(parts) + "<p>Версии исходных данных отсутствуют.</p>"
-            parts.append(table("Выбранная версия", [chosen]))
+                return "".join(parts) + f"<p>{ui.text('legacy.no_versions')}</p>"
+            parts.append(table(ui.text("legacy.selected_version"), [chosen], ui))
             for name, title in [
-                ("person", "Семья"),
-                ("asset", "Активы"),
-                ("liability", "Обязательства"),
-                ("budget_item", "Бюджет"),
-                ("goal", "Цели"),
-                ("portfolio", "Портфели"),
-                ("scenario", "Сценарии"),
+                ("person", "legacy.family"),
+                ("asset", "legacy.assets"),
+                ("liability", "legacy.liabilities"),
+                ("budget_item", "ui_budget"),
+                ("goal", "ui_goals"),
+                ("portfolio", "legacy.portfolios"),
+                ("scenario", "legacy.scenarios"),
             ]:
                 rows = self.rows(db, name, "WHERE client_id = ?", (chosen["id"],))
-                parts.append(table(title, rows))
+                parts.append(table(ui.text(title), rows, ui))
                 parts.extend(self.holdings(db, rows) if name == "portfolio" else [])
             scenarios = self.rows(db, "scenario", "WHERE client_id = ?", (chosen["id"],))
             runs = []
@@ -363,30 +266,32 @@ class LegacyReader:
                 runs.extend(self.rows(db, "plan_run", "WHERE scenario_id = ?", (scenario["id"],)))
             runs.sort(key=lambda row: row["id"])
             parts.append(
-                "<h2>Расчёты</h2><nav>"
+                f'<h2>{ui.text("legacy.calculations")}</h2><nav>'
                 + " ".join(
-                    link(f"Расчёт {row['id']}", code=code, version=chosen["version"], run=row["id"])
+                    link(ui.text("legacy.run", run=row["id"]), code=code, version=chosen["version"],
+                         run=row["id"])
                     for row in runs
                 )
                 + "</nav>"
             )
             selected = choose(runs, "id", run)
-            parts.append(table("Сводка расчёта", [] if selected is None else [selected]))
+            parts.append(table(ui.text("legacy.run_summary"), [] if selected is None else [selected], ui))
             if selected:
                 parts.append(
                     table(
-                        "Показатели расчёта",
+                        ui.text("legacy.run_metrics"),
                         self.rows(db, "run_metric", "WHERE plan_run_id = ?", (selected["id"],)),
+                        ui,
                     )
                 )
         return "".join(parts)
 
 
-def calendar_date(value: Any) -> str:
+def calendar_date(value: Any, ui: UiText) -> str:
     if not value:
         return "—"
     try:
-        return date.fromisoformat(str(value)[:10]).strftime("%d.%m.%Y")
+        return format_date(str(value)[:10], ui.language)
     except ValueError:
         return "—"
 
@@ -400,54 +305,72 @@ def choose(rows: list[dict[str, Any]], key: str, selection: str) -> dict[str, An
     return selected
 
 
-def display(key: str, value: Any, row: dict[str, Any]) -> str:
+def is_percent(key: str, row: dict[str, Any]) -> bool:
+    metric = str(row.get("key", ""))
+    return (
+        key.endswith("_rate")
+        or key in {"weight", "abs_deviation", "rel_deviation"}
+        or (key == "value" and (metric == "probability_of_success"
+                               or metric.endswith(("_mean_return", "_risk"))))
+        or (key == "amount_pv" and row.get("amount_basis") == "expense_share")
+    )
+
+
+def metric_caption(value: Any, ui: UiText) -> str | None:
+    metric = str(value)
+    if metric in METRICS:
+        return ui.text(METRICS[metric])
+    if metric.startswith("terminal_p") and metric[10:].isdigit():
+        return ui.text("legacy.metric_terminal", p=metric[10:])
+    if metric.endswith(("_mean_return", "_risk")):
+        stage, kind = metric.rsplit("_", 1)
+        if kind == "return":
+            stage = stage.removesuffix("_mean")
+        return ui.text(
+            "legacy.metric_average_return" if kind == "return" else "legacy.metric_risk",
+            stage=ui.text(ENUM_KEYS.get(stage, UNKNOWN_LABEL)),
+        )
+    return None
+
+
+def display(key: str, value: Any, row: dict[str, Any], ui: UiText) -> str:
     if value is None:
         return "—"
     if key in BOOLS:
-        return "Да" if value else "Нет"
+        return ui.text("legacy.yes") if value else ui.text("legacy.no")
     if key == "brokers":
         try:
             return ", ".join(json.loads(value))
         except (ValueError, TypeError):
             return str(value)
     if isinstance(value, (float, int)):
-        if (
-            key.endswith("_rate")
-            or key in {"weight", "abs_deviation", "rel_deviation"}
-            or (
-                key == "value"
-                and (
-                    row.get("key") == "probability_of_success"
-                    or str(row.get("key", "")).endswith(("_mean_return", "_risk"))
-                )
-            )
-            or (key == "amount_pv" and row.get("amount_basis") == "expense_share")
-        ):
+        if is_percent(key, row):
             return f"{value * 100:,.2f} %".replace(",", " ")
         return f"{value:,.2f}".replace(",", " ") if isinstance(value, float) else str(value)
-    if key == "key" and str(value).endswith(("_mean_return", "_risk")):
-        stage, metric = str(value).rsplit("_", 1)
-        if metric == "return":
-            stage = stage.removesuffix("_mean")
-        caption = "Средняя доходность" if metric == "return" else "Риск"
-        return f"{caption}: {ENUMS.get(stage, stage)}"
-    return ENUMS.get(str(value), str(value)) if key in ENUM_FIELDS else str(value)
+    if key == "key":
+        caption = metric_caption(value, ui)
+        if caption is not None:
+            return caption
+    if key in ENUM_FIELDS and str(value) in ENUM_KEYS:
+        return ui.text(ENUM_KEYS[str(value)])
+    return str(value)
 
 
-def table(title: str, rows: list[dict[str, Any]]) -> str:
+def table(title: str, rows: list[dict[str, Any]], ui: UiText) -> str:
     parts = [f"<section><h2>{html.escape(title)}</h2>"]
     if not rows:
-        return "".join(parts) + "<p>Нет записей.</p></section>"
+        return "".join(parts) + f"<p>{ui.text('legacy.no_records')}</p></section>"
     keys = [key for key in rows[0] if key not in INTERNAL]
     parts.append(
         '<div class="table-scroll"><table><thead><tr>'
-        + "".join(f'<th scope="col">{html.escape(LABELS[key])}</th>' for key in keys)
+        + "".join(f'<th scope="col">{html.escape(ui.text(FIELD_KEYS.get(key, UNKNOWN_LABEL)))}</th>'
+                  for key in keys)
         + "</tr></thead><tbody>"
     )
     for row in rows:
         parts.append(
             "<tr>"
-            + "".join(f"<td>{html.escape(display(key, row.get(key), row))}</td>" for key in keys)
+            + "".join(f"<td>{html.escape(display(key, row.get(key), row, ui))}</td>" for key in keys)
             + "</tr>"
         )
     return "".join(parts) + "</tbody></table></div></section>"
